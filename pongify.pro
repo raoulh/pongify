@@ -21,3 +21,7 @@ HEADERS += \
 
 FORMS += \
     src/MainWindow.ui
+
+win32 {
+    RC_FILE = windows_res.rc
+}

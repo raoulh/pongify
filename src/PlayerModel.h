@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
+#include <QJsonObject>
 #include "qqmlhelpers.h"
 
 class PlayerModel: public QStandardItemModel
@@ -11,7 +12,11 @@ class PlayerModel: public QStandardItemModel
     Q_OBJECT
     QML_READONLY_PROPERTY(double, totalBalance)
 public:
-    PlayerModel(QObject *parent = nullptr);
+    static PlayerModel *Instance()
+    {
+        static PlayerModel m;
+        return &m;
+    }
     virtual ~PlayerModel() override {}
 
     enum
@@ -24,12 +29,19 @@ public:
         RoleClub,
     };
 
+    void loadPlayer(const QJsonObject &obj);
+
+public slots:
+    void loadCache(); //current model is cleared
+    void saveCache();
+
 private:
+    PlayerModel(QObject *parent = nullptr);
 };
 
 class Player : public QObject, public QStandardItem
 {
-    Q_OBJECT    
+    Q_OBJECT
     QML_READONLY_PROPERTY(QString, firstName)
     QML_READONLY_PROPERTY(QString, lastName)
     QML_READONLY_PROPERTY(QString, license)
@@ -40,6 +52,7 @@ class Player : public QObject, public QStandardItem
 public:
     explicit Player(QObject *parent = nullptr);
 
+    QJsonObject toJson();
 };
 
 class PlayerFilterModel: public QSortFilterProxyModel

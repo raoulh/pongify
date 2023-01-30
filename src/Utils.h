@@ -7,6 +7,7 @@ class Utils
 {
 public:
     static QString getBinPath();
+    static QString getCachePath();
 };
 
 #endif // UTILS_H

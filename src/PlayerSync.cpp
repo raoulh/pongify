@@ -1,5 +1,6 @@
 #include "PlayerSync.h"
 #include "Utils.h"
+#include "PlayerModel.h"
 
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -31,6 +32,8 @@ void PlayerSync::start()
     {
         if (exitStatus != QProcess::NormalExit)
             qWarning() << "Process exits with exit code" << exitCode << "Exit Status:" << exitStatus;
+        else
+            PlayerModel::Instance()->saveCache();
 
         eventLoop->quit();
     });
@@ -85,6 +88,7 @@ void PlayerSync::readStdOut()
         else if (obj.contains("lastname"))
         {
             qDebug() << "Loading new player: " << obj["firstname"].toString() << " " << obj["lastname"].toString();
+            PlayerModel::Instance()->loadPlayer(obj);
         }
     }
 }

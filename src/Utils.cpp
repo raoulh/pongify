@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QCoreApplication>
 #include <QFile>
+#include <QStandardPaths>
 
 QString Utils::getBinPath()
 {
@@ -29,4 +30,9 @@ QString Utils::getBinPath()
     }
 
     return staticPath;
+}
+
+QString Utils::getCachePath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 }
