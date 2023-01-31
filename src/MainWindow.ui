@@ -6,21 +6,40 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>904</width>
+    <height>754</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QWidget" name="page">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="pixmap">
+           <pixmap resource="../res.qrc">:/img/logo.svg</pixmap>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_2"/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>17</height>
+     <width>904</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -29,11 +48,18 @@
     </property>
     <addaction name="separator"/>
     <addaction name="actionNouveau_tournoi"/>
-    <addaction name="actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS"/>
     <addaction name="separator"/>
     <addaction name="actionQuitter"/>
    </widget>
+   <widget class="QMenu" name="menuJoueurs">
+    <property name="title">
+     <string>Joueurs</string>
+    </property>
+    <addaction name="actionListe_des_joueurs"/>
+    <addaction name="actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS"/>
+   </widget>
    <addaction name="menuFichier"/>
+   <addaction name="menuJoueurs"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionQuitter">
@@ -51,7 +77,14 @@
     <string>Nouveau tournoi...</string>
    </property>
   </action>
+  <action name="actionListe_des_joueurs">
+   <property name="text">
+    <string>Liste des joueurs...</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

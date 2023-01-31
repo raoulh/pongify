@@ -7,7 +7,71 @@
 #include <QMessageBox>
 
 PlayerModel::PlayerModel(QObject *parent):
-    QStandardItemModel(parent)
+    QAbstractListModel(parent)
+{
+    headers = {{ "License" },
+               { "Nom" },
+               { "Prénom" },
+               { "Classement" },
+               { "Club" }};
+}
+
+PlayerModel::~PlayerModel()
+{
+    qDeleteAll(players);
+}
+
+QVariant PlayerModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    switch (role) {
+    case Qt::DisplayRole:
+        switch (index.column()) {
+        case 0: return players.at(index.row())->get_license();
+        case 1: return players.at(index.row())->get_lastName();
+        case 2: return players.at(index.row())->get_firstName();
+        case 3: return players.at(index.row())->get_ranking();
+        case 4: return players.at(index.row())->get_club();
+        default: break;
+        }
+
+        break;
+    case RoleFirstName: return players.at(index.row())->get_firstName();
+    case RoleLastName: return players.at(index.row())->get_lastName();
+    case RoleLicense: return players.at(index.row())->get_license();
+    case RoleLicenseValid: return players.at(index.row())->get_licenseValid();
+    case RoleRanking: return players.at(index.row())->get_ranking();
+    case RoleClub: return players.at(index.row())->get_club();
+    default: break;
+    }
+
+    return QVariant();
+}
+
+QVariant PlayerModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    {
+        if (section >= 0 && section < headers.size())
+            return headers.at(section);
+    }
+
+    return QVariant();
+}
+
+int PlayerModel::rowCount(const QModelIndex &) const
+{
+    return players.count();
+}
+
+int PlayerModel::columnCount(const QModelIndex &) const
+{
+    return 5;
+}
+
+QHash<int, QByteArray> PlayerModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[RoleFirstName] = "firstName";
@@ -16,7 +80,7 @@ PlayerModel::PlayerModel(QObject *parent):
     roles[RoleLicenseValid] = "lic_valid";
     roles[RoleRanking] = "ranking";
     roles[RoleClub] = "club";
-    setItemRoleNames(roles);
+    return roles;
 }
 
 void PlayerModel::loadPlayer(const QJsonObject &obj)
@@ -33,12 +97,14 @@ void PlayerModel::loadPlayer(const QJsonObject &obj)
     }
 
     //Check if player already exist in model
-    for (int i = 0;i < rowCount();i++)
+    auto idx = -1;
+    for (int i = 0;i < players.count();i++)
     {
-        auto it = dynamic_cast<Player *>(item(i));
+        auto it = players.at(i);
         if (it->get_license() == obj["license"].toString())
         {
             player = it;
+            idx = i;
             break;
         }
     }
@@ -53,12 +119,25 @@ void PlayerModel::loadPlayer(const QJsonObject &obj)
     player->update_licenseValid(obj["license_valid"].toBool());
     player->update_ranking(obj["ranking"].toString());
 
-    appendRow(player);
+    clubs.append(player->get_club());
+    clubs.removeDuplicates();
+
+    if (idx < 0)
+        players.append(player);
+}
+
+Player *PlayerModel::item(int row)
+{
+    if (row >= 0 && row < players.count())
+        return players.at(row);
+    return nullptr;
 }
 
 void PlayerModel::loadCache()
 {
-    clear();
+    qDeleteAll(players);
+    players.clear();
+    clubs.clear();
 
     QFile cacheFile(QStringLiteral("%1/players.cache").arg(Utils::getCachePath()));
     if (!cacheFile.open(QFile::ReadOnly))
@@ -96,7 +175,7 @@ void PlayerModel::saveCache()
 
     for (int i = 0;i < rowCount();i++)
     {
-        auto p = dynamic_cast<Player *>(item(i));
+        auto p = players.at(i);
         arr.append(p->toJson());
     }
 
@@ -114,8 +193,7 @@ void PlayerModel::saveCache()
 }
 
 Player::Player(QObject *parent):
-    QObject(parent),
-    QStandardItem()
+    QObject(parent)
 {
     update_licenseValid(false);
 }
@@ -150,7 +228,13 @@ int PlayerFilterModel::indexFromSource(int idx)
     return mapFromSource(index(idx, 0)).row();
 }
 
-void PlayerFilterModel::setSearchTerm(QString s)
+void PlayerFilterModel::setClub(QString s)
+{
+    club = s.toLower();
+    invalidate();
+}
+
+void PlayerFilterModel::setSearchName(QString s)
 {
     terms = s.toLower();
     invalidate();
@@ -160,23 +244,39 @@ bool PlayerFilterModel::filterAcceptsRow(int source_row, const QModelIndex &sour
 {
     Q_UNUSED(source_parent)
 
-    if (terms.isEmpty())
+    if (terms.isEmpty() && club.isEmpty())
         return true;
 
     PlayerModel *model = dynamic_cast<PlayerModel *>(sourceModel());
-    Player *item = dynamic_cast<Player *>(model->item(source_row));
+    Player *item = model->item(source_row);
     auto txt = item->get_firstName().toLower() + item->get_lastName().toLower();
 
-    return txt.contains(terms);
+    if (!terms.isEmpty() && !club.isEmpty())
+        return txt.contains(terms.toLower()) && item->get_club().toLower() == club.toLower();
+    else if (terms.isEmpty() && !club.isEmpty())
+        return item->get_club().toLower() == club.toLower();
+    else if (!terms.isEmpty() && club.isEmpty())
+        return txt.contains(terms.toLower());
+
+    return true;
 }
 
 bool PlayerFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     PlayerModel *model = dynamic_cast<PlayerModel *>(sourceModel());
-    Player *itemLeft = dynamic_cast<Player *>(model->item(left.row()));
-    Player *itemRight = dynamic_cast<Player *>(model->item(right.row()));
+    Player *itemLeft = model->item(left.row());
+    Player *itemRight = model->item(right.row());
 
     QCollator sorter;
     sorter.setNumericMode(true);
-    return sorter.compare(itemLeft->get_lastName(), itemRight->get_lastName()) < 0;
+
+    switch (left.column())
+    {
+    default:
+    case 0: return sorter.compare(itemLeft->get_license(), itemRight->get_license()) < 0;
+    case 1: return sorter.compare(itemLeft->get_lastName(), itemRight->get_lastName()) < 0;
+    case 2: return sorter.compare(itemLeft->get_firstName(), itemRight->get_firstName()) < 0;
+    case 3: return sorter.compare(itemLeft->get_ranking(), itemRight->get_ranking()) < 0;
+    case 4: return sorter.compare(itemLeft->get_club(), itemRight->get_club()) < 0;
+    }
 }

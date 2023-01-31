@@ -2,12 +2,15 @@
 #define PLAYERMODEL_H
 
 #include <QObject>
-#include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 #include <QJsonObject>
 #include "qqmlhelpers.h"
 
-class PlayerModel: public QStandardItemModel
+#include <QAbstractListModel>
+
+class Player;
+
+class PlayerModel: public QAbstractListModel
 {
     Q_OBJECT
     QML_READONLY_PROPERTY(double, totalBalance)
@@ -17,7 +20,7 @@ public:
         static PlayerModel m;
         return &m;
     }
-    virtual ~PlayerModel() override {}
+    virtual ~PlayerModel() override;
 
     enum
     {
@@ -29,7 +32,15 @@ public:
         RoleClub,
     };
 
+    virtual QVariant data(const QModelIndex &index, int role) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual QHash<int,QByteArray> roleNames() const override;
+
     void loadPlayer(const QJsonObject &obj);
+    Player *item(int row);
+    QStringList getClubs() { return clubs; }
 
 public slots:
     void loadCache(); //current model is cleared
@@ -37,9 +48,14 @@ public slots:
 
 private:
     PlayerModel(QObject *parent = nullptr);
+
+    QStringList headers;
+    QVector<Player *> players;
+
+    QStringList clubs;
 };
 
-class Player : public QObject, public QStandardItem
+class Player : public QObject
 {
     Q_OBJECT
     QML_READONLY_PROPERTY(QString, firstName)
@@ -65,13 +81,15 @@ public:
     Q_INVOKABLE int indexToSource(int idx);
     Q_INVOKABLE int indexFromSource(int idx);
 
-    Q_INVOKABLE void setSearchTerm(QString s);
+    Q_INVOKABLE void setSearchName(QString s);
+    Q_INVOKABLE void setClub(QString s);
 
 protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
     QString terms;
+    QString club;
 };
 
 #endif // PLAYERMODEL_H

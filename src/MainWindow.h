@@ -16,11 +16,9 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_actionQuitter_triggered();
-
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
-
     void on_actionNouveau_tournoi_triggered();
+    void on_actionListe_des_joueurs_triggered();
 
 private:
     Ui::MainWindow *ui;
