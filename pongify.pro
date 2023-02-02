@@ -1,4 +1,4 @@
-QT       += core gui widgets quick
+QT       += core gui widgets quick quickcontrols2
 
 CONFIG += c++17
 
@@ -6,22 +6,31 @@ include(3rd_party/quickflux/quickflux.pri)
 include(3rd_party/qt-qml-models/QtQmlModels.pri)
 
 SOURCES += \
+    src/DialogNewTournament.cpp \
     src/DialogPlayers.cpp \
     src/PlayerModel.cpp \
     src/PlayerSync.cpp \
+    src/TSerie.cpp \
+    src/TStorage.cpp \
+    src/Tournament.cpp \
     src/Utils.cpp \
     src/main.cpp \
     src/MainWindow.cpp
 
 HEADERS += \
+    src/DialogNewTournament.h \
     src/DialogPlayers.h \
     src/MainWindow.h \
     src/PlayerModel.h \
     src/PlayerSync.h \
+    src/TSerie.h \
+    src/TStorage.h \
+    src/Tournament.h \
     src/Utils.h \
     src/qqmlhelpers.h
 
 FORMS += \
+    src/DialogNewTournament.ui \
     src/DialogPlayers.ui \
     src/MainWindow.ui
 
@@ -31,3 +40,8 @@ win32 {
 
 RESOURCES += \
     res.qrc
+
+DISTFILES += \
+    qml/DashboardPage.qml \
+    qml/SvgImage.qml \
+    qml/main.qml

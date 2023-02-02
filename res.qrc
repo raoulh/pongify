@@ -1,5 +1,26 @@
 <RCC>
     <qresource prefix="/">
         <file>img/logo.svg</file>
+        <file>qml/main.qml</file>
+        <file>qml/DashboardPage.qml</file>
+        <file>img/table-tennis-equipment.png</file>
+        <file>qml/SvgImage.qml</file>
+        <file>qml/TournamentPage.qml</file>
+        <file>qml/SerieList.qml</file>
+        <file>qml/SerieView.qml</file>
+        <file>qml/ToolButtonTip.qml</file>
+        <file>icons/pongify/index.theme</file>
+        <file>icons/pongify/32x32/trash.png</file>
+        <file>icons/pongify/32x32@2/trash.png</file>
+        <file>icons/pongify/32x32@3/trash.png</file>
+        <file>icons/pongify/32x32@4/trash.png</file>
+        <file>icons/pongify/32x32/edit.png</file>
+        <file>icons/pongify/32x32@2/edit.png</file>
+        <file>icons/pongify/32x32@3/edit.png</file>
+        <file>icons/pongify/32x32@4/edit.png</file>
+        <file>icons/pongify/32x32/add.png</file>
+        <file>icons/pongify/32x32@2/add.png</file>
+        <file>icons/pongify/32x32@3/add.png</file>
+        <file>icons/pongify/32x32@4/add.png</file>
     </qresource>
 </RCC>

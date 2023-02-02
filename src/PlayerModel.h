@@ -13,7 +13,6 @@ class Player;
 class PlayerModel: public QAbstractListModel
 {
     Q_OBJECT
-    QML_READONLY_PROPERTY(double, totalBalance)
 public:
     static PlayerModel *Instance()
     {

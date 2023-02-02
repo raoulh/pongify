@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     //Force create the required user data path
     {
-        QDir dir(Utils::getCachePath());
+        QDir dir(QStringLiteral("%1/tournaments").arg(Utils::getCachePath()));
         if (!dir.exists())
             dir.mkpath(".");
     }

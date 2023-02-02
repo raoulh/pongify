@@ -15,22 +15,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QStackedWidget" name="stackedWidget">
-      <widget class="QWidget" name="page">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="pixmap">
-           <pixmap resource="../res.qrc">:/img/logo.svg</pixmap>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="page_2"/>
-     </widget>
-    </item>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -39,7 +35,7 @@
      <x>0</x>
      <y>0</y>
      <width>904</width>
-     <height>21</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -48,6 +44,8 @@
     </property>
     <addaction name="separator"/>
     <addaction name="actionNouveau_tournoi"/>
+    <addaction name="actionPropri_t_s"/>
+    <addaction name="actionFermer"/>
     <addaction name="separator"/>
     <addaction name="actionQuitter"/>
    </widget>
@@ -82,9 +80,17 @@
     <string>Liste des joueurs...</string>
    </property>
   </action>
+  <action name="actionFermer">
+   <property name="text">
+    <string>Fermer</string>
+   </property>
+  </action>
+  <action name="actionPropri_t_s">
+   <property name="text">
+    <string>Propriétés</string>
+   </property>
+  </action>
  </widget>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

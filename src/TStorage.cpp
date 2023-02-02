@@ -1,0 +1,200 @@
+#include "TStorage.h"
+#include "Tournament.h"
+#include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QUuid>
+#include "Utils.h"
+
+TStorage::TStorage():
+    QAbstractListModel{}
+{
+    headers = {{ "Nom" },
+               { "Date" },
+               { "Statut" }};
+}
+
+TStorage::~TStorage()
+{
+    qDeleteAll(tournaments);
+}
+
+QVariant TStorage::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    switch (role) {
+    case Qt::DisplayRole:
+        switch (index.column()) {
+        case 0: return tournaments.at(index.row())->get_name();
+        case 1: return tournaments.at(index.row())->get_date();
+        case 2: return tournaments.at(index.row())->get_status();
+        default: break;
+        }
+
+        break;
+    case RoleUuid: return tournaments.at(index.row())->get_uuid();
+    case RoleName: return tournaments.at(index.row())->get_name();
+    case RoleDate: return tournaments.at(index.row())->get_date().toString("dd/MM/yyyy");
+    case RoleStatus: return tournaments.at(index.row())->get_status();
+    default: break;
+    }
+
+    return QVariant();
+}
+
+QVariant TStorage::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    {
+        if (section >= 0 && section < headers.size())
+            return headers.at(section);
+    }
+
+    return QVariant();
+}
+
+int TStorage::rowCount(const QModelIndex &) const
+{
+    return tournaments.count();
+}
+
+int TStorage::columnCount(const QModelIndex &) const
+{
+    return 3;
+}
+
+QHash<int, QByteArray> TStorage::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[RoleName] = "name";
+    roles[RoleDate] = "date";
+    roles[RoleStatus] = "status";
+    roles[RoleUuid] = "uuid";
+    return roles;
+}
+
+void TStorage::loadTournament(const QJsonObject &obj)
+{
+    auto tournament = Tournament::fromJson(obj);
+
+    if (!tournament)
+    {
+        qWarning() << "Bad json for tournament: one of the required param is empty";
+        return;
+    }
+
+    tournaments.append(tournament);
+}
+
+Tournament *TStorage::item(int row)
+{
+    if (row >= 0 && row < tournaments.count())
+        return tournaments.at(row);
+    return nullptr;
+}
+
+void TStorage::loadFromDisk()
+{
+    beginResetModel();
+    qDeleteAll(tournaments);
+    tournaments.clear();
+
+    QDir dir(QStringLiteral("%1/tournaments").arg(Utils::getCachePath()));
+    auto lst = dir.entryInfoList({{"*.tnm"}}, QDir::Files);
+
+    for (const auto &finfo: lst)
+    {
+        if (!finfo.isFile()) continue;
+
+        QFile f(finfo.absoluteFilePath());
+        if (!f.open(QFile::ReadOnly))
+            continue;
+
+        QJsonParseError jerr;
+        QJsonDocument jdoc = QJsonDocument::fromJson(f.readAll(), &jerr);
+        if (jerr.error != QJsonParseError::NoError)
+        {
+            qWarning() << "JSON parse error " << jerr.errorString();
+            continue;
+        }
+
+        if (!jdoc.isObject())
+        {
+            qWarning() << "JSON is not an object";
+            continue;
+        }
+
+        loadTournament(jdoc.object());
+    }
+
+    endResetModel();
+}
+
+void TStorage::saveToDisk(int idx)
+{
+    auto t = item(idx);
+    if (t) saveToDisk(t);
+}
+
+void TStorage::saveToDisk(Tournament *t)
+{
+    //generate filename from date
+    auto fname = t->get_date().toString("dd-MM-yyyy");
+
+    QFile f(QStringLiteral("%1/tournaments/t_%2_%3.tnm").arg(Utils::getCachePath(), t->get_uuid(), fname));
+    if (!f.open(QFile::ReadWrite | QFile::Truncate))
+    {
+        qWarning() << "unable to open file " << f.fileName();
+        return;
+    }
+
+    QJsonDocument jdoc;
+    jdoc.setObject(t->toJson());
+
+    f.write(jdoc.toJson());
+    f.close();
+}
+
+Tournament *TStorage::createNewTournament(QString name)
+{
+    auto t = new Tournament();
+    t->update_name(name);
+    t->update_date(QDateTime::currentDateTime());
+    t->update_status("open");
+    t->update_uuid(QUuid::createUuid().toString(QUuid::WithoutBraces));
+
+    beginInsertRows({}, tournaments.count(), tournaments.count());
+    tournaments.append(t);
+    endInsertRows();
+    saveToDisk(t);
+
+    return t;
+}
+
+void TStorage::deleteTournament(Tournament *t)
+{
+    auto fname = t->get_date().toString("dd-MM-yyyy");
+    QString f(QStringLiteral("%1/tournaments/t_%2.tnm").arg(Utils::getCachePath(), t->get_uuid(), fname));
+    QFile::remove(f);
+
+    int idx = -1;
+    for (int i = 0;i < tournaments.size();i++)
+    {
+        if (t->get_uuid() == tournaments.at(i)->get_uuid())
+        {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx >= 0)
+    {
+        beginRemoveRows({}, idx, idx);
+        tournaments.removeAt(idx);
+        endRemoveRows();
+    }
+
+    delete t;
+}
