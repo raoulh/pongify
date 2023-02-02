@@ -1,10 +1,31 @@
 #include "Tournament.h"
 #include <QJsonObject>
+#include <QJsonArray>
 
 Tournament::Tournament(QObject *parent):
     QObject{parent}
 {
+    series = new QQmlObjectListModel<TSerie>(this, "name");
+    update_series(series);
+}
 
+void Tournament::addSerie(TSerie *s)
+{
+    series->append(s);
+}
+
+void Tournament::removeSerie(int idx)
+{
+    if (idx < 0 || idx >= series->count())
+        return;
+    series->remove(idx);
+}
+
+TSerie *Tournament::getSerie(int idx)
+{
+    if (idx < 0 || idx >= series->count())
+        return nullptr;
+    return series->at(idx);
 }
 
 Tournament *Tournament::fromJson(const QJsonObject &obj)
@@ -24,17 +45,30 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
     t->update_status(obj["status"].toString());
     t->update_uuid(obj["uuid"].toString());
 
-    //TODO load series
+    QJsonArray arr = obj["series"].toArray();
+    for (int i = 0;i < arr.count();i++)
+    {
+        auto o = arr.at(i).toObject();
+        TSerie *s = TSerie::fromJson(o);
+
+        if (s)
+            t->series->append(s);
+    }
 
     return t;
 }
 
 QJsonObject Tournament::toJson()
 {
+    QJsonArray arr;
+    for (int i = 0;i < series->count();i++)
+        arr.append(series->at(i)->toJson());
+
     return {
         { "uuid", get_uuid() },
         { "name", get_name() },
         { "date", get_date().toString(Qt::ISODate) },
         { "status", get_status() },
+        { "series", arr },
     };
 }

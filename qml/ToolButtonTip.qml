@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 
 ToolButton {
+    id: button
 
     property string tooltipText: ""
 
@@ -12,6 +13,7 @@ ToolButton {
         property bool mouseHovered
         onEntered: mouseHovered = true
         onExited: mouseHovered = false
+        onClicked: button.clicked()
     }
 
     ToolTip.text: tooltipText

@@ -22,5 +22,9 @@
         <file>icons/pongify/32x32@2/add.png</file>
         <file>icons/pongify/32x32@3/add.png</file>
         <file>icons/pongify/32x32@4/add.png</file>
+        <file>icons/pongify/32x32/menu.png</file>
+        <file>icons/pongify/32x32@2/menu.png</file>
+        <file>icons/pongify/32x32@3/menu.png</file>
+        <file>icons/pongify/32x32@4/menu.png</file>
     </qresource>
 </RCC>

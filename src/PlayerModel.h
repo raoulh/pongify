@@ -68,6 +68,7 @@ public:
     explicit Player(QObject *parent = nullptr);
 
     QJsonObject toJson();
+    static Player *fromJson(const QJsonObject &obj);
 };
 
 class PlayerFilterModel: public QSortFilterProxyModel

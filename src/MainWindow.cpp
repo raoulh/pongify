@@ -5,6 +5,7 @@
 #include "PlayerModel.h"
 #include "DialogPlayers.h"
 #include "DialogNewTournament.h"
+#include "DialogNewSerie.h"
 #include "TStorage.h"
 
 #include <QQuickStyle>
@@ -15,6 +16,7 @@
 #include <QLabel>
 #include <QSettings>
 #include <QMessageBox>
+#include <QWidgetAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -39,6 +41,9 @@ MainWindow::MainWindow(QWidget *parent)
     {
         ui->actionFermer->setEnabled(en);
         ui->actionPropri_t_s->setEnabled(en);
+
+        //update QML model
+        view->engine()->rootContext()->setContextProperty("currentTournament", currentTournament);
     });
 
     //Restore window position
@@ -83,6 +88,105 @@ void MainWindow::deleteTournament(int idx)
                                      .arg(t->get_name()));
     if (ret == QMessageBox::Yes)
         TStorage::Instance()->deleteTournament(t);
+}
+
+void MainWindow::showSerieMenu(int idx)
+{
+    QMenu menu;
+    QAction *action = nullptr;
+
+    QString headerSytle = QString("background-color: \"#225841\";" \
+                                  "margin: 1px 1px 0px 1px;" \
+                                  "padding: 5px 3px 5px 3px;" \
+                                  "border-left-width: 10px;" \
+                                  "border-style: solid;" \
+                                  "border-color: \"#348f69\";" \
+                                  "color: \"white\";" \
+                                  "font: bold;");
+
+    {
+        QWidgetAction *wa = new QWidgetAction(nullptr);
+        QLabel *l = new QLabel (tr("Série"));
+        l->setStyleSheet(headerSytle);
+        wa->setDefaultWidget(l);
+        menu.addAction(wa);
+    }
+
+    action = menu.addAction(tr("Démarrer la série"));
+    connect(action, &QAction::triggered, [this]()
+    {
+
+    });
+
+    action = menu.addAction(tr("Joueurs..."));
+    connect(action, &QAction::triggered, [this]()
+    {
+
+    });
+
+    action = menu.addAction(tr("Propriétés"));
+    connect(action, &QAction::triggered, [this, idx]()
+    {
+        editSerie(idx);
+    });
+
+    menu.addSeparator();
+
+    action = menu.addAction(tr("Supprimer"));
+    connect(action, &QAction::triggered, [this, idx]()
+    {
+        deleteSerie(idx);
+    });
+
+    menu.exec(QCursor::pos());
+}
+
+void MainWindow::newSerie()
+{
+    DialogNewSerie d(true);
+    if (d.exec() == QDialog::Accepted)
+    {
+        auto s = new TSerie();
+        s->update_name(d.getName());
+        s->update_ranking(d.getRanking());
+        s->update_tournamentType(d.getType());
+
+        currentTournament->addSerie(s);
+        TStorage::Instance()->saveToDisk(currentTournament);
+    }
+}
+
+void MainWindow::deleteSerie(int idx)
+{
+    auto s = currentTournament->getSerie(idx);
+    if (!s) return;
+
+    auto ret = QMessageBox::question(this, "Confirmation",
+                                     QStringLiteral("Supprimer la série \"%1\" ?")
+                                     .arg(s->get_name()));
+    if (ret == QMessageBox::Yes)
+    {
+        currentTournament->removeSerie(idx);
+        TStorage::Instance()->saveToDisk(currentTournament);
+    }
+}
+
+void MainWindow::editSerie(int idx)
+{
+    auto s = currentTournament->getSerie(idx);
+    if (!s) return;
+
+    DialogNewSerie d(false);
+    d.setName(s->get_name());
+    d.setRanking(s->get_ranking());
+    d.setType(s->get_tournamentType());
+    if (d.exec() == QDialog::Accepted)
+    {
+        s->update_name(d.getName());
+        s->update_ranking(d.getRanking());
+        s->update_tournamentType(d.getType());
+        TStorage::Instance()->saveToDisk(currentTournament);
+    }
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()
@@ -135,7 +239,7 @@ void MainWindow::loadQmlApp()
 {
     QQuickStyle::setStyle("Imagine");
 
-    QQuickView *view = new QQuickView();
+    view = new QQuickView();
     QWidget *container = QWidget::createWindowContainer(view, this);
     container->setMinimumSize(1024, 600);
     container->setFocusPolicy(Qt::TabFocus);

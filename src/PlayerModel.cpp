@@ -211,6 +211,28 @@ QJsonObject Player::toJson()
     return obj;
 }
 
+Player *Player::fromJson(const QJsonObject &obj)
+{
+    if (obj["firstname"].toString().isEmpty() ||
+        obj["lastname"].toString().isEmpty() ||
+        obj["license"].toString().isEmpty() ||
+        obj["ranking"].toString().isEmpty())
+    {
+        qWarning() << "Bad json for player: one of the required param is empty";
+        return nullptr;
+    }
+
+    Player *player = new Player();
+    player->update_firstName(obj["firstname"].toString());
+    player->update_lastName(obj["lastname"].toString());
+    player->update_club(obj["club"].toString());
+    player->update_license(obj["license"].toString());
+    player->update_licenseValid(obj["license_valid"].toBool());
+    player->update_ranking(obj["ranking"].toString());
+
+    return player;
+}
+
 PlayerFilterModel::PlayerFilterModel(QObject *parent):
     QSortFilterProxyModel(parent)
 {

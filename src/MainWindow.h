@@ -9,6 +9,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class Tournament;
+class QQuickView;
 
 class MainWindow : public QMainWindow
 {
@@ -22,6 +23,10 @@ public:
     Q_INVOKABLE void newTournament();
     Q_INVOKABLE void openTournament(int idx);
     Q_INVOKABLE void deleteTournament(int idx);
+    Q_INVOKABLE void showSerieMenu(int idx);
+    Q_INVOKABLE void newSerie();
+    Q_INVOKABLE void deleteSerie(int idx);
+    Q_INVOKABLE void editSerie(int idx);
 
 private slots:
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
@@ -32,6 +37,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    QQuickView *view;
     Tournament *currentTournament = nullptr;
 
     virtual void closeEvent(QCloseEvent *event) override;

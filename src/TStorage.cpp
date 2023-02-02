@@ -140,10 +140,7 @@ void TStorage::saveToDisk(int idx)
 
 void TStorage::saveToDisk(Tournament *t)
 {
-    //generate filename from date
-    auto fname = t->get_date().toString("dd-MM-yyyy");
-
-    QFile f(QStringLiteral("%1/tournaments/t_%2_%3.tnm").arg(Utils::getCachePath(), t->get_uuid(), fname));
+    QFile f(QStringLiteral("%1/tournaments/t_%2.tnm").arg(Utils::getCachePath(), t->get_uuid()));
     if (!f.open(QFile::ReadWrite | QFile::Truncate))
     {
         qWarning() << "unable to open file " << f.fileName();
@@ -175,8 +172,7 @@ Tournament *TStorage::createNewTournament(QString name)
 
 void TStorage::deleteTournament(Tournament *t)
 {
-    auto fname = t->get_date().toString("dd-MM-yyyy");
-    QString f(QStringLiteral("%1/tournaments/t_%2.tnm").arg(Utils::getCachePath(), t->get_uuid(), fname));
+    QString f(QStringLiteral("%1/tournaments/t_%2.tnm").arg(Utils::getCachePath(), t->get_uuid()));
     QFile::remove(f);
 
     int idx = -1;
