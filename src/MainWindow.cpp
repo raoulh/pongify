@@ -114,6 +114,7 @@ void MainWindow::on_actionPropri_t_s_triggered()
     if (d.exec() == QDialog::Accepted)
     {
         currentTournament->update_name(d.getName());
+        currentTournament->update_date(QDateTime(d.getDate(), QTime::currentTime()));
         TStorage::Instance()->saveToDisk(currentTournament);
     }
 }
