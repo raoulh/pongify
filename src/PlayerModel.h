@@ -21,6 +21,8 @@ public:
     }
     virtual ~PlayerModel() override;
 
+    static PlayerModel *createEmpty();
+
     enum
     {
         RoleFirstName = Qt::UserRole + 1,
@@ -36,10 +38,16 @@ public:
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual QHash<int,QByteArray> roleNames() const override;
+    virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
     void loadPlayer(const QJsonObject &obj);
     Player *item(int row);
     QStringList getClubs() { return clubs; }
+
+    void appendClone(Player *p);
+    void clear();
+
+    Q_INVOKABLE QObject *getFromLicense(QString lic);
 
 public slots:
     void loadCache(); //current model is cleared
@@ -83,6 +91,7 @@ public:
 
     Q_INVOKABLE void setSearchName(QString s);
     Q_INVOKABLE void setClub(QString s);
+    Q_INVOKABLE void setLicenseList(QStringList lics);
 
 protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
@@ -90,6 +99,7 @@ protected:
 
     QString terms;
     QString club;
+    QStringList licenseList;
 };
 
 #endif // PLAYERMODEL_H

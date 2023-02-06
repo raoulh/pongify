@@ -4,12 +4,13 @@
 TSerie::TSerie(QObject *parent):
     QObject{parent}
 {
-    players = new QQmlObjectListModel<Player>(this, "name");
+    players = PlayerModel::createEmpty();
     update_players(players);
 }
 
 TSerie::~TSerie()
 {
+    delete players;
 }
 
 TSerie *TSerie::fromJson(const QJsonObject &obj)
@@ -30,10 +31,7 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
     for (int i = 0;i < arr.count();i++)
     {
         auto o = arr.at(i).toObject();
-        Player *p = Player::fromJson(o);
-
-        if (p)
-            t->players->append(p);
+        t->players->loadPlayer(o);
     }
 
     return t;
@@ -47,10 +45,18 @@ QJsonObject TSerie::toJson()
     obj.insert("ranking", get_ranking());
 
     QJsonArray arr;
-    for (int i = 0;i < players->count();i++)
-        arr.append(players->at(i)->toJson());
+    for (int i = 0;i < players->rowCount();i++)
+        arr.append(players->item(i)->toJson());
 
     obj.insert("players", arr);
 
     return obj;
+}
+
+QStringList TSerie::getPlayerLicences()
+{
+    QStringList lst;
+    for (int i = 0;i < players->rowCount();i++)
+        lst.append(players->item(i)->get_license());
+    return lst;
 }

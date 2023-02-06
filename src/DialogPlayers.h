@@ -3,6 +3,7 @@
 
 #include <QDialog>
 
+class Player;
 class PlayerModel;
 class PlayerFilterModel;
 
@@ -17,6 +18,8 @@ class DialogPlayers : public QDialog
 public:
     explicit DialogPlayers(PlayerModel *m, QWidget *parent = nullptr);
     ~DialogPlayers();
+
+    Player *getSelected();
 
 private:
     Ui::DialogPlayers *ui;

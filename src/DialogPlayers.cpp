@@ -35,3 +35,13 @@ DialogPlayers::~DialogPlayers()
 {
     delete ui;
 }
+
+Player *DialogPlayers::getSelected()
+{
+    auto indexes = ui->treeView->selectionModel()->selectedIndexes();
+    if (indexes.isEmpty())
+        return nullptr;
+    auto idx = filterModel->indexToSource(indexes.at(0).row());
+
+    return playerModel->item(idx);
+}

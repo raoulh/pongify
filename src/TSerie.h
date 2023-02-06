@@ -21,8 +21,11 @@ public:
     static TSerie *fromJson(const QJsonObject &obj);
     QJsonObject toJson();
 
+    QStringList getPlayerLicences();
+    PlayerModel *getPlayerModel() { return players; }
+
 private:
-    QQmlObjectListModel<Player> *players;
+    PlayerModel *players;
 };
 
 #endif // TSERIE_H

@@ -26,5 +26,17 @@
         <file>icons/pongify/32x32@2/menu.png</file>
         <file>icons/pongify/32x32@3/menu.png</file>
         <file>icons/pongify/32x32@4/menu.png</file>
+        <file>icons/pongify/32x32/athlete.png</file>
+        <file>icons/pongify/32x32/filter.png</file>
+        <file>icons/pongify/32x32/play-button.png</file>
+        <file>icons/pongify/32x32@2/athlete.png</file>
+        <file>icons/pongify/32x32@2/filter.png</file>
+        <file>icons/pongify/32x32@2/play-button.png</file>
+        <file>icons/pongify/32x32@3/athlete.png</file>
+        <file>icons/pongify/32x32@3/filter.png</file>
+        <file>icons/pongify/32x32@3/play-button.png</file>
+        <file>icons/pongify/32x32@4/athlete.png</file>
+        <file>icons/pongify/32x32@4/filter.png</file>
+        <file>icons/pongify/32x32@4/play-button.png</file>
     </qresource>
 </RCC>

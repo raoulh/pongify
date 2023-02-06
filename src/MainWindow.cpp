@@ -7,6 +7,7 @@
 #include "DialogNewTournament.h"
 #include "DialogNewSerie.h"
 #include "TStorage.h"
+#include "DialogPlayerList.h"
 
 #include <QQuickStyle>
 #include <QQuickView>
@@ -18,9 +19,9 @@
 #include <QMessageBox>
 #include <QWidgetAction>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent):
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -95,45 +96,34 @@ void MainWindow::showSerieMenu(int idx)
     QMenu menu;
     QAction *action = nullptr;
 
-    QString headerSytle = QString("background-color: \"#225841\";" \
-                                  "margin: 1px 1px 0px 1px;" \
-                                  "padding: 5px 3px 5px 3px;" \
-                                  "border-left-width: 10px;" \
-                                  "border-style: solid;" \
-                                  "border-color: \"#348f69\";" \
-                                  "color: \"white\";" \
-                                  "font: bold;");
-
-    {
-        QWidgetAction *wa = new QWidgetAction(nullptr);
-        QLabel *l = new QLabel (tr("Série"));
-        l->setStyleSheet(headerSytle);
-        wa->setDefaultWidget(l);
-        menu.addAction(wa);
-    }
-
-    action = menu.addAction(tr("Démarrer la série"));
-    connect(action, &QAction::triggered, [this]()
+    action = menu.addAction(QIcon::fromTheme("play-button"), tr("Démarrer la série"));
+    connect(action, &QAction::triggered, this, [this, idx]()
     {
 
     });
 
-    action = menu.addAction(tr("Joueurs..."));
-    connect(action, &QAction::triggered, [this]()
+    action = menu.addAction(QIcon::fromTheme("athlete"), tr("Joueurs..."));
+    connect(action, &QAction::triggered, this, [this, idx]()
     {
-
+        auto s = currentTournament->getSerie(idx);
+        if (!s) return;
+        DialogPlayerList d(s);
+        if (d.exec() == QDialog::Accepted)
+        {
+            TStorage::Instance()->saveToDisk(currentTournament);
+        }
     });
 
-    action = menu.addAction(tr("Propriétés"));
-    connect(action, &QAction::triggered, [this, idx]()
+    action = menu.addAction(QIcon::fromTheme("filter"), tr("Propriétés"));
+    connect(action, &QAction::triggered, this, [this, idx]()
     {
         editSerie(idx);
     });
 
     menu.addSeparator();
 
-    action = menu.addAction(tr("Supprimer"));
-    connect(action, &QAction::triggered, [this, idx]()
+    action = menu.addAction(QIcon::fromTheme("trash"), tr("Supprimer"));
+    connect(action, &QAction::triggered, this, [this, idx]()
     {
         deleteSerie(idx);
     });

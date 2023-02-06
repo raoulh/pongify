@@ -5,6 +5,7 @@
 #include <QFile>
 #include "Utils.h"
 #include <QMessageBox>
+#include <QQmlEngine>
 
 PlayerModel::PlayerModel(QObject *parent):
     QAbstractListModel(parent)
@@ -19,6 +20,11 @@ PlayerModel::PlayerModel(QObject *parent):
 PlayerModel::~PlayerModel()
 {
     qDeleteAll(players);
+}
+
+PlayerModel *PlayerModel::createEmpty()
+{
+    return new PlayerModel();
 }
 
 QVariant PlayerModel::data(const QModelIndex &index, int role) const
@@ -83,6 +89,14 @@ QHash<int, QByteArray> PlayerModel::roleNames() const
     return roles;
 }
 
+bool PlayerModel::removeRows(int row, int count, const QModelIndex &)
+{
+    beginRemoveRows({}, row, row + count - 1);
+    players.remove(row, count);
+    endRemoveRows();
+    return true;
+}
+
 void PlayerModel::loadPlayer(const QJsonObject &obj)
 {
     Player *player = nullptr;
@@ -123,7 +137,12 @@ void PlayerModel::loadPlayer(const QJsonObject &obj)
     clubs.removeDuplicates();
 
     if (idx < 0)
+    {
+        beginInsertRows({}, players.count(), players.count());
         players.append(player);
+        endInsertRows();
+
+    }
 }
 
 Player *PlayerModel::item(int row)
@@ -132,6 +151,34 @@ Player *PlayerModel::item(int row)
         return players.at(row);
     return nullptr;
 }
+
+void PlayerModel::appendClone(Player *p)
+{
+    loadPlayer(p->toJson());
+}
+
+void PlayerModel::clear()
+{
+    qDeleteAll(players);
+    players.clear();
+    clubs.clear();
+}
+
+QObject *PlayerModel::getFromLicense(QString lic)
+{
+    for (int i = 0;i < players.count();i++)
+    {
+        auto p = players.at(i);
+        if (lic == p->get_license())
+        {
+            QQmlEngine::setObjectOwnership(p, QQmlEngine::CppOwnership);
+            return p;
+        }
+    }
+
+    return nullptr;
+}
+
 
 void PlayerModel::loadCache()
 {
@@ -256,6 +303,11 @@ void PlayerFilterModel::setClub(QString s)
     invalidate();
 }
 
+void PlayerFilterModel::setLicenseList(QStringList lics)
+{
+    licenseList = lics;
+}
+
 void PlayerFilterModel::setSearchName(QString s)
 {
     terms = s.toLower();
@@ -266,12 +318,18 @@ bool PlayerFilterModel::filterAcceptsRow(int source_row, const QModelIndex &sour
 {
     Q_UNUSED(source_parent)
 
-    if (terms.isEmpty() && club.isEmpty())
+    if (terms.isEmpty() && club.isEmpty() && licenseList.isEmpty())
         return true;
 
     PlayerModel *model = dynamic_cast<PlayerModel *>(sourceModel());
     Player *item = model->item(source_row);
     auto txt = item->get_firstName().toLower() + item->get_lastName().toLower();
+
+    if (!licenseList.isEmpty())
+    {
+        if (!licenseList.contains(item->get_license()))
+            return false;
+    }
 
     if (!terms.isEmpty() && !club.isEmpty())
         return txt.contains(terms.toLower()) && item->get_club().toLower() == club.toLower();

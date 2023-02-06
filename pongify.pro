@@ -8,6 +8,7 @@ include(3rd_party/qt-qml-models/QtQmlModels.pri)
 SOURCES += \
     src/DialogNewSerie.cpp \
     src/DialogNewTournament.cpp \
+    src/DialogPlayerList.cpp \
     src/DialogPlayers.cpp \
     src/PlayerModel.cpp \
     src/PlayerSync.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 HEADERS += \
     src/DialogNewSerie.h \
     src/DialogNewTournament.h \
+    src/DialogPlayerList.h \
     src/DialogPlayers.h \
     src/MainWindow.h \
     src/PlayerModel.h \
@@ -34,6 +36,7 @@ HEADERS += \
 FORMS += \
     src/DialogNewSerie.ui \
     src/DialogNewTournament.ui \
+    src/DialogPlayerList.ui \
     src/DialogPlayers.ui \
     src/MainWindow.ui
 
