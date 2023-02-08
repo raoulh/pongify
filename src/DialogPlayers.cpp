@@ -1,8 +1,9 @@
 #include "DialogPlayers.h"
 #include "ui_DialogPlayers.h"
 #include "PlayerModel.h"
+#include "DialogAddPlayer.h"
 
-DialogPlayers::DialogPlayers(PlayerModel *m, QWidget *parent) :
+DialogPlayers::DialogPlayers(PlayerModel *m, bool isAddDialog, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogPlayers),
     playerModel(m)
@@ -29,6 +30,15 @@ DialogPlayers::DialogPlayers(PlayerModel *m, QWidget *parent) :
     {
         filterModel->setSearchName(txt);
     });
+
+    if (isAddDialog)
+    {
+        ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    }
+    else
+    {
+        ui->buttonBox->setStandardButtons(QDialogButtonBox::Close);
+    }
 }
 
 DialogPlayers::~DialogPlayers()
@@ -44,4 +54,14 @@ Player *DialogPlayers::getSelected()
     auto idx = filterModel->indexToSource(indexes.at(0).row());
 
     return playerModel->item(idx);
+}
+
+void DialogPlayers::on_pushButtonAddManual_clicked()
+{
+    DialogAddPlayer d;
+    if (d.exec() == QDialog::Accepted)
+    {
+        playerModel->loadPlayer(d.getPlayerJson());
+        playerModel->saveCache();
+    }
 }

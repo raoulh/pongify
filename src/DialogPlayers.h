@@ -16,10 +16,13 @@ class DialogPlayers : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogPlayers(PlayerModel *m, QWidget *parent = nullptr);
+    explicit DialogPlayers(PlayerModel *m, bool isAddDialog, QWidget *parent = nullptr);
     ~DialogPlayers();
 
     Player *getSelected();
+
+private slots:
+    void on_pushButtonAddManual_clicked();
 
 private:
     Ui::DialogPlayers *ui;

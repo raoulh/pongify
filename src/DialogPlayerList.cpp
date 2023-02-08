@@ -35,7 +35,7 @@ DialogPlayerList::~DialogPlayerList()
 
 void DialogPlayerList::on_pushButtonAdd_clicked()
 {
-    DialogPlayers d(PlayerModel::Instance());
+    DialogPlayers d(PlayerModel::Instance(), true);
     if (d.exec() == QDialog::Accepted)
     {
         auto p = d.getSelected();

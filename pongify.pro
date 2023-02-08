@@ -6,6 +6,7 @@ include(3rd_party/quickflux/quickflux.pri)
 include(3rd_party/qt-qml-models/QtQmlModels.pri)
 
 SOURCES += \
+    src/DialogAddPlayer.cpp \
     src/DialogNewSerie.cpp \
     src/DialogNewTournament.cpp \
     src/DialogPlayerList.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
     src/MainWindow.cpp
 
 HEADERS += \
+    src/DialogAddPlayer.h \
     src/DialogNewSerie.h \
     src/DialogNewTournament.h \
     src/DialogPlayerList.h \
@@ -34,6 +36,7 @@ HEADERS += \
     src/qqmlhelpers.h
 
 FORMS += \
+    src/DialogAddPlayer.ui \
     src/DialogNewSerie.ui \
     src/DialogNewTournament.ui \
     src/DialogPlayerList.ui \

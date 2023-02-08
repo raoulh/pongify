@@ -187,7 +187,7 @@ void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_trigger
 
 void MainWindow::on_actionListe_des_joueurs_triggered()
 {
-    DialogPlayers d(PlayerModel::Instance());
+    DialogPlayers d(PlayerModel::Instance(), false);
     d.exec();
 }
 
