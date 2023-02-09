@@ -52,5 +52,9 @@ RESOURCES += \
 
 DISTFILES += \
     qml/DashboardPage.qml \
+    qml/SerieList.qml \
+    qml/SerieView.qml \
     qml/SvgImage.qml \
+    qml/ToolButtonTip.qml \
+    qml/TournamentPage.qml \
     qml/main.qml

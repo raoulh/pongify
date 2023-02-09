@@ -94,6 +94,7 @@ bool PlayerModel::removeRows(int row, int count, const QModelIndex &)
     beginRemoveRows({}, row, row + count - 1);
     players.remove(row, count);
     endRemoveRows();
+    emit playersChanged();
     return true;
 }
 
@@ -141,7 +142,7 @@ void PlayerModel::loadPlayer(const QJsonObject &obj)
         beginInsertRows({}, players.count(), players.count());
         players.append(player);
         endInsertRows();
-
+        emit playersChanged();
     }
 }
 
@@ -178,7 +179,6 @@ QObject *PlayerModel::getFromLicense(QString lic)
 
     return nullptr;
 }
-
 
 void PlayerModel::loadCache()
 {

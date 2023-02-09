@@ -57,16 +57,16 @@ void DialogNewSerie::setRanking(QString r)
 QString DialogNewSerie::getType()
 {
     if (ui->comboBoxType->currentIndex() == 0)
-        return {"direct"};
+        return {"single"};
 
-    return {"poules"};
+    return {"roundrobbin"};
 }
 
 void DialogNewSerie::setType(QString t)
 {
     t = t.trimmed();
-    if (t.toLower() == "direct")
+    if (t.toLower() == "single")
         ui->comboBoxType->setCurrentIndex(0);
-    else if (t.toLower() == "poules")
+    else if (t.toLower() == "roundrobbin")
         ui->comboBoxType->setCurrentIndex(1);
 }

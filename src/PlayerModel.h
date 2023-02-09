@@ -49,6 +49,9 @@ public:
 
     Q_INVOKABLE QObject *getFromLicense(QString lic);
 
+signals:
+    void playersChanged();
+
 public slots:
     void loadCache(); //current model is cleared
     void saveCache();

@@ -45,6 +45,9 @@ MainWindow::MainWindow(QWidget *parent):
 
         //update QML model
         view->engine()->rootContext()->setContextProperty("currentTournament", currentTournament);
+        auto s = currentTournament->getSerie(0);
+        if (s)
+            view->engine()->rootContext()->setContextProperty("selectedSerie", s);
     });
 
     //Restore window position
@@ -99,7 +102,16 @@ void MainWindow::showSerieMenu(int idx)
     action = menu.addAction(QIcon::fromTheme("play-button"), tr("Démarrer la série"));
     connect(action, &QAction::triggered, this, [this, idx]()
     {
-
+        auto s = currentTournament->getSerie(idx);
+        if (!s) return;
+        if (s->get_status() != "stopped") return;
+        auto ret = QMessageBox::question(this, "Confirmation",
+                                         QStringLiteral("Démarrer la série \"%1\" ?")
+                                         .arg(s->get_name()));
+        if (ret == QMessageBox::Yes)
+        {
+            s->startSerie();
+        }
     });
 
     action = menu.addAction(QIcon::fromTheme("athlete"), tr("Joueurs..."));
@@ -112,6 +124,15 @@ void MainWindow::showSerieMenu(int idx)
         {
             TStorage::Instance()->saveToDisk(currentTournament);
         }
+    });
+
+    action = menu.addAction(QIcon::fromTheme("casino"), tr("Placer les joueurs"));
+    connect(action, &QAction::triggered, this, [this, idx]()
+    {
+        auto s = currentTournament->getSerie(idx);
+        if (!s) return;
+        s->autoSeedPlayers();
+        TStorage::Instance()->saveToDisk(currentTournament);
     });
 
     action = menu.addAction(QIcon::fromTheme("filter"), tr("Propriétés"));
@@ -140,6 +161,7 @@ void MainWindow::newSerie()
         s->update_name(d.getName());
         s->update_ranking(d.getRanking());
         s->update_tournamentType(d.getType());
+        s->update_status("stopped");
 
         currentTournament->addSerie(s);
         TStorage::Instance()->saveToDisk(currentTournament);
@@ -177,6 +199,13 @@ void MainWindow::editSerie(int idx)
         s->update_tournamentType(d.getType());
         TStorage::Instance()->saveToDisk(currentTournament);
     }
+}
+
+void MainWindow::selectSerie(int idx)
+{
+    auto s = currentTournament->getSerie(idx);
+    if (!s) return;
+    view->engine()->rootContext()->setContextProperty("selectedSerie", s);
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()
@@ -237,6 +266,7 @@ void MainWindow::loadQmlApp()
     view->engine()->rootContext()->setContextProperty("mainWindow", this);
     view->engine()->rootContext()->setContextProperty("storage", TStorage::Instance());
     view->engine()->rootContext()->setContextProperty("playerModel", PlayerModel::Instance());
+    view->engine()->rootContext()->setContextProperty("selectedSerie", nullptr);
 
     view->setSource(QUrl("qrc:/qml/main.qml"));
     ui->verticalLayout->addWidget(container);

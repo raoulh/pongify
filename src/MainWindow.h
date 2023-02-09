@@ -27,6 +27,7 @@ public:
     Q_INVOKABLE void newSerie();
     Q_INVOKABLE void deleteSerie(int idx);
     Q_INVOKABLE void editSerie(int idx);
+    Q_INVOKABLE void selectSerie(int idx);
 
 private slots:
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
