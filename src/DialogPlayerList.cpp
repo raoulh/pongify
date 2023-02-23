@@ -26,6 +26,12 @@ DialogPlayerList::DialogPlayerList(TSerie *s, QWidget *parent) :
 
     ui->treeView->setModel(filterModel);
     ui->treeView->setUniformRowHeights(true);
+
+    connect(playerModel, &PlayerModel::playersChanged, this, [this]()
+    {
+        ui->labelPlayerCount->setText(QStringLiteral("%1 joueurs").arg(playerModel->rowCount()));
+    });
+    ui->labelPlayerCount->setText(QStringLiteral("%1 joueurs").arg(playerModel->rowCount()));
 }
 
 DialogPlayerList::~DialogPlayerList()

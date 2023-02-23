@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent):
 
     QIcon::setThemeName("pongify");
 
+    setWindowTitle("Pongify - Gestion de tournoi");
+
     QLabel *cpyLabel = new QLabel("(c) 2023 Raoul Hecky");
     ui->statusbar->addPermanentWidget(cpyLabel, 1);
 
@@ -120,10 +122,12 @@ void MainWindow::showSerieMenu(int idx)
         auto s = currentTournament->getSerie(idx);
         if (!s) return;
         DialogPlayerList d(s);
+        view->engine()->rootContext()->setContextProperty("selectedSerie", nullptr);
         if (d.exec() == QDialog::Accepted)
         {
             TStorage::Instance()->saveToDisk(currentTournament);
         }
+        view->engine()->rootContext()->setContextProperty("selectedSerie", s);
     });
 
     action = menu.addAction(QIcon::fromTheme("casino"), tr("Placer les joueurs"));
@@ -132,6 +136,7 @@ void MainWindow::showSerieMenu(int idx)
         auto s = currentTournament->getSerie(idx);
         if (!s) return;
         s->autoSeedPlayers();
+        view->engine()->rootContext()->setContextProperty("selectedSerie", s);
         TStorage::Instance()->saveToDisk(currentTournament);
     });
 

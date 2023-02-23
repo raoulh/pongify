@@ -3,6 +3,7 @@
 #include <QCollator>
 #include <algorithm>
 #include <random>
+#include <QQmlEngine>
 
 TMatch::TMatch(QObject *parent):
     QObject(parent)
@@ -13,7 +14,7 @@ TMatch::TMatch(QObject *parent):
     update_playerScore2(-1);
     update_playerWinner1(false);
     update_playerWinner2(false);
-    update_isBye(true);
+    update_isBye(false);
 }
 
 TSerie::TSerie(QObject *parent):
@@ -134,25 +135,26 @@ void TSerie::autoSeedPlayers()
     if (allp.count() < 3)
         return;
 
-    if (allMatches.isEmpty())
-        prepareMatches();
+    //clear all matches
+    clearAllMatches();
+    prepareMatches();
 
     auto firstRound = allMatches.at(0);
 
     //Set all Bye match for best players
-    int byeCount = matchCountForRound(0) - allp.count();
+    int byeCount = matchCountForRound(0) * 2 - allp.count();
 
     //seed max 25% of the best players manually, the rest will be randomly placed
-    int seedMax = allp.count() * 0.25;
+    int seedMax = ceil(allp.count() * 0.25);
     for (int i = 0;i < seedMax;i++)
     {
-        auto matchIdx = seedPlayer(i, firstRound->count());
-        firstRound->at(matchIdx)->update_player1(allp.at(i));
+        auto matchIdx = seedPlayer(i + 1, firstRound->count() * 2);
+        firstRound->at(matchIdx / 2)->update_player1(allp.at(i));
 
         if (byeCount > 0)
         {
-            firstRound->at(matchIdx)->update_player2(nullptr);
-            firstRound->at(matchIdx)->update_isBye(true);
+            firstRound->at(matchIdx / 2)->update_player2(nullptr);
+            firstRound->at(matchIdx / 2)->update_isBye(true);
             byeCount--;
         }
     }
@@ -161,27 +163,31 @@ void TSerie::autoSeedPlayers()
     allp.remove(0, seedMax);
     std::random_shuffle(allp.begin(), allp.end());
 
-    for (int i = 0, j = 0;i < firstRound->count() && j < allp.count();i++)
+    for (int iround = 0, jplayer = 0;iround < firstRound->count() && jplayer < allp.count();iround++)
     {
-        Player *pl = allp.at(j);
+        Player *pl = allp.at(jplayer);
 
-        if (!firstRound->at(i)->get_player1())
+        if (!firstRound->at(iround)->get_player1())
         {
-            firstRound->at(i)->update_player1(pl);
-            j++;
+            firstRound->at(iround)->update_player1(pl);
+            jplayer++;
+            pl = allp.at(jplayer);
 
             //if there is still some bye to place, put them
             if (byeCount > 0)
             {
-                firstRound->at(i)->update_player2(nullptr);
-                firstRound->at(i)->update_isBye(true);
+                firstRound->at(iround)->update_player2(nullptr);
+                firstRound->at(iround)->update_isBye(true);
                 byeCount--;
             }
         }
-        else if (!firstRound->at(i)->get_player1() && !firstRound->at(i)->get_isBye())
+
+        if (firstRound->at(iround)->get_player1() &&
+            !firstRound->at(iround)->get_isBye() &&
+            !firstRound->at(iround)->get_player2())
         {
-            firstRound->at(i)->update_player2(pl);
-            j++;
+            firstRound->at(iround)->update_player2(pl);
+            jplayer++;
         }
     }
 }
@@ -246,8 +252,11 @@ int TSerie::matchCountForRound(int round)
 {
     if (get_tournamentType() == "single")
     {
-        int playerCountWithBye = nearestPowerOf2(players->rowCount());
-        int m = playerCountWithBye - round;
+        int playerCountWithBye = nearestPowerOf2(players->rowCount()) / 2;
+        int m = playerCountWithBye;
+        auto roundCalc = round + 1;
+        while (m > 1 && --roundCalc > 0)
+            m = m / 2;
 
         qDebug() << "matchs for round(" << round << "): " << m;
 
@@ -267,6 +276,7 @@ QObject *TSerie::getPlayer1(int round, int match)
     {
         auto m = getMatchForRound(round, match);
         if (!m) return nullptr;
+        QQmlEngine::setObjectOwnership(m, QQmlEngine::CppOwnership);
 
         return m->get_player1();
     }
@@ -280,6 +290,7 @@ QObject *TSerie::getPlayer2(int round, int match)
     {
         auto m = getMatchForRound(round, match);
         if (!m) return nullptr;
+        QQmlEngine::setObjectOwnership(m, QQmlEngine::CppOwnership);
 
         return m->get_player2();
     }
@@ -322,13 +333,18 @@ bool TSerie::winnerForMatch(int round, int match, int playerIdx)
 void TSerie::playersModelChanged()
 {
     //Min players check
-    if (players->rowCount() < 2)
+    if (players->rowCount() < 3)
     {
         update_rounds(0);
         return;
     }
 
-    int rounds = nearestPowerOf2(players->rowCount());
+    int firstround = nearestPowerOf2(players->rowCount()) / 2;
+    auto rounds = 0;
+
+    while (firstround > 0 && ++rounds)
+        firstround = firstround / 2;
+
     update_rounds(rounds);
 
     qDebug() << "Serie: " << get_name() << " players:" << players->rowCount() << " rounds: " << rounds;
