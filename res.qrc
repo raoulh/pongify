@@ -38,7 +38,7 @@
         <file>icons/pongify/32x32@4/athlete.png</file>
         <file>icons/pongify/32x32@4/filter.png</file>
         <file>icons/pongify/32x32@4/play-button.png</file>
-		<file>icons/pongify/32x32/casino.png</file>
+        <file>icons/pongify/32x32/casino.png</file>
         <file>icons/pongify/32x32@2/casino.png</file>
         <file>icons/pongify/32x32@3/casino.png</file>
         <file>icons/pongify/32x32@4/casino.png</file>
@@ -46,5 +46,6 @@
         <file>qml/BracketView.qml</file>
         <file>qml/MatchBloc.qml</file>
         <file>qml/RoundedRectangle.qml</file>
+        <file>img/medal.png</file>
     </qresource>
 </RCC>

@@ -18,11 +18,13 @@ Rectangle {
     property bool winner1
     property bool winner2
 
-    color: playerFirstName1 == "" || winner2? "#b2b2b2": "#484848"
+    color: bloc.mouseHovered? "#585848": playerFirstName1 == "" || winner2? "#b2b2b2": "#484848"
     radius: 6
 
     implicitHeight: 110
     implicitWidth: 250
+
+    property bool mouseHovered: false
 
     //Bottom rect for background color of player 2
     RoundedRectangle {
@@ -33,7 +35,7 @@ Rectangle {
         topLeftRounded: false
         topRightRounded: false
         radius: bloc.radius
-        color: playerFirstName2 == "" || winner1? "#b2b2b2": "#484848"
+        color: bloc.mouseHovered? "#585848": playerFirstName2 == "" || winner1? "#b2b2b2": "#484848"
     }
 
     RowLayout {
@@ -63,6 +65,14 @@ Rectangle {
                         font {
                             pointSize: 12
                         }
+                    }
+                    Image {
+                        source: "qrc:/img/medal.png"
+                        visible: winner1
+
+                        Layout.preferredHeight: 20
+                        Layout.preferredWidth: 20
+                        fillMode: Image.PreserveAspectFit
                     }
                     Text {
                         Layout.fillHeight: true
@@ -111,6 +121,14 @@ Rectangle {
                         font {
                             pointSize: 12
                         }
+                    }
+                    Image {
+                        source: "qrc:/img/medal.png"
+                        visible: winner2
+
+                        Layout.preferredHeight: 20
+                        Layout.preferredWidth: 20
+                        fillMode: Image.PreserveAspectFit
                     }
                     Text {
                         Layout.fillHeight: true
@@ -190,5 +208,14 @@ Rectangle {
                 }
             }
         }
+    }
+
+    MouseArea {
+        id: mouse
+        anchors.fill: parent
+
+        hoverEnabled: true
+        onEntered: bloc.mouseHovered = true
+        onExited: bloc.mouseHovered = false
     }
 }

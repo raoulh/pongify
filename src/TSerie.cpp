@@ -15,12 +15,29 @@ TMatch::TMatch(QObject *parent):
     update_playerWinner1(false);
     update_playerWinner2(false);
     update_isBye(false);
+
+    connect(this, &TMatch::player1Changed, this, [this](auto *player)
+    {
+        connect(player, &Player::destroyed, this, [this]()
+        {
+            update_player1(nullptr);
+        });
+    });
+
+    connect(this, &TMatch::player2Changed, this, [this](auto *player)
+    {
+        connect(player, &Player::destroyed, this, [this]()
+        {
+            update_player2(nullptr);
+        });
+    });
 }
 
 TSerie::TSerie(QObject *parent):
     QObject{parent}
 {
     players = PlayerModel::createEmpty();
+    QQmlEngine::setObjectOwnership(players, QQmlEngine::CppOwnership);
     update_players(players);
 
     connect(players, &PlayerModel::playersChanged, this, &TSerie::playersModelChanged);
@@ -102,7 +119,7 @@ void TSerie::startSerie()
 int TSerie::seedPlayer(int rank, int partSize)
 {
     // base case, if rank == 1, return position 0
-    if (rank <= 0)
+    if (rank <= 1)
         return 0;
 
     // if our rank is even we need to put the player into the right part
@@ -114,7 +131,7 @@ int TSerie::seedPlayer(int rank, int partSize)
 
     // if the rank is uneven, we put the player in the left part
     // since rank is uneven we need to add + 1 so that it stays uneven
-    return seedPlayer(rank / 2, partSize / 2);
+    return seedPlayer(rank / 2 + 1, partSize / 2);
 }
 
 void TSerie::autoSeedPlayers()
@@ -276,9 +293,11 @@ QObject *TSerie::getPlayer1(int round, int match)
     {
         auto m = getMatchForRound(round, match);
         if (!m) return nullptr;
-        QQmlEngine::setObjectOwnership(m, QQmlEngine::CppOwnership);
 
-        return m->get_player1();
+        auto p = m->get_player1();
+        QQmlEngine::setObjectOwnership(p, QQmlEngine::CppOwnership);
+
+        return p;
     }
 
     return nullptr;
@@ -290,9 +309,11 @@ QObject *TSerie::getPlayer2(int round, int match)
     {
         auto m = getMatchForRound(round, match);
         if (!m) return nullptr;
-        QQmlEngine::setObjectOwnership(m, QQmlEngine::CppOwnership);
 
-        return m->get_player2();
+        auto p = m->get_player2();
+        QQmlEngine::setObjectOwnership(p, QQmlEngine::CppOwnership);
+
+        return p;
     }
 
     return nullptr;
@@ -322,9 +343,17 @@ bool TSerie::winnerForMatch(int round, int match, int playerIdx)
         if (!m) return -1;
 
         if (playerIdx == 0)
+        {
+            if (m->get_player1() && m->get_isBye())
+                return true; //when bye player is automatically a winner
             return m->get_playerWinner1();
+        }
         else
+        {
+            if (m->get_player2() && m->get_isBye())
+                return true; //when bye player is automatically a winner
             return m->get_playerWinner2();
+        }
     }
 
     return false;

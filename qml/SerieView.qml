@@ -22,7 +22,7 @@ Rectangle {
         Text {
             id: titleTxt
             padding: 10
-            text: "Série: %1".arg(selectedSerie.name)
+            text: selectedSerie? "Série: %1".arg(selectedSerie.name): ""
             elide: Text.ElideRight
             color: "#7AA4AC"
             font {

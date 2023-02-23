@@ -8,7 +8,7 @@ RowLayout {
     spacing: 30
 
     Repeater {
-        model: selectedSerie.rounds
+        model: selectedSerie? selectedSerie.rounds: 0
 
         ColumnLayout {
             id: colMatchs
@@ -18,7 +18,7 @@ RowLayout {
             Repeater {
                 id: roundRep
                 property int roundIndex: index
-                model: selectedSerie.matchCountForRound(roundIndex)
+                model: selectedSerie? selectedSerie.matchCountForRound(roundIndex): 0
 
                 Item {
                     Layout.alignment: Qt.AlignVCenter
@@ -29,23 +29,34 @@ RowLayout {
                     MatchBloc {
                         anchors.centerIn: parent
 
+                        QtObject {
+                            id: emptyPlayer
+                            property string firstName
+                            property string lastName
+                            property string ranking
+                        }
+
                         property int matchIndex: index
-                        property QtObject player1: selectedSerie.getPlayer1(roundRep.roundIndex, matchIndex)
-                        property QtObject player2: selectedSerie.getPlayer2(roundRep.roundIndex, matchIndex)
+                        property QtObject player1: selectedSerie && selectedSerie.getPlayer1(roundRep.roundIndex, matchIndex)?
+                                                     selectedSerie.getPlayer1(roundRep.roundIndex, matchIndex):
+                                                       emptyPlayer
+                        property QtObject player2: selectedSerie && selectedSerie.getPlayer2(roundRep.roundIndex, matchIndex)?
+                                                       selectedSerie.getPlayer2(roundRep.roundIndex, matchIndex):
+                                                         emptyPlayer
 
-                        playerFirstName1: player1? player1.firstName: ""
-                        playerLastName1: player1? player1.lastName: ""
-                        playerRank1: player1? player1.ranking: ""
+                        playerFirstName1: player1.firstName
+                        playerLastName1: player1.lastName
+                        playerRank1: player1.ranking
 
-                        playerFirstName2: player2? player2.firstName: ""
-                        playerLastName2: player2? player2.lastName: ""
-                        playerRank2: player2? player2.ranking: ""
+                        playerFirstName2: player2.firstName
+                        playerLastName2: player2.lastName
+                        playerRank2: player2.ranking
 
-                        score1: selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 0)
-                        score2: selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 1)
+                        score1: selectedSerie? selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 0): ""
+                        score2: selectedSerie? selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 1): ""
 
-                        winner1: selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 0)
-                        winner2: selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 1)
+                        winner1: selectedSerie? selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 0): false
+                        winner2: selectedSerie? selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 1): false
                     }
                 }
             }
