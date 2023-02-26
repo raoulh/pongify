@@ -1,0 +1,11 @@
+Write me classes in C++ with algorithms using Qt that will do management of a tournament. Use the following rules to write the classes:
+- The tournament is based on series with a list of players in each series
+- each player have a name and a rank. The ranks is either of: "NC" for unranked or a number starting at 90 and decreasing by 5 for each levels that are better. Maximum rank is 0
+- Each series can be played in round-robbin mode or in single elimination mode
+- Each series have a name, a list of players, a type for the serie (single elimination or round-robbin), the maximum ranking allowed for participating players, the status of the serie (currently playing or stopped or finished)
+- Each serie contains a list or graph of matchs to be played
+- Write a seeding function in the serie class to seed players. The seeding should be done in semi-random, where best players in series needs to play their encounter at the end 
+- The a tournament class is named "Tournament", a serie class is named "TSerie", a player class is named "Player", a match class is named "TMatch"
+- Use QVector or QList or any other Qt classes instead of C++ standard STL
+
+write only the first class Player for now

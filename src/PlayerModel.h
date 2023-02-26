@@ -47,7 +47,7 @@ public:
     void appendClone(Player *p);
     void clear();
 
-    Q_INVOKABLE QObject *getFromLicense(QString lic);
+    Q_INVOKABLE Player *getFromLicense(QString lic);
 
 signals:
     void playersChanged();

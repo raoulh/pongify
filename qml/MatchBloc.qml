@@ -18,6 +18,8 @@ Rectangle {
     property bool winner1
     property bool winner2
 
+    signal clicked()
+
     color: bloc.mouseHovered? "#585848": playerFirstName1 == "" || winner2? "#b2b2b2": "#484848"
     radius: 6
 
@@ -217,5 +219,6 @@ Rectangle {
         hoverEnabled: true
         onEntered: bloc.mouseHovered = true
         onExited: bloc.mouseHovered = false
+        onClicked: bloc.clicked()
     }
 }

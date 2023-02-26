@@ -165,7 +165,7 @@ void PlayerModel::clear()
     clubs.clear();
 }
 
-QObject *PlayerModel::getFromLicense(QString lic)
+Player *PlayerModel::getFromLicense(QString lic)
 {
     for (int i = 0;i < players.count();i++)
     {

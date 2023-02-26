@@ -47,5 +47,9 @@
         <file>qml/MatchBloc.qml</file>
         <file>qml/RoundedRectangle.qml</file>
         <file>img/medal.png</file>
+		<file>icons/pongify/32x32/high-score.png</file>
+        <file>icons/pongify/32x32@2/high-score.png</file>
+        <file>icons/pongify/32x32@3/high-score.png</file>
+        <file>icons/pongify/32x32@4/high-score.png</file>
     </qresource>
 </RCC>

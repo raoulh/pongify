@@ -19,18 +19,41 @@ Rectangle {
         height: titleTxt.implicitHeight
         radius: 10
 
-        Text {
+        Row {
             id: titleTxt
-            padding: 10
-            text: selectedSerie? "Série: %1".arg(selectedSerie.name): ""
-            elide: Text.ElideRight
-            color: "#7AA4AC"
-            font {
-                pointSize: 18
-                bold: true
+            spacing: 20
+
+            Text {
+
+                padding: 10
+                text: selectedSerie? "Série: %1".arg(selectedSerie.name): ""
+                elide: Text.ElideRight
+                color: "#7AA4AC"
+                font {
+                    pointSize: 20
+                    bold: true
+                }
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
             }
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
+
+            Text {
+                padding: 10
+                text: selectedSerie?
+                          selectedSerie.status === "stopped"? "[Non démarré]" :
+                          selectedSerie.status === "playing"? "[Jeu en cours]" :
+                          selectedSerie.status === "finished"? "[Terminé]" :
+                                                              "" : ""
+                elide: Text.ElideRight
+                color: "#79A3AB"
+                font {
+                    pointSize: 18
+                    bold: false
+                    italic: true
+                }
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+            }
         }
     }
 

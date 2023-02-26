@@ -1,6 +1,7 @@
 #include "Tournament.h"
 #include <QJsonObject>
 #include <QJsonArray>
+#include "TStorage.h"
 
 Tournament::Tournament(QObject *parent):
     QObject{parent}
@@ -11,7 +12,13 @@ Tournament::Tournament(QObject *parent):
 
 void Tournament::addSerie(TSerie *s)
 {
+    s->setParent(this);
     series->append(s);
+
+    connect(s, &TSerie::matchesUpdated, this, [this]()
+    {
+        TStorage::Instance()->saveToDisk(this);
+    });
 }
 
 void Tournament::removeSerie(int idx)
@@ -52,7 +59,7 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
         TSerie *s = TSerie::fromJson(o);
 
         if (s)
-            t->series->append(s);
+            t->addSerie(s);
     }
 
     return t;

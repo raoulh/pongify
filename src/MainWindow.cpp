@@ -122,21 +122,27 @@ void MainWindow::showSerieMenu(int idx)
         auto s = currentTournament->getSerie(idx);
         if (!s) return;
         DialogPlayerList d(s);
-        //view->engine()->rootContext()->setContextProperty("selectedSerie", nullptr);
         if (d.exec() == QDialog::Accepted)
         {
             TStorage::Instance()->saveToDisk(currentTournament);
         }
-        //view->engine()->rootContext()->setContextProperty("selectedSerie", s);
     });
 
-    action = menu.addAction(QIcon::fromTheme("casino"), tr("Placer les joueurs"));
+    action = menu.addAction(QIcon::fromTheme("casino"), tr("Placer les joueurs automatiquement"));
     connect(action, &QAction::triggered, this, [this, idx]()
     {
         auto s = currentTournament->getSerie(idx);
         if (!s) return;
         s->autoSeedPlayers();
-        view->engine()->rootContext()->setContextProperty("selectedSerie", s);
+        TStorage::Instance()->saveToDisk(currentTournament);
+    });
+
+    action = menu.addAction(QIcon::fromTheme("trash"), tr("Effacer les joueurs placés"));
+    connect(action, &QAction::triggered, this, [this, idx]()
+    {
+        auto s = currentTournament->getSerie(idx);
+        if (!s) return;
+        s->removeAllPlayers();
         TStorage::Instance()->saveToDisk(currentTournament);
     });
 

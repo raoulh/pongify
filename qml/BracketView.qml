@@ -27,6 +27,7 @@ RowLayout {
                     Layout.preferredWidth: children[0].width
 
                     MatchBloc {
+                        id: matchBloc
                         anchors.centerIn: parent
 
                         QtObject {
@@ -37,12 +38,8 @@ RowLayout {
                         }
 
                         property int matchIndex: index
-                        property QtObject player1: selectedSerie && selectedSerie.getPlayer1(roundRep.roundIndex, matchIndex)?
-                                                     selectedSerie.getPlayer1(roundRep.roundIndex, matchIndex):
-                                                       emptyPlayer
-                        property QtObject player2: selectedSerie && selectedSerie.getPlayer2(roundRep.roundIndex, matchIndex)?
-                                                       selectedSerie.getPlayer2(roundRep.roundIndex, matchIndex):
-                                                         emptyPlayer
+                        property QtObject player1: emptyPlayer
+                        property QtObject player2: emptyPlayer
 
                         playerFirstName1: player1.firstName
                         playerLastName1: player1.lastName
@@ -52,11 +49,32 @@ RowLayout {
                         playerLastName2: player2.lastName
                         playerRank2: player2.ranking
 
-                        score1: selectedSerie? selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 0): ""
-                        score2: selectedSerie? selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 1): ""
+                        onClicked: if (selectedSerie) selectedSerie.clickedOnMatch(roundRep.roundIndex, matchIndex)
 
-                        winner1: selectedSerie? selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 0): false
-                        winner2: selectedSerie? selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 1): false
+                        function updateMatchData() {
+                            matchBloc.score1 = selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 0)
+                            matchBloc.score2 = selectedSerie.scoreForMatch(roundRep.roundIndex, matchIndex, 1)
+                            matchBloc.winner1 = selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 0)
+                            matchBloc.winner2 = selectedSerie.winnerForMatch(roundRep.roundIndex, matchIndex, 1)
+
+                            let player = selectedSerie.getPlayer1(roundRep.roundIndex, matchIndex)
+                            if (!player) player = emptyPlayer
+                            matchBloc.player1 = player
+
+                            player = selectedSerie.getPlayer2(roundRep.roundIndex, matchIndex)
+                            if (!player) player = emptyPlayer
+                            matchBloc.player2 = player
+                        }
+
+                        Component.onCompleted: updateMatchData()
+
+                        Connections {
+                            target: selectedSerie
+
+                            function onMatchesUpdated() {
+                                matchBloc.updateMatchData()
+                            }
+                        }
                     }
                 }
             }

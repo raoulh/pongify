@@ -48,12 +48,18 @@ public:
 
     void startSerie();
     void autoSeedPlayers();
+    void removeAllPlayers();
 
     Q_INVOKABLE int matchCountForRound(int round);
     Q_INVOKABLE QObject *getPlayer1(int round, int match);
     Q_INVOKABLE QObject *getPlayer2(int round, int match);
     Q_INVOKABLE int scoreForMatch(int round, int match, int playerIdx);
     Q_INVOKABLE bool winnerForMatch(int round, int match, int playerIdx);
+
+    Q_INVOKABLE void clickedOnMatch(int round, int match);
+
+signals:
+    void matchesUpdated();
 
 private slots:
     void playersModelChanged();

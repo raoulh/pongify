@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <random>
 #include <QQmlEngine>
+#include <QMenu>
+#include <QAction>
+#include "DialogEditScore.h"
 
 TMatch::TMatch(QObject *parent):
     QObject(parent)
@@ -47,6 +50,7 @@ TSerie::TSerie(QObject *parent):
 TSerie::~TSerie()
 {
     delete players;
+    clearAllMatches();
 }
 
 TSerie *TSerie::fromJson(const QJsonObject &obj)
@@ -73,6 +77,35 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
         t->players->loadPlayer(o);
     }
 
+    t->clearAllMatches();
+
+    //get all rounds
+    arr = obj["rounds"].toArray();
+    for (int i = 0;i < arr.count();i++)
+    {
+        auto round = arr.at(i).toArray();
+        auto r = new TRound();
+        for (int j = 0;j < round.count();j++)
+        {
+            auto match = round.at(j).toObject();
+            auto m = new TMatch();
+
+            m->update_playerScore1(match["playerScore1"].toInt());
+            m->update_playerScore2(match["playerScore2"].toInt());
+            m->update_playerWinner1(match["playerWinner1"].toBool());
+            m->update_playerWinner2(match["playerWinner2"].toBool());
+            m->update_isBye(match["isBye"].toBool());
+
+            auto player = t->players->getFromLicense(match["player1"].toString());
+            m->update_player1(player);
+            player = t->players->getFromLicense(match["player2"].toString());
+            m->update_player2(player);
+
+            r->append(m);
+        }
+        t->allMatches.append(r);
+    }
+
     return t;
 }
 
@@ -90,6 +123,31 @@ QJsonObject TSerie::toJson()
 
     obj.insert("players", arr);
 
+    //save all rounds
+    arr = {};
+    for (int i = 0;i < allMatches.count();i++)
+    {
+        QJsonArray roundArr;
+
+        for (int j = 0;j < allMatches.at(i)->count();j++)
+        {
+            auto match = allMatches.at(i)->at(j);
+            QJsonObject mObj = {
+                { "playerScore1", match->get_playerScore1() },
+                { "playerScore2", match->get_playerScore2() },
+                { "playerWinner1", match->get_playerWinner1() },
+                { "playerWinner2", match->get_playerWinner2() },
+                { "isBye", match->get_isBye() },
+                { "player1", match->get_player1()? match->get_player1()->get_license(): "" },
+                { "player2", match->get_player2()? match->get_player2()->get_license(): "" },
+            };
+            roundArr.append(mObj);
+        }
+
+        arr.append(roundArr);
+    }
+    obj.insert("rounds", arr);
+
     return obj;
 }
 
@@ -103,7 +161,17 @@ QStringList TSerie::getPlayerLicences()
 
 void TSerie::startSerie()
 {
+    //Serie status:
+    // - stopped  --> by default when created
+    // - playing  --> once the serie is started
+    // - finished --> when the score is entered for the final match, hall of fame can be displayed for the serie
+
     if (get_status() != "stopped") return;
+
+    //TODO:
+    // - Check if players are all in the first round
+    // - Check if any players are duplicated in multiple matches in the first round
+    // If any of this is true, warn user and don't start the serie
 
     update_status("playing");
 }
@@ -207,6 +275,14 @@ void TSerie::autoSeedPlayers()
             jplayer++;
         }
     }
+
+    emit matchesUpdated();
+}
+
+void TSerie::removeAllPlayers()
+{
+    clearAllMatches();
+    prepareMatches();
 }
 
 int TSerie::nearestPowerOf2(long long N)
@@ -253,6 +329,8 @@ void TSerie::prepareMatches()
             r->append(m);
         }
     }
+
+    emit matchesUpdated();
 }
 
 void TSerie::clearAllMatches()
@@ -263,6 +341,8 @@ void TSerie::clearAllMatches()
     }
     qDeleteAll(allMatches);
     allMatches.clear();
+
+    emit matchesUpdated();
 }
 
 int TSerie::matchCountForRound(int round)
@@ -275,7 +355,7 @@ int TSerie::matchCountForRound(int round)
         while (m > 1 && --roundCalc > 0)
             m = m / 2;
 
-        qDebug() << "matchs for round(" << round << "): " << m;
+        //qDebug() << "matchs for round(" << round << "): " << m;
 
         return m;
     }
@@ -359,6 +439,55 @@ bool TSerie::winnerForMatch(int round, int match, int playerIdx)
     return false;
 }
 
+void TSerie::clickedOnMatch(int round, int match)
+{
+    QMenu menu;
+    QAction *action = nullptr;
+    auto m = getMatchForRound(round, match);
+
+    action = menu.addAction(QIcon::fromTheme("high-score"), tr("Score du match"));
+    if (m && m->get_isBye())
+        action->setDisabled(true);
+    connect(action, &QAction::triggered, this, [=]()
+    {
+        DialogEditScore d(m);
+        if (d.exec() == QDialog::Accepted)
+        {
+            m->update_playerScore1(d.getScorePlayer1());
+            m->update_playerScore2(d.getScorePlayer2());
+
+            //update winner
+            m->update_playerWinner1(m->get_playerScore1() > m->get_playerScore2());
+            m->update_playerWinner2(!m->get_playerWinner1());
+
+            emit matchesUpdated();
+        }
+    });
+
+    action = menu.addAction(QIcon::fromTheme("trash"), tr("Effacer le score"));
+    if (m && m->get_isBye())
+        action->setDisabled(true);
+    connect(action, &QAction::triggered, this, [=]()
+    {
+        m->update_playerScore1(-1);
+        m->update_playerScore2(-1);
+        m->update_playerWinner1(false);
+        m->update_playerWinner2(false);
+
+        emit matchesUpdated();
+
+    });
+
+    action = menu.addAction(QIcon::fromTheme("athlete"), tr("Changer joueurs"));
+    if (round == 0 && get_status() != "stopped")
+        action->setDisabled(true);
+    connect(action, &QAction::triggered, this, []()
+    {
+    });
+
+    menu.exec(QCursor::pos());
+}
+
 void TSerie::playersModelChanged()
 {
     //Min players check
@@ -379,4 +508,6 @@ void TSerie::playersModelChanged()
     qDebug() << "Serie: " << get_name() << " players:" << players->rowCount() << " rounds: " << rounds;
 
     prepareMatches();
+
+    emit matchesUpdated();
 }
