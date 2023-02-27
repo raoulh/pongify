@@ -36,6 +36,14 @@ TMatch::TMatch(QObject *parent):
     });
 }
 
+void TMatch::clearScore()
+{
+    update_playerScore1(-1);
+    update_playerScore2(-1);
+    update_playerWinner1(false);
+    update_playerWinner2(false);
+}
+
 TSerie::TSerie(QObject *parent):
     QObject{parent}
 {
@@ -106,6 +114,7 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
         t->allMatches.append(r);
     }
 
+    t->updateNextMatches();
     return t;
 }
 
@@ -276,6 +285,7 @@ void TSerie::autoSeedPlayers()
         }
     }
 
+    updateNextMatches();
     emit matchesUpdated();
 }
 
@@ -343,6 +353,54 @@ void TSerie::clearAllMatches()
     allMatches.clear();
 
     emit matchesUpdated();
+}
+
+void TSerie::updateNextMatches()
+{
+    for (int i = 0;i < allMatches.count();i++)
+    {
+        auto round = allMatches.at(i);
+
+        for (int j = 0, i_next = 0;j < round->count();j++)
+        {
+            if (i + 1 >= allMatches.count())
+                break; //last round
+
+            auto match = round->at(j);
+            auto nextMatch = allMatches.at(i + 1)->at(i_next);
+
+            //get winner
+            Player *winner = nullptr;
+            if (match->get_playerWinner1() || match->get_isBye())
+                winner = match->get_player1();
+            else if (match->get_playerWinner2())
+                winner = match->get_player2();
+
+            bool hasChanged = false;
+            Player *p1 = nextMatch->get_player1();
+            Player *p2 = nextMatch->get_player2();
+
+            if (j % 2 == 0)
+            {
+                nextMatch->update_player1(winner);
+                if (p1 != winner)
+                    hasChanged = true;
+            }
+            else
+            {
+                nextMatch->update_player2(winner);
+                if (p2 != winner)
+                    hasChanged = true;
+            }
+
+            //Clear score if player1/2 changed from before
+            if (hasChanged)
+                nextMatch->clearScore();
+
+            if ((j + 1) % 2 == 0)
+                i_next++; //increment next round match on pair idx only
+        }
+    }
 }
 
 int TSerie::matchCountForRound(int round)
@@ -444,10 +502,17 @@ void TSerie::clickedOnMatch(int round, int match)
     QMenu menu;
     QAction *action = nullptr;
     auto m = getMatchForRound(round, match);
+    bool actionDisabled = false;
+
+    if (m)
+    {
+        //disable action if
+        if (m->get_isBye() || !m->get_player1() || !m->get_player1())
+            actionDisabled = true;
+    }
 
     action = menu.addAction(QIcon::fromTheme("high-score"), tr("Score du match"));
-    if (m && m->get_isBye())
-        action->setDisabled(true);
+    if (actionDisabled) action->setDisabled(true);
     connect(action, &QAction::triggered, this, [=]()
     {
         DialogEditScore d(m);
@@ -460,30 +525,30 @@ void TSerie::clickedOnMatch(int round, int match)
             m->update_playerWinner1(m->get_playerScore1() > m->get_playerScore2());
             m->update_playerWinner2(!m->get_playerWinner1());
 
+            updateNextMatches();
             emit matchesUpdated();
         }
     });
 
     action = menu.addAction(QIcon::fromTheme("trash"), tr("Effacer le score"));
-    if (m && m->get_isBye())
-        action->setDisabled(true);
+    if (actionDisabled) action->setDisabled(true);
     connect(action, &QAction::triggered, this, [=]()
     {
-        m->update_playerScore1(-1);
-        m->update_playerScore2(-1);
-        m->update_playerWinner1(false);
-        m->update_playerWinner2(false);
-
+        m->clearScore();
+        updateNextMatches();
         emit matchesUpdated();
 
     });
 
-    action = menu.addAction(QIcon::fromTheme("athlete"), tr("Changer joueurs"));
-    if (round == 0 && get_status() != "stopped")
-        action->setDisabled(true);
-    connect(action, &QAction::triggered, this, []()
+    if (round == 0)
     {
-    });
+        action = menu.addAction(QIcon::fromTheme("athlete"), tr("Changer joueurs"));
+        if (get_status() != "stopped")
+            action->setDisabled(true);
+        connect(action, &QAction::triggered, this, []()
+        {
+        });
+    }
 
     menu.exec(QCursor::pos());
 }

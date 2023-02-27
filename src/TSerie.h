@@ -18,6 +18,8 @@ class TMatch: public QObject
     QML_READONLY_PROPERTY(bool, isBye)
 public:
     explicit TMatch(QObject *parent = nullptr);
+
+    void clearScore();
 };
 
 typedef QVector<TMatch *> TRound;
@@ -75,6 +77,8 @@ private:
     int seedPlayer(int rank, int partSize);
     void prepareMatches();
     void clearAllMatches();
+
+    void updateNextMatches();
 };
 
 #endif // TSERIE_H
