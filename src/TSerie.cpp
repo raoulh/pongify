@@ -189,6 +189,8 @@ void TSerie::stopSerie()
 {
     if (get_status() != "playing") return;
 
+
+
     update_status("finished");
 }
 
