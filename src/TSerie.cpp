@@ -185,6 +185,13 @@ void TSerie::startSerie()
     update_status("playing");
 }
 
+void TSerie::stopSerie()
+{
+    if (get_status() != "playing") return;
+
+    update_status("finished");
+}
+
 /**
  * @param rank
  *            rank of the player, best player == 0, second best player == 1, ...

@@ -100,57 +100,76 @@ void MainWindow::showSerieMenu(int idx)
 {
     QMenu menu;
     QAction *action = nullptr;
+    auto serie = currentTournament->getSerie(idx);
+    if (!serie) return;
 
-    action = menu.addAction(QIcon::fromTheme("play-button"), tr("Démarrer la série"));
-    connect(action, &QAction::triggered, this, [this, idx]()
+    if (serie->get_status() == "stopped")
     {
-        auto s = currentTournament->getSerie(idx);
-        if (!s) return;
-        if (s->get_status() != "stopped") return;
-        auto ret = QMessageBox::question(this, "Confirmation",
-                                         QStringLiteral("Démarrer la série \"%1\" ?")
-                                         .arg(s->get_name()));
-        if (ret == QMessageBox::Yes)
+        action = menu.addAction(QIcon::fromTheme("play-button"), tr("Démarrer la série"));
+        connect(action, &QAction::triggered, this, [this, serie]()
         {
-            s->startSerie();
-        }
-    });
+            auto ret = QMessageBox::question(this, "Confirmation",
+                                             QStringLiteral("Démarrer la série \"%1\" ?")
+                                             .arg(serie->get_name()));
+            if (ret == QMessageBox::Yes)
+            {
+                serie->startSerie();
+            }
+        });
+    }
+
+    if (serie->get_status() == "playing")
+    {
+        action = menu.addAction(QIcon::fromTheme("stop-button"), tr("Terminer la série"));
+        connect(action, &QAction::triggered, this, [this, serie]()
+        {
+            auto ret = QMessageBox::question(this, "Confirmation",
+                                             QStringLiteral("Terminer la série \"%1\" ?")
+                                             .arg(serie->get_name()));
+            if (ret == QMessageBox::Yes)
+            {
+                serie->stopSerie();
+            }
+        });
+    }
 
     action = menu.addAction(QIcon::fromTheme("athlete"), tr("Joueurs..."));
-    connect(action, &QAction::triggered, this, [this, idx]()
+    connect(action, &QAction::triggered, this, [this, serie]()
     {
-        auto s = currentTournament->getSerie(idx);
-        if (!s) return;
-        DialogPlayerList d(s);
+        DialogPlayerList d(serie);
         if (d.exec() == QDialog::Accepted)
         {
             TStorage::Instance()->saveToDisk(currentTournament);
         }
     });
+    if (serie->get_status() != "stopped")
+        action->setDisabled(true);
 
     action = menu.addAction(QIcon::fromTheme("casino"), tr("Placer les joueurs automatiquement"));
-    connect(action, &QAction::triggered, this, [this, idx]()
+    connect(action, &QAction::triggered, this, [this, serie]()
     {
-        auto s = currentTournament->getSerie(idx);
-        if (!s) return;
-        s->autoSeedPlayers();
+        serie->autoSeedPlayers();
         TStorage::Instance()->saveToDisk(currentTournament);
     });
+    if (serie->get_status() != "stopped")
+        action->setDisabled(true);
 
     action = menu.addAction(QIcon::fromTheme("trash"), tr("Effacer les joueurs placés"));
-    connect(action, &QAction::triggered, this, [this, idx]()
+    connect(action, &QAction::triggered, this, [this, serie]()
     {
-        auto s = currentTournament->getSerie(idx);
-        if (!s) return;
-        s->removeAllPlayers();
+        serie->removeAllPlayers();
         TStorage::Instance()->saveToDisk(currentTournament);
     });
+    if (serie->get_status() != "stopped")
+        action->setDisabled(true);
 
     action = menu.addAction(QIcon::fromTheme("filter"), tr("Propriétés"));
     connect(action, &QAction::triggered, this, [this, idx]()
     {
         editSerie(idx);
     });
+    if (serie->get_status() != "stopped")
+        action->setDisabled(true);
 
     menu.addSeparator();
 
@@ -159,6 +178,8 @@ void MainWindow::showSerieMenu(int idx)
     {
         deleteSerie(idx);
     });
+    if (serie->get_status() == "playing")
+        action->setDisabled(true);
 
     menu.exec(QCursor::pos());
 }

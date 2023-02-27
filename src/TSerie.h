@@ -49,6 +49,7 @@ public:
     PlayerModel *getPlayerModel() { return players; }
 
     void startSerie();
+    void stopSerie();
     void autoSeedPlayers();
     void removeAllPlayers();
 
