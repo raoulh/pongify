@@ -22,6 +22,8 @@ public:
     void setRanking(QString r);
     QString getType();
     void setType(QString t);
+    bool getDouble();
+    void setDouble(bool en);
 
 private:
     Ui::DialogNewSerie *ui;

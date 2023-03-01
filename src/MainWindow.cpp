@@ -194,6 +194,7 @@ void MainWindow::newSerie()
         s->update_ranking(d.getRanking());
         s->update_tournamentType(d.getType());
         s->update_status("stopped");
+        s->update_isDouble(d.getDouble());
 
         currentTournament->addSerie(s);
         TStorage::Instance()->saveToDisk(currentTournament);
@@ -224,11 +225,13 @@ void MainWindow::editSerie(int idx)
     d.setName(s->get_name());
     d.setRanking(s->get_ranking());
     d.setType(s->get_tournamentType());
+    d.setDouble(s->get_isDouble());
     if (d.exec() == QDialog::Accepted)
     {
         s->update_name(d.getName());
         s->update_ranking(d.getRanking());
         s->update_tournamentType(d.getType());
+        s->update_isDouble(d.getDouble());
         TStorage::Instance()->saveToDisk(currentTournament);
     }
 }

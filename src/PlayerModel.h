@@ -44,6 +44,8 @@ public:
     Player *item(int row);
     QStringList getClubs() { return clubs; }
 
+    int indexFromPlayer(Player *p);
+
     void appendClone(Player *p);
     void clear();
 

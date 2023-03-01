@@ -153,6 +153,18 @@ Player *PlayerModel::item(int row)
     return nullptr;
 }
 
+int PlayerModel::indexFromPlayer(Player *p)
+{
+    for (int i = 0;i < players.count() && p;i++)
+    {
+        auto player = players.at(i);
+        if (player->get_license() == p->get_license())
+            return i;
+    }
+
+    return -1;
+}
+
 void PlayerModel::appendClone(Player *p)
 {
     loadPlayer(p->toJson());

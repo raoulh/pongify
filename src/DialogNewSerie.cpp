@@ -70,3 +70,13 @@ void DialogNewSerie::setType(QString t)
     else if (t.toLower() == "roundrobbin")
         ui->comboBoxType->setCurrentIndex(1);
 }
+
+bool DialogNewSerie::getDouble()
+{
+    return ui->checkBoxDouble->isChecked();
+}
+
+void DialogNewSerie::setDouble(bool en)
+{
+    ui->checkBoxDouble->setChecked(en);
+}

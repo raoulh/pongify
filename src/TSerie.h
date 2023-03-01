@@ -11,6 +11,8 @@ class TMatch: public QObject
     Q_OBJECT
     QML_READONLY_PROPERTY(Player *, player1)
     QML_READONLY_PROPERTY(Player *, player2)
+    QML_READONLY_PROPERTY(Player *, playerSecond1)
+    QML_READONLY_PROPERTY(Player *, playerSecond2)
     QML_READONLY_PROPERTY(int, playerScore1)
     QML_READONLY_PROPERTY(int, playerScore2)
     QML_READONLY_PROPERTY(bool, playerWinner1)
@@ -37,6 +39,8 @@ class TSerie : public QObject
 
     //keep the number of round in this serie
     QML_READONLY_PROPERTY(int, rounds)
+
+    QML_READONLY_PROPERTY(bool, isDouble)
 
 public:
     explicit TSerie(QObject *parent = nullptr);

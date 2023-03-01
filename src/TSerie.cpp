@@ -7,12 +7,16 @@
 #include <QMenu>
 #include <QAction>
 #include "DialogEditScore.h"
+#include <QMessageBox>
+#include "DialogChangePlayer.h"
 
 TMatch::TMatch(QObject *parent):
     QObject(parent)
 {
     update_player1(nullptr);
     update_player2(nullptr);
+    update_playerSecond1(nullptr);
+    update_playerSecond2(nullptr);
     update_playerScore1(-1);
     update_playerScore2(-1);
     update_playerWinner1(false);
@@ -34,6 +38,22 @@ TMatch::TMatch(QObject *parent):
             update_player2(nullptr);
         });
     });
+
+    connect(this, &TMatch::playerSecond1Changed, this, [this](auto *player)
+    {
+        connect(player, &Player::destroyed, this, [this]()
+        {
+            update_playerSecond1(nullptr);
+        });
+    });
+
+    connect(this, &TMatch::playerSecond2Changed, this, [this](auto *player)
+    {
+        connect(player, &Player::destroyed, this, [this]()
+        {
+            update_playerSecond2(nullptr);
+        });
+    });
 }
 
 void TMatch::clearScore()
@@ -53,6 +73,8 @@ TSerie::TSerie(QObject *parent):
 
     connect(players, &PlayerModel::playersChanged, this, &TSerie::playersModelChanged);
     playersModelChanged();
+
+    update_isDouble(false);
 }
 
 TSerie::~TSerie()
@@ -77,6 +99,7 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
     t->update_status(obj["status"].toString());
     if (t->get_status().isEmpty())
         t->update_status("stopped");
+    t->update_isDouble(obj["double"].toBool());
 
     QJsonArray arr = obj["players"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -109,6 +132,11 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
             player = t->players->getFromLicense(match["player2"].toString());
             m->update_player2(player);
 
+            player = t->players->getFromLicense(match["playerSecond1"].toString());
+            m->update_playerSecond1(player);
+            player = t->players->getFromLicense(match["playerSecond2"].toString());
+            m->update_playerSecond2(player);
+
             r->append(m);
         }
         t->allMatches.append(r);
@@ -125,6 +153,7 @@ QJsonObject TSerie::toJson()
     obj.insert("type", get_tournamentType());
     obj.insert("ranking", get_ranking());
     obj.insert("status", get_status());
+    obj.insert("double", get_isDouble());
 
     QJsonArray arr;
     for (int i = 0;i < players->rowCount();i++)
@@ -149,6 +178,8 @@ QJsonObject TSerie::toJson()
                 { "isBye", match->get_isBye() },
                 { "player1", match->get_player1()? match->get_player1()->get_license(): "" },
                 { "player2", match->get_player2()? match->get_player2()->get_license(): "" },
+                { "playerSecond1", match->get_playerSecond1()? match->get_playerSecond1()->get_license(): "" },
+                { "playerSecond2", match->get_playerSecond2()? match->get_playerSecond2()->get_license(): "" },
             };
             roundArr.append(mObj);
         }
@@ -177,10 +208,61 @@ void TSerie::startSerie()
 
     if (get_status() != "stopped") return;
 
-    //TODO:
-    // - Check if players are all in the first round
-    // - Check if any players are duplicated in multiple matches in the first round
-    // If any of this is true, warn user and don't start the serie
+    if (allMatches.count() < 2)
+        return;
+
+    //Check if all players are playing the 1st round
+    auto firstRound = allMatches.at(0);
+    for (int i = 0;i < players->rowCount();i++)
+    {
+        bool found = false;
+        for (int j = 0;j < firstRound->count();j++)
+        {
+            auto match = firstRound->at(j);
+            if (match->get_player1() == players->item(i) ||
+                match->get_player2() == players->item(i))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            QMessageBox::warning(nullptr, "Attention",
+                                 "Tous les joueurs ne sont pas placés dans le premier tour.\nImpossible de démarrer la série.");
+
+            return;
+        }
+    }
+
+    auto addToSet = [](QSet<Player *> &s, Player *p)
+    {
+        if (!s.contains(p))
+        {
+            s.insert(p);
+            return false;
+        }
+
+        return true;
+    };
+
+    QSet<Player *> s;
+    for (int i = 0;i < firstRound->count();i++)
+    {
+        auto match = firstRound->at(i);
+
+        if (addToSet(s, match->get_player1()) ||
+            addToSet(s, match->get_player2()) ||
+            addToSet(s, match->get_playerSecond1()) ||
+            addToSet(s, match->get_playerSecond2()))
+        {
+            QMessageBox::warning(nullptr, "Attention",
+                                 "Il y a des joueurs en double dans le premier tour. Veuillez corriger.");
+
+            return;
+        }
+    }
 
     update_status("playing");
 }
@@ -487,7 +569,7 @@ bool TSerie::winnerForMatch(int round, int match, int playerIdx)
     if (get_tournamentType() == "single")
     {
         auto m = getMatchForRound(round, match);
-        if (!m) return -1;
+        if (!m) return false;
 
         if (playerIdx == 0)
         {
@@ -546,7 +628,6 @@ void TSerie::clickedOnMatch(int round, int match)
         m->clearScore();
         updateNextMatches();
         emit matchesUpdated();
-
     });
 
     if (round == 0)
@@ -554,8 +635,25 @@ void TSerie::clickedOnMatch(int round, int match)
         action = menu.addAction(QIcon::fromTheme("athlete"), tr("Changer joueurs"));
         if (get_status() != "stopped")
             action->setDisabled(true);
-        connect(action, &QAction::triggered, this, []()
+        connect(action, &QAction::triggered, this, [=]()
         {
+            DialogChangePlayer d(players, m, get_isDouble());
+            if (d.exec() == QDialog::Accepted)
+            {
+                m->update_player1(d.getPlayer1_1());
+                m->update_player2(d.getPlayer2_1());
+                m->update_playerSecond1(d.getPlayer1_2());
+                m->update_playerSecond2(d.getPlayer2_2());
+
+                if ((m->get_player1() && !m->get_player2()) ||
+                    (!m->get_player1() && m->get_player2()))
+                    m->update_isBye(true);
+                else
+                    m->update_isBye(false);
+
+                updateNextMatches();
+                emit matchesUpdated();
+            }
         });
     }
 
