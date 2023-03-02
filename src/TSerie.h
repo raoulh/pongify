@@ -11,13 +11,12 @@ class TMatch: public QObject
     Q_OBJECT
     QML_READONLY_PROPERTY(Player *, player1)
     QML_READONLY_PROPERTY(Player *, player2)
-    QML_READONLY_PROPERTY(Player *, playerSecond1)
-    QML_READONLY_PROPERTY(Player *, playerSecond2)
     QML_READONLY_PROPERTY(int, playerScore1)
     QML_READONLY_PROPERTY(int, playerScore2)
     QML_READONLY_PROPERTY(bool, playerWinner1)
     QML_READONLY_PROPERTY(bool, playerWinner2)
     QML_READONLY_PROPERTY(bool, isBye)
+    QML_READONLY_PROPERTY(bool, isDouble)
 public:
     explicit TMatch(QObject *parent = nullptr);
 

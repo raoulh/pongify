@@ -19,6 +19,9 @@ DialogNewSerie::DialogNewSerie(bool isnew, QWidget *parent) :
     ui->comboBoxRanking->addItem("NC");
     for (int i = 90; i > 0;i -= 5)
         ui->comboBoxRanking->addItem(QString::number(i));
+
+    if (!isnew)
+        ui->checkBoxDouble->setDisabled(true);
 }
 
 DialogNewSerie::~DialogNewSerie()

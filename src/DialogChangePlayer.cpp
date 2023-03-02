@@ -26,9 +26,6 @@ DialogChangePlayer::DialogChangePlayer(PlayerModel *m, TMatch *ma, bool isDouble
     ui->comboBoxP1->setCurrentIndex(model->indexFromPlayer(match->get_player1()));
     ui->comboBoxP2->setCurrentIndex(model->indexFromPlayer(match->get_player2()));
 
-    ui->comboBoxP1_2->setCurrentIndex(model->indexFromPlayer(match->get_playerSecond1()));
-    ui->comboBoxP2_2->setCurrentIndex(model->indexFromPlayer(match->get_playerSecond2()));
-
     if (!isDouble)
     {
         ui->comboBoxP1_2->hide();

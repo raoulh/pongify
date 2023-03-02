@@ -241,6 +241,7 @@ void MainWindow::selectSerie(int idx)
     auto s = currentTournament->getSerie(idx);
     if (!s) return;
     view->engine()->rootContext()->setContextProperty("selectedSerie", s);
+    emit s->matchesUpdated(); //force update matches in QML
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()

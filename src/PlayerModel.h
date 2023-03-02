@@ -31,6 +31,12 @@ public:
         RoleLicenseValid,
         RoleRanking,
         RoleClub,
+        RoleFirstNameSecond,
+        RoleLastNameSecond,
+        RoleLicenseSecond,
+        RoleLicenseValidSecond,
+        RoleRankingSecond,
+        RoleClubSecond,
     };
 
     virtual QVariant data(const QModelIndex &index, int role) const override;
@@ -76,6 +82,14 @@ class Player : public QObject
     QML_READONLY_PROPERTY(bool, licenseValid)
     QML_READONLY_PROPERTY(QString, ranking)
     QML_READONLY_PROPERTY(QString, club)
+
+    //For double match, the second player is here
+    QML_READONLY_PROPERTY(QString, firstNameSecond)
+    QML_READONLY_PROPERTY(QString, lastNameSecond)
+    QML_READONLY_PROPERTY(QString, licenseSecond)
+    QML_READONLY_PROPERTY(bool, licenseValidSecond)
+    QML_READONLY_PROPERTY(QString, rankingSecond)
+    QML_READONLY_PROPERTY(QString, clubSecond)
 
 public:
     explicit Player(QObject *parent = nullptr);

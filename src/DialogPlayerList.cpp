@@ -3,8 +3,121 @@
 #include "TSerie.h"
 #include "PlayerModel.h"
 #include "DialogPlayers.h"
+#include "DialogAddDoublePlayers.h"
 
 #include <QMessageBox>
+#include <QStyledItemDelegate>
+#include <QPainter>
+
+class TwoLineItemDelegate: public QStyledItemDelegate
+{
+public:
+    TwoLineItemDelegate():
+        QStyledItemDelegate()
+    {}
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        QStyledItemDelegate::paint(painter,option,index);
+
+        //When only one player, draw using default class
+        if (!index.data(PlayerModel::RoleFirstName).isValid() ||
+            index.data(PlayerModel::RoleFirstNameSecond).toString() == "")
+            return QStyledItemDelegate::paint(painter, option, index);
+
+        painter->save();
+
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+
+        QString headerText = QStringLiteral("%1 %2").arg(
+                                 index.data(PlayerModel::RoleFirstName).toString(),
+                                 index.data(PlayerModel::RoleLastName).toString());
+        QString subText = QStringLiteral("%1 %2").arg(
+                              index.data(PlayerModel::RoleFirstNameSecond).toString(),
+                              index.data(PlayerModel::RoleLastNameSecond).toString());
+
+        QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+        QSize iconsize = icon.actualSize(option.decorationSize);
+
+        // draw correct background
+        opt.text = "";
+        QStyle *style = opt.widget ? opt.widget->style() : QApplication::style();
+        style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, opt.widget);
+
+        QRect rect = opt.rect;
+        QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
+        if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
+            cg = QPalette::Inactive;
+
+        // set pen color
+        if (opt.state & QStyle::State_Selected)
+            painter->setPen(opt.palette.color(cg, QPalette::HighlightedText));
+        else
+            painter->setPen(opt.palette.color(cg, QPalette::Text));
+
+        QFont font = painter->font();
+        QFont subFont = painter->font();
+        //font.setBold(true);
+        //subFont.setWeight(subFont.weight() - 4);
+        subFont.setPointSize(subFont.pointSize() - 1);
+        subFont.setItalic(true);
+
+        // draw 2 lines of text
+        painter->setFont(font);
+        painter->drawText(QRect(rect.left() + iconsize.width() + 8, rect.top(), rect.width() - iconsize.width() - 8, rect.height()/2),
+                          opt.displayAlignment, headerText);
+        painter->setFont(subFont);
+
+        if (!(opt.state & QStyle::State_Selected))
+        {
+            QColor penColor = painter->pen().color();
+            penColor.setNamedColor("#A0A0A0");
+            painter->setPen(penColor);
+        }
+
+        painter->drawText(QRect(rect.left() + iconsize.width() + 8, rect.top()+rect.height()/2, rect.width() - iconsize.width() - 8, rect.height()/2),
+                          opt.displayAlignment, subText);
+
+        painter->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        //When only one player, draw using default class
+        if (!index.data(PlayerModel::RoleFirstName).isValid() ||
+             index.data(PlayerModel::RoleFirstNameSecond).toString() == "")
+            return QStyledItemDelegate::sizeHint(option, index);
+
+        QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+        QSize iconsize = icon.actualSize(option.decorationSize);
+
+        QFont font = QApplication::font();
+        QFont subFont = QApplication::font();
+
+        subFont.setPointSize(subFont.pointSize() - 1);
+        subFont.setItalic(true);
+
+        QFontMetrics fm(font), subfm(subFont);
+
+        QString headerText = QStringLiteral("%1 %2").arg(
+                                 index.data(PlayerModel::RoleFirstName).toString(),
+                                 index.data(PlayerModel::RoleLastName).toString());
+        QString subText = QStringLiteral("%1 %2").arg(
+                              index.data(PlayerModel::RoleFirstNameSecond).toString(),
+                              index.data(PlayerModel::RoleLastNameSecond).toString());
+
+        int textWidth = fm.horizontalAdvance(headerText);
+        int subWidth = subfm.horizontalAdvance(subText);
+        if (textWidth < subWidth) textWidth = subWidth;
+
+        QSize sz(iconsize.width() + textWidth + 10, fm.height() + subfm.height() + 8);
+        if (sz.width() < 180)
+            sz.setWidth(180);
+
+        return sz;
+    }
+};
 
 DialogPlayerList::DialogPlayerList(TSerie *s, QWidget *parent) :
     QDialog(parent),
@@ -24,6 +137,7 @@ DialogPlayerList::DialogPlayerList(TSerie *s, QWidget *parent) :
     filterModel = new PlayerFilterModel(this);
     filterModel->setSourceModel(playerModel);
 
+    ui->treeView->setItemDelegate(new TwoLineItemDelegate());
     ui->treeView->setModel(filterModel);
     ui->treeView->setUniformRowHeights(true);
 
@@ -41,6 +155,25 @@ DialogPlayerList::~DialogPlayerList()
 
 void DialogPlayerList::on_pushButtonAdd_clicked()
 {
+    if (serie->get_isDouble())
+    {
+        DialogAddDoublePlayers d;
+        if (d.exec() == QDialog::Accepted)
+        {
+            playerModel->appendClone(d.getPlayer1());
+            auto p1 = playerModel->item(playerModel->rowCount() - 1);
+            auto p2 = d.getPlayer2();
+            p1->update_firstNameSecond(p2->get_firstNameSecond());
+            p1->update_lastNameSecond(p2->get_lastNameSecond());
+            p1->update_clubSecond(p2->get_clubSecond());
+            p1->update_licenseSecond(p2->get_licenseSecond());
+            p1->update_rankingSecond(p2->get_rankingSecond());
+            p1->update_licenseValidSecond(p2->get_licenseValidSecond());
+        }
+
+        return;
+    }
+
     DialogPlayers d(PlayerModel::Instance(), true);
     if (d.exec() == QDialog::Accepted)
     {

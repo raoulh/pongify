@@ -50,6 +50,12 @@ QVariant PlayerModel::data(const QModelIndex &index, int role) const
     case RoleLicenseValid: return players.at(index.row())->get_licenseValid();
     case RoleRanking: return players.at(index.row())->get_ranking();
     case RoleClub: return players.at(index.row())->get_club();
+    case RoleFirstNameSecond: return players.at(index.row())->get_firstNameSecond();
+    case RoleLastNameSecond: return players.at(index.row())->get_lastNameSecond();
+    case RoleLicenseSecond: return players.at(index.row())->get_licenseSecond();
+    case RoleLicenseValidSecond: return players.at(index.row())->get_licenseValidSecond();
+    case RoleRankingSecond: return players.at(index.row())->get_rankingSecond();
+    case RoleClubSecond: return players.at(index.row())->get_clubSecond();
     default: break;
     }
 
@@ -74,7 +80,10 @@ int PlayerModel::rowCount(const QModelIndex &) const
 
 int PlayerModel::columnCount(const QModelIndex &) const
 {
-    return 5;
+    if (players.isEmpty())
+        return 5;
+    else
+        return players.at(0)->get_licenseSecond().isEmpty()? 5: 1;
 }
 
 QHash<int, QByteArray> PlayerModel::roleNames() const
@@ -86,6 +95,12 @@ QHash<int, QByteArray> PlayerModel::roleNames() const
     roles[RoleLicenseValid] = "lic_valid";
     roles[RoleRanking] = "ranking";
     roles[RoleClub] = "club";
+    roles[RoleFirstNameSecond] = "firstNameSecond";
+    roles[RoleLastNameSecond] = "lastNameSecond";
+    roles[RoleLicenseSecond] = "licenseSecond";
+    roles[RoleLicenseValidSecond] = "lic_validSecond";
+    roles[RoleRankingSecond] = "rankingSecond";
+    roles[RoleClubSecond] = "clubSecond";
     return roles;
 }
 
@@ -116,7 +131,8 @@ void PlayerModel::loadPlayer(const QJsonObject &obj)
     for (int i = 0;i < players.count();i++)
     {
         auto it = players.at(i);
-        if (it->get_license() == obj["license"].toString())
+        if (it->get_license() == obj["license"].toString() ||
+            it->get_license() == obj["licenseSecond"].toString())
         {
             player = it;
             idx = i;
@@ -134,7 +150,16 @@ void PlayerModel::loadPlayer(const QJsonObject &obj)
     player->update_licenseValid(obj["license_valid"].toBool());
     player->update_ranking(obj["ranking"].toString());
 
+    player->update_firstNameSecond(obj["firstnameSecond"].toString());
+    player->update_lastNameSecond(obj["lastnameSecond"].toString());
+    player->update_clubSecond(obj["clubSecond"].toString());
+    player->update_licenseSecond(obj["licenseSecond"].toString());
+    player->update_licenseValidSecond(obj["license_validSecond"].toBool());
+    player->update_rankingSecond(obj["rankingSecond"].toString());
+
     clubs.append(player->get_club());
+    if (!player->get_clubSecond().isEmpty())
+        clubs.append(player->get_clubSecond());
     clubs.removeDuplicates();
 
     if (idx < 0)
@@ -267,6 +292,16 @@ QJsonObject Player::toJson()
     obj.insert("ranking", get_ranking());
     obj.insert("club", get_club());
 
+    if (get_licenseSecond() != "")
+    {
+        obj.insert("firstnameSecond", get_firstNameSecond());
+        obj.insert("lastnameSecond", get_lastNameSecond());
+        obj.insert("licenseSecond", get_licenseSecond());
+        obj.insert("license_validSecond", get_licenseValidSecond());
+        obj.insert("rankingSecond", get_rankingSecond());
+        obj.insert("clubSecond", get_clubSecond());
+    }
+
     return obj;
 }
 
@@ -288,6 +323,13 @@ Player *Player::fromJson(const QJsonObject &obj)
     player->update_license(obj["license"].toString());
     player->update_licenseValid(obj["license_valid"].toBool());
     player->update_ranking(obj["ranking"].toString());
+
+    player->update_firstNameSecond(obj["firstnameSecond"].toString());
+    player->update_lastNameSecond(obj["lastnameSecond"].toString());
+    player->update_clubSecond(obj["clubSecond"].toString());
+    player->update_licenseSecond(obj["licenseSecond"].toString());
+    player->update_licenseValidSecond(obj["license_validSecond"].toBool());
+    player->update_rankingSecond(obj["rankingSecond"].toString());
 
     return player;
 }
@@ -361,6 +403,12 @@ bool PlayerFilterModel::lessThan(const QModelIndex &left, const QModelIndex &rig
 
     QCollator sorter;
     sorter.setNumericMode(true);
+
+    if (model->rowCount() > 0 &&
+        !model->item(0)->get_licenseSecond().isEmpty())
+    {
+        return sorter.compare(itemLeft->get_lastName(), itemRight->get_lastName());
+    }
 
     switch (left.column())
     {
