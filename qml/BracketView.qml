@@ -35,6 +35,9 @@ RowLayout {
                             property string firstName
                             property string lastName
                             property string ranking
+                            property string firstNameSecond
+                            property string lastNameSecond
+                            property string rankingSecond
                         }
 
                         property int matchIndex: index
@@ -44,10 +47,18 @@ RowLayout {
                         playerFirstName1: player1.firstName
                         playerLastName1: player1.lastName
                         playerRank1: player1.ranking
+                        playerFirstNameSecond1: player1.firstNameSecond
+                        playerLastNameSecond1: player1.lastNameSecond
+                        playerRankSecond1: player1.rankingSecond
 
                         playerFirstName2: player2.firstName
                         playerLastName2: player2.lastName
                         playerRank2: player2.ranking
+                        playerFirstNameSecond2: player2.firstNameSecond
+                        playerLastNameSecond2: player2.lastNameSecond
+                        playerRankSecond2: player2.rankingSecond
+
+                        isDouble: selectedSerie? selectedSerie.isDouble: false
 
                         onClicked: if (selectedSerie) selectedSerie.clickedOnMatch(roundRep.roundIndex, matchIndex)
 

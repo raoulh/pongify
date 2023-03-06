@@ -60,12 +60,15 @@ public:
         QFont subFont = painter->font();
         //font.setBold(true);
         //subFont.setWeight(subFont.weight() - 4);
-        subFont.setPointSize(subFont.pointSize() - 1);
-        subFont.setItalic(true);
+        //subFont.setPointSize(subFont.pointSize() - 1);
+        //subFont.setItalic(true);
 
         // draw 2 lines of text
         painter->setFont(font);
-        painter->drawText(QRect(rect.left() + iconsize.width() + 8, rect.top(), rect.width() - iconsize.width() - 8, rect.height()/2),
+        painter->drawText(QRect(rect.left() + iconsize.width() + 8,
+                                rect.top(),
+                                rect.width() - iconsize.width() - 8,
+                                rect.height() / 2),
                           opt.displayAlignment, headerText);
         painter->setFont(subFont);
 
@@ -76,7 +79,10 @@ public:
             painter->setPen(penColor);
         }
 
-        painter->drawText(QRect(rect.left() + iconsize.width() + 8, rect.top()+rect.height()/2, rect.width() - iconsize.width() - 8, rect.height()/2),
+        painter->drawText(QRect(rect.left() + iconsize.width() + 8,
+                                rect.top() + rect.height() / 2,
+                                rect.width() - iconsize.width() - 8,
+                                rect.height() / 2),
                           opt.displayAlignment, subText);
 
         painter->restore();
@@ -163,12 +169,12 @@ void DialogPlayerList::on_pushButtonAdd_clicked()
             playerModel->appendClone(d.getPlayer1());
             auto p1 = playerModel->item(playerModel->rowCount() - 1);
             auto p2 = d.getPlayer2();
-            p1->update_firstNameSecond(p2->get_firstNameSecond());
-            p1->update_lastNameSecond(p2->get_lastNameSecond());
-            p1->update_clubSecond(p2->get_clubSecond());
-            p1->update_licenseSecond(p2->get_licenseSecond());
-            p1->update_rankingSecond(p2->get_rankingSecond());
-            p1->update_licenseValidSecond(p2->get_licenseValidSecond());
+            p1->update_firstNameSecond(p2->get_firstName());
+            p1->update_lastNameSecond(p2->get_lastName());
+            p1->update_clubSecond(p2->get_club());
+            p1->update_licenseSecond(p2->get_license());
+            p1->update_rankingSecond(p2->get_ranking());
+            p1->update_licenseValidSecond(p2->get_licenseValid());
         }
 
         return;

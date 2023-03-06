@@ -8,9 +8,16 @@ Rectangle {
     property string playerFirstName1
     property string playerLastName1
     property string playerRank1
+    property string playerFirstNameSecond1
+    property string playerLastNameSecond1
+    property string playerRankSecond1
+
     property string playerFirstName2
     property string playerLastName2
     property string playerRank2
+    property string playerFirstNameSecond2
+    property string playerLastNameSecond2
+    property string playerRankSecond2
 
     property string score1
     property string score2
@@ -18,13 +25,15 @@ Rectangle {
     property bool winner1
     property bool winner2
 
+    property bool isDouble: false
+
     signal clicked()
 
     color: bloc.mouseHovered? "#585848": playerFirstName1 == "" || winner2? "#b2b2b2": "#484848"
     radius: 6
 
     implicitHeight: 110
-    implicitWidth: 250
+    implicitWidth: isDouble? 350 : 250
 
     property bool mouseHovered: false
 
@@ -61,7 +70,9 @@ Rectangle {
                     Text {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        text: playerFirstName1 == ""? "-": playerFirstName1
+                        text: playerFirstName1 == ""? "-": isDouble?
+                                                          "%1 %2".arg(bloc.playerFirstName1).arg(bloc.playerLastName1):
+                                                          playerFirstName1
                         color: "#ffffff"
                         elide: Text.ElideRight
                         font {
@@ -78,6 +89,7 @@ Rectangle {
                     }
                     Text {
                         Layout.fillHeight: true
+                        Layout.preferredWidth: implicitWidth
                         text: playerRank1
                         color: "#eed67d"
                         font {
@@ -86,14 +98,32 @@ Rectangle {
                     }
                 }
 
-                Text {
+                RowLayout {
+                    spacing: 0
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    text: playerLastName1 == ""? "-": playerLastName1
-                    color: "#ffffff"
-                    elide: Text.ElideRight
-                    font {
-                        pointSize: 12
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        text: playerLastName1 == ""? "-": isDouble?
+                                                         "%1 %2".arg(bloc.playerFirstNameSecond1).arg(bloc.playerLastNameSecond1):
+                                                         playerLastName1
+                        color: "#ffffff"
+                        elide: Text.ElideRight
+                        font {
+                            pointSize: 12
+                        }
+                    }
+                    Text {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: implicitWidth
+                        text: playerRankSecond1
+                        color: "#eed67d"
+                        font {
+                            pointSize: 12
+                        }
+                        visible: isDouble
                     }
                 }
             }
@@ -117,7 +147,9 @@ Rectangle {
                     Text {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        text: playerFirstName2 == ""? "-": playerFirstName2
+                        text: playerFirstName2 == ""? "-": isDouble?
+                                                          "%1 %2".arg(bloc.playerFirstName2).arg(bloc.playerLastName2):
+                                                          playerFirstName2
                         color: "#ffffff"
                         elide: Text.ElideRight
                         font {
@@ -134,6 +166,7 @@ Rectangle {
                     }
                     Text {
                         Layout.fillHeight: true
+                        Layout.preferredWidth: implicitWidth
                         text: playerRank2
                         color: "#eed67d"
                         font {
@@ -142,14 +175,31 @@ Rectangle {
                     }
                 }
 
-                Text {
+                RowLayout {
+                    spacing: 0
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    text: playerLastName2 == ""? "-": playerLastName2
-                    color: "#ffffff"
-                    elide: Text.ElideRight
-                    font {
-                        pointSize: 12
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        text: playerLastName2 == ""? "-": isDouble?
+                                                         "%1 %2".arg(bloc.playerFirstNameSecond2).arg(bloc.playerLastNameSecond2):
+                                                         playerLastName2
+                        color: "#ffffff"
+                        elide: Text.ElideRight
+                        font {
+                            pointSize: 12
+                        }
+                    }
+                    Text {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: implicitWidth
+                        text: playerRank2
+                        color: "#eed67d"
+                        font {
+                            pointSize: 12
+                        }
                     }
                 }
             }

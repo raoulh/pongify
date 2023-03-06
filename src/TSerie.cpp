@@ -287,8 +287,14 @@ void TSerie::autoSeedPlayers()
     QCollator sorter;
 
     std::sort(allp.begin(), allp.end(),
-              [&sorter](Player *a, Player *b)
+              [&sorter, this](Player *a, Player *b)
     {
+        if (get_isDouble())
+        {
+            int rA = a->get_ranking().toInt() + a->get_rankingSecond().toInt();
+            int rB = b->get_ranking().toInt() + b->get_rankingSecond().toInt();
+            return rA < rB;
+        }
         return sorter.compare(a->get_ranking(), b->get_ranking()) < 0;
     });
 

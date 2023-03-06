@@ -29,7 +29,8 @@ PlayerModel *PlayerModel::createEmpty()
 
 QVariant PlayerModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid() ||
+        (!players.isEmpty() && !players.at(0)->get_licenseSecond().isEmpty() && role < Qt::UserRole))
         return QVariant();
 
     switch (role) {
@@ -66,6 +67,8 @@ QVariant PlayerModel::headerData(int section, Qt::Orientation orientation, int r
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
+        if (!players.isEmpty() && !players.at(0)->get_licenseSecond().isEmpty())
+            return "Equipes";
         if (section >= 0 && section < headers.size())
             return headers.at(section);
     }
