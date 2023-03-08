@@ -288,14 +288,19 @@ void TSerie::autoSeedPlayers()
 
     std::sort(allp.begin(), allp.end(),
               [&sorter, this](Player *a, Player *b)
-    {
+    {        
+        QString rA, rB;
         if (get_isDouble())
         {
-            int rA = a->get_ranking().toInt() + a->get_rankingSecond().toInt();
-            int rB = b->get_ranking().toInt() + b->get_rankingSecond().toInt();
-            return rA < rB;
+            rA = sorter.compare(a->get_ranking(), a->get_rankingSecond()) < 0? a->get_ranking(): a->get_rankingSecond();
+            rB = sorter.compare(b->get_ranking(), b->get_rankingSecond()) < 0? b->get_ranking(): b->get_rankingSecond();
         }
-        return sorter.compare(a->get_ranking(), b->get_ranking()) < 0;
+        else
+        {
+            rA = a->get_ranking();
+            rB = b->get_ranking();
+        }
+        return sorter.compare(rA, rB) < 0;
     });
 
     if (allp.count() < 3)
@@ -621,8 +626,8 @@ void TSerie::clickedOnMatch(int round, int match)
             DialogChangePlayer d(players, m, get_isDouble());
             if (d.exec() == QDialog::Accepted)
             {
-                m->update_player1(d.getPlayer1_1());
-                m->update_player2(d.getPlayer2_1());
+                m->update_player1(d.getPlayer1());
+                m->update_player2(d.getPlayer2());
 
                 if ((m->get_player1() && !m->get_player2()) ||
                     (!m->get_player1() && m->get_player2()))

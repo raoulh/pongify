@@ -19,10 +19,8 @@ public:
     explicit DialogChangePlayer(PlayerModel *m, TMatch *ma, bool isDouble, QWidget *parent = nullptr);
     ~DialogChangePlayer();
 
-    Player *getPlayer1_1();
-    Player *getPlayer1_2();
-    Player *getPlayer2_1();
-    Player *getPlayer2_2();
+    Player *getPlayer1();
+    Player *getPlayer2();
 
 private:
     Ui::DialogChangePlayer *ui;

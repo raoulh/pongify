@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>307</width>
-    <height>262</height>
+    <width>364</width>
+    <height>207</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,9 +22,6 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QComboBox" name="comboBoxP1"/>
-      </item>
-      <item>
-       <widget class="QComboBox" name="comboBoxP1_2"/>
       </item>
       <item>
        <widget class="QCheckBox" name="checkBoxBye1">
@@ -44,9 +41,6 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QComboBox" name="comboBoxP2"/>
-      </item>
-      <item>
-       <widget class="QComboBox" name="comboBoxP2_2"/>
       </item>
       <item>
        <widget class="QCheckBox" name="checkBoxBye2">

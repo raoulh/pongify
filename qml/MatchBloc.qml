@@ -195,7 +195,7 @@ Rectangle {
                     Text {
                         Layout.fillHeight: true
                         Layout.preferredWidth: implicitWidth
-                        text: playerRank2
+                        text: playerRankSecond2
                         color: "#eed67d"
                         font {
                             pointSize: 12
