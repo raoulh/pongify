@@ -399,22 +399,184 @@ void TSerie::prepareMatches()
     if (allMatches.count() > players->rowCount())
         clearAllMatches();
 
-    //prepare correct number of rounds
-    while (allMatches.count() < get_rounds())
+    if (get_tournamentType() == "single")
     {
-        auto r = new TRound();
-        allMatches.append(r);
-    }
-
-    //prepare correct number of matches in each round
-    for (int i = 0;i < allMatches.count();i++)
-    {
-        auto r = allMatches.at(i);
-        while (r->count() < matchCountForRound(i))
+        //prepare correct number of rounds
+        while (allMatches.count() < get_rounds())
         {
-            auto m = new TMatch();
-            r->append(m);
+            auto r = new TRound();
+            allMatches.append(r);
         }
+
+        //prepare correct number of matches in each round
+        for (int i = 0;i < allMatches.count();i++)
+        {
+            auto r = allMatches.at(i);
+            while (r->count() < matchCountForRound(i))
+            {
+                auto m = new TMatch();
+                r->append(m);
+            }
+        }
+    }
+    else if (get_tournamentType() == "roundrobbin")
+    {
+        /*
+        int n = players->rowCount();
+
+        //prepare correct number of rounds
+        while (allMatches.count() < n - 1)
+        {
+            auto r = new TRound();
+            allMatches.append(r);
+        }
+
+        for (int i = 0;i < n - 1;i++)
+        {
+            allMatches[i]->resize(n / 2);
+
+            for (int j = 0;j < n / 2;j++)
+            {
+                int player1Index = (i + j) % (n - 1);
+                int player2Index = (i + n - j - 1) % (n - 1);
+
+                if (j == 0)
+                    player2Index = n - 1;
+
+                Player *player1 = players->item(player1Index);
+                Player *player2 = players->item(player2Index);
+
+                allMatches[i]->replace(j, new TMatch());
+                allMatches[i]->at(j)->update_player1(player1);
+                allMatches[i]->at(j)->update_player2(player2);
+            }
+        }
+        */
+
+        /*
+        //prepare correct number of rounds
+        while (allMatches.count() < get_rounds())
+        {
+            auto r = new TRound();
+            allMatches.append(r);
+        }
+
+        QVector<Player *> vplayers(players->rowCount());
+        for (int i = 0;i < players->rowCount();i++)
+            vplayers.append(players->item(i));
+
+        int numPlayers = vplayers.size();
+        QVector<QVector<Player*>> rounds(numPlayers - 1);
+
+        for (int i = 0;i < numPlayers - 1;i++)
+        {
+            int mid = numPlayers / 2;
+
+            for (int j = 0;j < mid;j++)
+            {
+                int k = numPlayers - 1 - j;
+
+                if (j == 0)
+                {
+                    //m_matches.append(new TMatch(m_players[j], m_players[k]));
+
+                }
+                else
+                {
+                    rounds[i].append(vplayers[j]);
+                    rounds[i].append(vplayers[k]);
+                }
+            }
+            std::rotate(vplayers.begin() + 1, vplayers.begin() + numPlayers - 1, vplayers.end());
+        }
+
+        for (int i = 0;i < rounds.size();i++)
+        {
+            for (int j = 0;j < rounds[i].size();j += 2)
+            {
+                auto m = new TMatch();
+                allMatches.at(i)->append(m);
+                m->update_player1(rounds[i][j]);
+                m->update_player2(rounds[i][j + 1]);
+            }
+        }
+        */
+
+        QVector<Player *> vplayers(players->rowCount());
+        for (int i = 0;i < players->rowCount();i++)
+            vplayers.replace(i, players->item(i));
+
+        if (vplayers.size() % 2 == 1)
+            vplayers.append(nullptr);
+
+        int playerCount = vplayers.size();
+        int rounds = playerCount - 1;
+        int half = playerCount / 2;
+
+        QVector<Player *> teams;
+        teams.append(vplayers.mid(1, -1));
+
+        /*teams.append(vplayers.mid(half, half));
+        auto tt = vplayers.mid(1, half);
+        std::reverse(tt.begin(), tt.end());
+        teams.append(tt);
+        */
+
+        int teamSize = teams.count();
+
+        for (int round = 0;round < rounds;round++)
+        {
+            int teamIdx = round % teamSize;
+            TRound *r = new TRound();
+            allMatches.append(r);
+
+            auto m = new TMatch();
+            m->update_player1(teams[teamIdx]);
+            m->update_player2(teams[0]);
+            r->append(m);
+
+            for (int i = 1;i < half;i++)
+            {
+                int p1 = (round + i) % teamSize;
+                int p2 = (round + teamSize - i) % teamSize;
+
+                auto m = new TMatch();
+                m->update_player1(teams[p1]);
+                m->update_player2(teams[p2]);
+                r->append(m);
+            }
+        }
+
+//        // Calculate number of rounds
+//        int numRounds = vplayers.size() - 1;
+//        if (numRounds % 2 == 1) {
+//            numRounds++;
+//        }
+
+//        // Create rounds of matches
+//        for (int round = 0; round < numRounds; round++) {
+//            TRound *matches = new TRound();
+//            allMatches.append(matches);
+
+//            // Create matches for this round
+//            for (int i = 0; i < vplayers.size() / 2; i++)
+//            {
+//                int player1Index = (round + i) % (vplayers.size() - 1);
+//                int player2Index = (round + vplayers.size() - i - 1) % (vplayers.size() - 1);
+//                if (player2Index == vplayers.size() - 1) {
+//                    player2Index = vplayers.size() - 2;
+//                }
+
+//                auto m = new TMatch();
+//                m->update_player1(vplayers[player1Index]);
+//                m->update_player2(vplayers[player2Index]);
+//                matches->append(m);
+//            }
+
+//            // Move last player to second position, except in first round
+//            if (round > 0)
+//                vplayers.move(vplayers.size() - 1, 1);
+//        }
     }
 
     emit matchesUpdated();
@@ -434,48 +596,51 @@ void TSerie::clearAllMatches()
 
 void TSerie::updateNextMatches()
 {
-    for (int i = 0;i < allMatches.count();i++)
+    if (get_tournamentType() == "single")
     {
-        auto round = allMatches.at(i);
-
-        for (int j = 0, i_next = 0;j < round->count();j++)
+        for (int i = 0;i < allMatches.count();i++)
         {
-            if (i + 1 >= allMatches.count())
-                break; //last round
+            auto round = allMatches.at(i);
 
-            auto match = round->at(j);
-            auto nextMatch = allMatches.at(i + 1)->at(i_next);
-
-            //get winner
-            Player *winner = nullptr;
-            if (match->get_playerWinner1() || match->get_isBye())
-                winner = match->get_player1();
-            else if (match->get_playerWinner2())
-                winner = match->get_player2();
-
-            bool hasChanged = false;
-            Player *p1 = nextMatch->get_player1();
-            Player *p2 = nextMatch->get_player2();
-
-            if (j % 2 == 0)
+            for (int j = 0, i_next = 0;j < round->count();j++)
             {
-                nextMatch->update_player1(winner);
-                if (p1 != winner)
-                    hasChanged = true;
-            }
-            else
-            {
-                nextMatch->update_player2(winner);
-                if (p2 != winner)
-                    hasChanged = true;
-            }
+                if (i + 1 >= allMatches.count())
+                    break; //last round
 
-            //Clear score if player1/2 changed from before
-            if (hasChanged)
-                nextMatch->clearScore();
+                auto match = round->at(j);
+                auto nextMatch = allMatches.at(i + 1)->at(i_next);
 
-            if ((j + 1) % 2 == 0)
-                i_next++; //increment next round match on pair idx only
+                //get winner
+                Player *winner = nullptr;
+                if (match->get_playerWinner1() || match->get_isBye())
+                    winner = match->get_player1();
+                else if (match->get_playerWinner2())
+                    winner = match->get_player2();
+
+                bool hasChanged = false;
+                Player *p1 = nextMatch->get_player1();
+                Player *p2 = nextMatch->get_player2();
+
+                if (j % 2 == 0)
+                {
+                    nextMatch->update_player1(winner);
+                    if (p1 != winner)
+                        hasChanged = true;
+                }
+                else
+                {
+                    nextMatch->update_player2(winner);
+                    if (p2 != winner)
+                        hasChanged = true;
+                }
+
+                //Clear score if player1/2 changed from before
+                if (hasChanged)
+                    nextMatch->clearScore();
+
+                if ((j + 1) % 2 == 0)
+                    i_next++; //increment next round match on pair idx only
+            }
         }
     }
 }
@@ -496,7 +661,8 @@ int TSerie::matchCountForRound(int round)
     }
     else if (get_tournamentType() == "roundrobbin")
     {
-
+        if (!allMatches.isEmpty())
+            return allMatches.at(0)->count();
     }
 
     return 0;
@@ -504,74 +670,54 @@ int TSerie::matchCountForRound(int round)
 
 QObject *TSerie::getPlayer1(int round, int match)
 {
-    if (get_tournamentType() == "single")
-    {
-        auto m = getMatchForRound(round, match);
-        if (!m) return nullptr;
+    auto m = getMatchForRound(round, match);
+    if (!m) return nullptr;
 
-        auto p = m->get_player1();
-        QQmlEngine::setObjectOwnership(p, QQmlEngine::CppOwnership);
+    auto p = m->get_player1();
+    QQmlEngine::setObjectOwnership(p, QQmlEngine::CppOwnership);
 
-        return p;
-    }
-
-    return nullptr;
+    return p;
 }
 
 QObject *TSerie::getPlayer2(int round, int match)
 {
-    if (get_tournamentType() == "single")
-    {
-        auto m = getMatchForRound(round, match);
-        if (!m) return nullptr;
+    auto m = getMatchForRound(round, match);
+    if (!m) return nullptr;
 
-        auto p = m->get_player2();
-        QQmlEngine::setObjectOwnership(p, QQmlEngine::CppOwnership);
+    auto p = m->get_player2();
+    QQmlEngine::setObjectOwnership(p, QQmlEngine::CppOwnership);
 
-        return p;
-    }
-
-    return nullptr;
+    return p;
 }
 
 int TSerie::scoreForMatch(int round, int match, int playerIdx)
 {
-    if (get_tournamentType() == "single")
-    {
-        auto m = getMatchForRound(round, match);
-        if (!m) return -1;
+    auto m = getMatchForRound(round, match);
+    if (!m) return -1;
 
-        if (playerIdx == 0)
-            return m->get_playerScore1();
-        else
-            return m->get_playerScore2();
-    }
-
-    return -1;
+    if (playerIdx == 0)
+        return m->get_playerScore1();
+    else
+        return m->get_playerScore2();
 }
 
 bool TSerie::winnerForMatch(int round, int match, int playerIdx)
 {
-    if (get_tournamentType() == "single")
+    auto m = getMatchForRound(round, match);
+    if (!m) return false;
+
+    if (playerIdx == 0)
     {
-        auto m = getMatchForRound(round, match);
-        if (!m) return false;
-
-        if (playerIdx == 0)
-        {
-            if (m->get_player1() && m->get_isBye())
-                return true; //when bye player is automatically a winner
-            return m->get_playerWinner1();
-        }
-        else
-        {
-            if (m->get_player2() && m->get_isBye())
-                return true; //when bye player is automatically a winner
-            return m->get_playerWinner2();
-        }
+        if (m->get_player1() && m->get_isBye())
+            return true; //when bye player is automatically a winner
+        return m->get_playerWinner1();
     }
-
-    return false;
+    else
+    {
+        if (m->get_player2() && m->get_isBye())
+            return true; //when bye player is automatically a winner
+        return m->get_playerWinner2();
+    }
 }
 
 void TSerie::clickedOnMatch(int round, int match)
@@ -646,6 +792,8 @@ void TSerie::clickedOnMatch(int round, int match)
 
 void TSerie::playersModelChanged()
 {
+    int rounds = 0;
+
     //Min players check
     if (players->rowCount() < 3)
     {
@@ -653,11 +801,16 @@ void TSerie::playersModelChanged()
         return;
     }
 
-    int firstround = nearestPowerOf2(players->rowCount()) / 2;
-    auto rounds = 0;
-
-    while (firstround > 0 && ++rounds)
-        firstround = firstround / 2;
+    if (get_tournamentType() == "single")
+    {
+        int firstround = nearestPowerOf2(players->rowCount()) / 2;
+        while (firstround > 0 && ++rounds)
+            firstround = firstround / 2;
+    }
+    else if (get_tournamentType() == "roundrobbin")
+    {
+        rounds = players->rowCount();
+    }
 
     update_rounds(rounds);
 
