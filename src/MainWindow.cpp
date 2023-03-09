@@ -145,23 +145,26 @@ void MainWindow::showSerieMenu(int idx)
     if (serie->get_status() != "stopped")
         action->setDisabled(true);
 
-    action = menu.addAction(QIcon::fromTheme("casino"), tr("Placer les joueurs automatiquement"));
-    connect(action, &QAction::triggered, this, [this, serie]()
+    if (serie->get_tournamentType() == "single")
     {
-        serie->autoSeedPlayers();
-        TStorage::Instance()->saveToDisk(currentTournament);
-    });
-    if (serie->get_status() != "stopped")
-        action->setDisabled(true);
+        action = menu.addAction(QIcon::fromTheme("casino"), tr("Placer les joueurs automatiquement"));
+        connect(action, &QAction::triggered, this, [this, serie]()
+        {
+            serie->autoSeedPlayers();
+            TStorage::Instance()->saveToDisk(currentTournament);
+        });
+        if (serie->get_status() != "stopped")
+            action->setDisabled(true);
 
-    action = menu.addAction(QIcon::fromTheme("trash"), tr("Effacer les joueurs placés"));
-    connect(action, &QAction::triggered, this, [this, serie]()
-    {
-        serie->removeAllPlayers();
-        TStorage::Instance()->saveToDisk(currentTournament);
-    });
-    if (serie->get_status() != "stopped")
-        action->setDisabled(true);
+        action = menu.addAction(QIcon::fromTheme("trash"), tr("Effacer les joueurs placés"));
+        connect(action, &QAction::triggered, this, [this, serie]()
+        {
+            serie->removeAllPlayers();
+            TStorage::Instance()->saveToDisk(currentTournament);
+        });
+        if (serie->get_status() != "stopped")
+            action->setDisabled(true);
+    }
 
     action = menu.addAction(QIcon::fromTheme("filter"), tr("Propriétés"));
     connect(action, &QAction::triggered, this, [this, idx]()

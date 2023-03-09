@@ -58,6 +58,7 @@ TSerie::TSerie(QObject *parent):
     playersModelChanged();
 
     update_isDouble(false);
+    connect(this, &TSerie::tournamentTypeChanged, this, &TSerie::playersModelChanged);
 }
 
 TSerie::~TSerie()
@@ -288,7 +289,7 @@ void TSerie::autoSeedPlayers()
 
     std::sort(allp.begin(), allp.end(),
               [&sorter, this](Player *a, Player *b)
-    {        
+    {
         QString rA, rB;
         if (get_isDouble())
         {
@@ -396,8 +397,7 @@ TMatch *TSerie::getMatchForRound(int round, int match)
 void TSerie::prepareMatches()
 {
     //Prepare models
-    if (allMatches.count() > players->rowCount())
-        clearAllMatches();
+    clearAllMatches();
 
     if (get_tournamentType() == "single")
     {
@@ -421,87 +421,6 @@ void TSerie::prepareMatches()
     }
     else if (get_tournamentType() == "roundrobbin")
     {
-        /*
-        int n = players->rowCount();
-
-        //prepare correct number of rounds
-        while (allMatches.count() < n - 1)
-        {
-            auto r = new TRound();
-            allMatches.append(r);
-        }
-
-        for (int i = 0;i < n - 1;i++)
-        {
-            allMatches[i]->resize(n / 2);
-
-            for (int j = 0;j < n / 2;j++)
-            {
-                int player1Index = (i + j) % (n - 1);
-                int player2Index = (i + n - j - 1) % (n - 1);
-
-                if (j == 0)
-                    player2Index = n - 1;
-
-                Player *player1 = players->item(player1Index);
-                Player *player2 = players->item(player2Index);
-
-                allMatches[i]->replace(j, new TMatch());
-                allMatches[i]->at(j)->update_player1(player1);
-                allMatches[i]->at(j)->update_player2(player2);
-            }
-        }
-        */
-
-        /*
-        //prepare correct number of rounds
-        while (allMatches.count() < get_rounds())
-        {
-            auto r = new TRound();
-            allMatches.append(r);
-        }
-
-        QVector<Player *> vplayers(players->rowCount());
-        for (int i = 0;i < players->rowCount();i++)
-            vplayers.append(players->item(i));
-
-        int numPlayers = vplayers.size();
-        QVector<QVector<Player*>> rounds(numPlayers - 1);
-
-        for (int i = 0;i < numPlayers - 1;i++)
-        {
-            int mid = numPlayers / 2;
-
-            for (int j = 0;j < mid;j++)
-            {
-                int k = numPlayers - 1 - j;
-
-                if (j == 0)
-                {
-                    //m_matches.append(new TMatch(m_players[j], m_players[k]));
-
-                }
-                else
-                {
-                    rounds[i].append(vplayers[j]);
-                    rounds[i].append(vplayers[k]);
-                }
-            }
-            std::rotate(vplayers.begin() + 1, vplayers.begin() + numPlayers - 1, vplayers.end());
-        }
-
-        for (int i = 0;i < rounds.size();i++)
-        {
-            for (int j = 0;j < rounds[i].size();j += 2)
-            {
-                auto m = new TMatch();
-                allMatches.at(i)->append(m);
-                m->update_player1(rounds[i][j]);
-                m->update_player2(rounds[i][j + 1]);
-            }
-        }
-        */
-
         QVector<Player *> vplayers(players->rowCount());
         for (int i = 0;i < players->rowCount();i++)
             vplayers.replace(i, players->item(i));
@@ -509,74 +428,30 @@ void TSerie::prepareMatches()
         if (vplayers.size() % 2 == 1)
             vplayers.append(nullptr);
 
-        int playerCount = vplayers.size();
-        int rounds = playerCount - 1;
-        int half = playerCount / 2;
+        int half = vplayers.size() / 2;
+        QVector<Player *> rotated = vplayers.mid(1, -1);
 
-        QVector<Player *> teams;
-        teams.append(vplayers.mid(1, -1));
-
-        /*teams.append(vplayers.mid(half, half));
-        auto tt = vplayers.mid(1, half);
-        std::reverse(tt.begin(), tt.end());
-        teams.append(tt);
-        */
-
-        int teamSize = teams.count();
-
-        for (int round = 0;round < rounds;round++)
+        for (int i = 0;i < get_rounds();i++)
         {
-            int teamIdx = round % teamSize;
             TRound *r = new TRound();
             allMatches.append(r);
 
-            auto m = new TMatch();
-            m->update_player1(teams[teamIdx]);
-            m->update_player2(teams[0]);
-            r->append(m);
-
-            for (int i = 1;i < half;i++)
+            for (int m = 0;m < half;m++)
             {
-                int p1 = (round + i) % teamSize;
-                int p2 = (round + teamSize - i) % teamSize;
+                //get first player in first half
+                int idx1 = m;
 
-                auto m = new TMatch();
-                m->update_player1(teams[p1]);
-                m->update_player2(teams[p2]);
-                r->append(m);
+                //get second player in second half reversed
+                int idx2 = vplayers.count() - 1 - m;
+
+                auto match = new TMatch();
+                match->update_player1(idx1 == 0? vplayers[0] : rotated[idx1 - 1]);
+                match->update_player2(rotated[idx2 - 1]);
+                r->append(match);
             }
+
+            std::rotate(rotated.rbegin(), rotated.rbegin() + 1, rotated.rend());
         }
-
-//        // Calculate number of rounds
-//        int numRounds = vplayers.size() - 1;
-//        if (numRounds % 2 == 1) {
-//            numRounds++;
-//        }
-
-//        // Create rounds of matches
-//        for (int round = 0; round < numRounds; round++) {
-//            TRound *matches = new TRound();
-//            allMatches.append(matches);
-
-//            // Create matches for this round
-//            for (int i = 0; i < vplayers.size() / 2; i++)
-//            {
-//                int player1Index = (round + i) % (vplayers.size() - 1);
-//                int player2Index = (round + vplayers.size() - i - 1) % (vplayers.size() - 1);
-//                if (player2Index == vplayers.size() - 1) {
-//                    player2Index = vplayers.size() - 2;
-//                }
-
-//                auto m = new TMatch();
-//                m->update_player1(vplayers[player1Index]);
-//                m->update_player2(vplayers[player2Index]);
-//                matches->append(m);
-//            }
-
-//            // Move last player to second position, except in first round
-//            if (round > 0)
-//                vplayers.move(vplayers.size() - 1, 1);
-//        }
     }
 
     emit matchesUpdated();
@@ -661,8 +536,14 @@ int TSerie::matchCountForRound(int round)
     }
     else if (get_tournamentType() == "roundrobbin")
     {
-        if (!allMatches.isEmpty())
-            return allMatches.at(0)->count();
+        int playerCount = players->rowCount();
+        if (playerCount % 2 == 1)
+            playerCount++;
+
+        int count = playerCount / 2;
+        qDebug() << "matchCountForRound:" << count;
+
+        return count;
     }
 
     return 0;
@@ -730,7 +611,8 @@ void TSerie::clickedOnMatch(int round, int match)
     if (m)
     {
         //disable action if
-        if (m->get_isBye() || !m->get_player1() || !m->get_player1())
+        if (m->get_isBye() || !m->get_player1() || !m->get_player1() ||
+            get_status() == "finished")
             actionDisabled = true;
     }
 
@@ -762,7 +644,8 @@ void TSerie::clickedOnMatch(int round, int match)
         emit matchesUpdated();
     });
 
-    if (round == 0)
+    if (round == 0 &&
+        get_tournamentType() == "single")
     {
         action = menu.addAction(QIcon::fromTheme("athlete"), tr("Changer joueurs"));
         if (get_status() != "stopped")
@@ -810,6 +693,8 @@ void TSerie::playersModelChanged()
     else if (get_tournamentType() == "roundrobbin")
     {
         rounds = players->rowCount();
+        if (rounds % 2 == 0)
+            rounds--;
     }
 
     update_rounds(rounds);
