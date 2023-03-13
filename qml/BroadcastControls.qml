@@ -4,25 +4,34 @@ import QtQuick.Controls
 
 Rectangle {
     color: "#DADEDA"
+    implicitHeight: col.implicitHeight
 
     ColumnLayout {
-        anchors.fill: parent
+        id: col
         spacing: 0
+        width: parent.width
 
         Rectangle {
             color: "#4fc1e9"
-            Layout.preferredHeight: 50
+            Layout.preferredHeight: 28
             Layout.fillWidth: true
 
-            ColumnLayout {
-                anchors.fill: parent
-                spacing: 5
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter
+
+                Item { height: 1; Layout.preferredWidth: 2 }
+
+                SvgImage {
+                    Layout.alignment: Qt.AlignCenter
+                    source: "qrc:/img/broadcast.svg"
+                    width: 18
+                }
 
                 Text {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    leftPadding: 5
-                    text: currentTournament.name
+                    leftPadding: 2
+                    text: "Diffusion"
                     elide: Text.ElideRight
                     color: "white"
                     font {
@@ -32,22 +41,8 @@ Rectangle {
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
                 }
-
-                Text {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    leftPadding: 5
-                    text: currentTournament.date.toLocaleString(Qt.locale("fr_FR"), "dddd, d MMMM yyyy")
-                    elide: Text.ElideRight
-                    color: "white"
-                    font {
-                        pointSize: 12
-                        bold: false
-                    }
-                    horizontalAlignment: Text.AlignLeft
-                    verticalAlignment: Text.AlignVCenter
-                }
             }
+
         }
 
         ToolBar {
@@ -57,9 +52,19 @@ Rectangle {
                 anchors.fill: parent
 
                 ToolButtonTip {
-                    icon.name: "add"
-                    onClicked: mainWindow.newSerie()
-                    tooltipText: "Ajouter une nouvelle série"
+                    icon.name: "play-button2"
+                    onClicked: mainWindow.broadcastStart()
+                    tooltipText: "Diffuser sur un ecran"
+                    enabled: !mainWindow.broadcastActive
+                    icon.color: enabled? "white" : "#a7d9eb"
+                }
+
+                ToolButtonTip {
+                    icon.name: "stop-button2"
+                    onClicked: mainWindow.broadcastStop()
+                    tooltipText: "Arreter la diffusion"
+                    enabled: mainWindow.broadcastActive
+                    icon.color: enabled? "white" : "#a7d9eb"
                 }
 
                 Item { Layout.fillWidth: true; height: 1 }
@@ -68,7 +73,7 @@ Rectangle {
 
         Item {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: 300
             clip: true
 
             ListView {
@@ -139,12 +144,6 @@ Rectangle {
 
                 ScrollBar.vertical: ScrollBar {}
             }
-        }
-
-
-        BroadcastControls {
-            Layout.preferredHeight: implicitHeight
-            Layout.fillWidth: true
         }
     }
 }

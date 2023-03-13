@@ -6,8 +6,10 @@ include(3rd_party/quickflux/quickflux.pri)
 include(3rd_party/qt-qml-models/QtQmlModels.pri)
 
 SOURCES += \
+    src/BroadcastWindow.cpp \
     src/DialogAddDoublePlayers.cpp \
     src/DialogAddPlayer.cpp \
+    src/DialogBroadcastOpts.cpp \
     src/DialogChangePlayer.cpp \
     src/DialogEditScore.cpp \
     src/DialogNewSerie.cpp \
@@ -24,8 +26,10 @@ SOURCES += \
     src/MainWindow.cpp
 
 HEADERS += \
+    src/BroadcastWindow.h \
     src/DialogAddDoublePlayers.h \
     src/DialogAddPlayer.h \
+    src/DialogBroadcastOpts.h \
     src/DialogChangePlayer.h \
     src/DialogEditScore.h \
     src/DialogNewSerie.h \
@@ -44,6 +48,7 @@ HEADERS += \
 FORMS += \
     src/DialogAddDoublePlayers.ui \
     src/DialogAddPlayer.ui \
+    src/DialogBroadcastOpts.ui \
     src/DialogChangePlayer.ui \
     src/DialogEditScore.ui \
     src/DialogNewSerie.ui \

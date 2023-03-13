@@ -47,13 +47,24 @@
         <file>qml/MatchBloc.qml</file>
         <file>qml/RoundedRectangle.qml</file>
         <file>img/medal.png</file>
-		<file>icons/pongify/32x32/high-score.png</file>
+        <file>icons/pongify/32x32/high-score.png</file>
         <file>icons/pongify/32x32@2/high-score.png</file>
         <file>icons/pongify/32x32@3/high-score.png</file>
         <file>icons/pongify/32x32@4/high-score.png</file>
-		<file>icons/pongify/32x32/stop-button.png</file>
+        <file>icons/pongify/32x32/stop-button.png</file>
         <file>icons/pongify/32x32@2/stop-button.png</file>
         <file>icons/pongify/32x32@3/stop-button.png</file>
         <file>icons/pongify/32x32@4/stop-button.png</file>
+        <file>icons/pongify/32x32/stop-button2.png</file>
+        <file>icons/pongify/32x32@2/stop-button2.png</file>
+        <file>icons/pongify/32x32@3/stop-button2.png</file>
+        <file>icons/pongify/32x32@4/stop-button2.png</file>
+        <file>icons/pongify/32x32/play-button2.png</file>
+        <file>icons/pongify/32x32@2/play-button2.png</file>
+        <file>icons/pongify/32x32@3/play-button2.png</file>
+        <file>icons/pongify/32x32@4/play-button2.png</file>
+        <file>qml/BroadcastControls.qml</file>
+        <file>img/broadcast.svg</file>
+        <file>qml/BroadcastWindow.qml</file>
     </qresource>
 </RCC>

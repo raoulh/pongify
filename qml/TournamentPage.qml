@@ -8,7 +8,7 @@ SplitView {
         id: left
 
         SplitView.minimumWidth: 50
-        SplitView.preferredWidth: 200
+        SplitView.preferredWidth: 250
         SplitView.maximumWidth: 500
     }
 

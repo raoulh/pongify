@@ -8,6 +8,8 @@
 #include "DialogNewSerie.h"
 #include "TStorage.h"
 #include "DialogPlayerList.h"
+#include "DialogBroadcastOpts.h"
+#include "BroadcastWindow.h"
 
 #include <QQuickStyle>
 #include <QQuickView>
@@ -47,9 +49,8 @@ MainWindow::MainWindow(QWidget *parent):
 
         //update QML model
         view->engine()->rootContext()->setContextProperty("currentTournament", currentTournament);
-        auto s = currentTournament->getSerie(0);
-        if (s)
-            view->engine()->rootContext()->setContextProperty("selectedSerie", s);
+        auto s = currentTournament? currentTournament->getSerie(0): nullptr;
+        view->engine()->rootContext()->setContextProperty("selectedSerie", s);
     });
 
     //Restore window position
@@ -60,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent):
         restoreState(settings.value("MainWindow/windowState").toByteArray());
 
     update_tournamentOpened(false);
+    update_broadcastActive(false);
     loadQmlApp();
 }
 
@@ -245,6 +247,30 @@ void MainWindow::selectSerie(int idx)
     if (!s) return;
     view->engine()->rootContext()->setContextProperty("selectedSerie", s);
     emit s->matchesUpdated(); //force update matches in QML
+}
+
+void MainWindow::broadcastStart()
+{
+    DialogBroadcastOpts d;
+    if (d.exec() == QDialog::Accepted)
+    {
+        update_broadcastActive(true);
+        if (broadcastWin)
+            broadcastWin->deleteLater();
+        broadcastWin = new BroadcastWindow(d.getScreen(), d.getFullscreen(), currentTournament, this);
+        connect(broadcastWin, &BroadcastWindow::windowClosed, this, [=]()
+        {
+            broadcastStop();
+        });
+    }
+}
+
+void MainWindow::broadcastStop()
+{
+    update_broadcastActive(false);
+    if (broadcastWin)
+        broadcastWin->deleteLater();
+    broadcastWin = nullptr;
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()

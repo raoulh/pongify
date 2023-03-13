@@ -10,11 +10,13 @@ QT_END_NAMESPACE
 
 class Tournament;
 class QQuickView;
+class BroadcastWindow;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
     QML_READONLY_PROPERTY(bool, tournamentOpened)
+    QML_READONLY_PROPERTY(bool, broadcastActive)
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -29,6 +31,9 @@ public:
     Q_INVOKABLE void editSerie(int idx);
     Q_INVOKABLE void selectSerie(int idx);
 
+    Q_INVOKABLE void broadcastStart();
+    Q_INVOKABLE void broadcastStop();
+
 private slots:
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
     void on_actionListe_des_joueurs_triggered();
@@ -40,6 +45,7 @@ private:
 
     QQuickView *view;
     Tournament *currentTournament = nullptr;
+    BroadcastWindow *broadcastWin = nullptr;
 
     virtual void closeEvent(QCloseEvent *event) override;
 
