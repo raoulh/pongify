@@ -189,54 +189,60 @@ void TSerie::startSerie()
     if (allMatches.count() < 2)
         return;
 
-    //Check if all players are playing the 1st round
-    auto firstRound = allMatches.at(0);
-    for (int i = 0;i < players->rowCount();i++)
+    if (get_tournamentType() == "single")
     {
-        bool found = false;
-        for (int j = 0;j < firstRound->count();j++)
+        //Check if all players are playing the 1st round
+        auto firstRound = allMatches.at(0);
+        for (int i = 0;i < players->rowCount();i++)
         {
-            auto match = firstRound->at(j);
-            if (match->get_player1() == players->item(i) ||
-                match->get_player2() == players->item(i))
+            bool found = false;
+            for (int j = 0;j < firstRound->count();j++)
             {
-                found = true;
-                break;
+                auto match = firstRound->at(j);
+                if (match->get_player1() == players->item(i) ||
+                    match->get_player2() == players->item(i))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                QMessageBox::warning(nullptr, "Attention",
+                                     "Tous les joueurs ne sont pas placés dans le premier tour.\nImpossible de démarrer la série.");
+
+                return;
             }
         }
 
-        if (!found)
+        auto addToSet = [](QSet<Player *> &s, Player *p)
         {
-            QMessageBox::warning(nullptr, "Attention",
-                                 "Tous les joueurs ne sont pas placés dans le premier tour.\nImpossible de démarrer la série.");
+            if (!p)
+                return false;
 
-            return;
-        }
-    }
+            if (!s.contains(p))
+            {
+                s.insert(p);
+                return false;
+            }
 
-    auto addToSet = [](QSet<Player *> &s, Player *p)
-    {
-        if (!s.contains(p))
+            return true;
+        };
+
+        QSet<Player *> s;
+        for (int i = 0;i < firstRound->count();i++)
         {
-            s.insert(p);
-            return false;
-        }
+            auto match = firstRound->at(i);
 
-        return true;
-    };
+            if (addToSet(s, match->get_player1()) ||
+                addToSet(s, match->get_player2()))
+            {
+                QMessageBox::warning(nullptr, "Attention",
+                                     "Il y a des joueurs en double dans le premier tour. Veuillez corriger.");
 
-    QSet<Player *> s;
-    for (int i = 0;i < firstRound->count();i++)
-    {
-        auto match = firstRound->at(i);
-
-        if (addToSet(s, match->get_player1()) ||
-            addToSet(s, match->get_player2()))
-        {
-            QMessageBox::warning(nullptr, "Attention",
-                                 "Il y a des joueurs en double dans le premier tour. Veuillez corriger.");
-
-            return;
+                return;
+            }
         }
     }
 
