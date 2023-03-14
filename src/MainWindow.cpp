@@ -10,6 +10,7 @@
 #include "DialogPlayerList.h"
 #include "DialogBroadcastOpts.h"
 #include "BroadcastWindow.h"
+#include "DialogEditInfo.h"
 
 #include <QQuickStyle>
 #include <QQuickView>
@@ -62,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent):
 
     update_tournamentOpened(false);
     update_broadcastActive(false);
+    update_currentBrodcastViewIndex(0);
+    update_broadcastViews(nullptr);
     loadQmlApp();
 }
 
@@ -262,15 +265,44 @@ void MainWindow::broadcastStart()
         {
             broadcastStop();
         });
+        update_currentBrodcastViewIndex(0);
+        update_broadcastViews(broadcastWin->get_views());
+        update_currentBrodcastViewIndex(broadcastWin->get_currentViewIndex());
+        connect(broadcastWin, &BroadcastWindow::currentViewIndexChanged, this, &MainWindow::update_currentBrodcastViewIndex);
     }
 }
 
 void MainWindow::broadcastStop()
 {
     update_broadcastActive(false);
+    update_currentBrodcastViewIndex(0);
+    update_broadcastViews(nullptr);
     if (broadcastWin)
         broadcastWin->deleteLater();
     broadcastWin = nullptr;
+}
+
+void MainWindow::broadcastNext()
+{
+    if (broadcastWin)
+        broadcastWin->nextView();
+}
+
+void MainWindow::broadcastPrevious()
+{
+    if (broadcastWin)
+        broadcastWin->previousView();
+}
+
+void MainWindow::broadcastEditInfo()
+{
+    DialogEditInfo d;
+    d.setText(currentTournament->get_infoText());
+    if (d.exec() == QDialog::Accepted)
+    {
+        currentTournament->update_infoText(d.getText());
+        TStorage::Instance()->saveToDisk(currentTournament);
+    }
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()
@@ -290,6 +322,7 @@ void MainWindow::on_actionFermer_triggered()
     if (currentTournament)
         TStorage::Instance()->saveToDisk(currentTournament);
     currentTournament = nullptr;
+    broadcastStop();
     update_tournamentOpened(false);
 }
 
@@ -313,6 +346,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue("MainWindow/geometry", saveGeometry());
     settings.setValue("MainWindow/windowState", saveState());
 
+    //do not use broadcastStop() here, as it uses deleteLater which will not happen
+    // because the mainloop has already stopped
+    delete broadcastWin;
+
     if (currentTournament)
         TStorage::Instance()->saveToDisk(currentTournament);
 
@@ -332,6 +369,7 @@ void MainWindow::loadQmlApp()
     view->engine()->rootContext()->setContextProperty("storage", TStorage::Instance());
     view->engine()->rootContext()->setContextProperty("playerModel", PlayerModel::Instance());
     view->engine()->rootContext()->setContextProperty("selectedSerie", nullptr);
+    view->engine()->rootContext()->setContextProperty("currentTournament", nullptr);
 
     view->setSource(QUrl("qrc:/qml/main.qml"));
     ui->verticalLayout->addWidget(container);

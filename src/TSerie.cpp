@@ -425,7 +425,7 @@ void TSerie::prepareMatches()
             }
         }
     }
-    else if (get_tournamentType() == "roundrobbin")
+    else if (get_tournamentType() == "roundrobin")
     {
         QVector<Player *> vplayers(players->rowCount());
         for (int i = 0;i < players->rowCount();i++)
@@ -540,7 +540,7 @@ int TSerie::matchCountForRound(int round)
 
         return m;
     }
-    else if (get_tournamentType() == "roundrobbin")
+    else if (get_tournamentType() == "roundrobin")
     {
         int playerCount = players->rowCount();
         if (playerCount % 2 == 1)
@@ -696,7 +696,7 @@ void TSerie::playersModelChanged()
         while (firstround > 0 && ++rounds)
             firstround = firstround / 2;
     }
-    else if (get_tournamentType() == "roundrobbin")
+    else if (get_tournamentType() == "roundrobin")
     {
         rounds = players->rowCount();
         if (rounds % 2 == 0)

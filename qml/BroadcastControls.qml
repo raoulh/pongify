@@ -67,6 +67,29 @@ Rectangle {
                     icon.color: enabled? "white" : "#a7d9eb"
                 }
 
+                ToolButtonTip {
+                    icon.name: "previous"
+                    onClicked: mainWindow.broadcastPrevious()
+                    tooltipText: "Afficher le précédent"
+                    enabled: mainWindow.broadcastActive
+                    icon.color: enabled? "white" : "#a7d9eb"
+                }
+
+                ToolButtonTip {
+                    icon.name: "next"
+                    onClicked: mainWindow.broadcastNext()
+                    tooltipText: "Afficher le suivant"
+                    enabled: mainWindow.broadcastActive
+                    icon.color: enabled? "white" : "#a7d9eb"
+                }
+
+                ToolButtonTip {
+                    icon.name: "edit"
+                    onClicked: mainWindow.broadcastEditInfo()
+                    tooltipText: "Modifier le texte informatif"
+                    icon.color: enabled? "white" : "#a7d9eb"
+                }
+
                 Item { Layout.fillWidth: true; height: 1 }
             }
         }
@@ -80,22 +103,19 @@ Rectangle {
                 id: listSerie
                 anchors.fill: parent
 
-                model: currentTournament? currentTournament.series: undefined
+                model: mainWindow.broadcastViews
+                currentIndex: mainWindow.currentBrodcastViewIndex
 
                 delegate: ItemDelegate {
                     id: control
 
                     width: parent? parent.width: 0
-                    height: bt.implicitHeight + 10
+                    height: 32
                     text: name
-
-                    onClicked: {
-                        listSerie.currentIndex = index
-                        mainWindow.selectSerie(index)
-                    }
 
                     contentItem: RowLayout {
                         width: 300
+                        height: 26
                         spacing: 4
 
                         Item { Layout.preferredWidth: 5; height: 1 }
@@ -103,12 +123,10 @@ Rectangle {
                         Image {
                             Layout.preferredHeight: 20
                             Layout.preferredWidth: 20
-                            source: qtObject.status == "playing"?
-                                        "qrc:/icons/pongify/32x32@4/play-button.png" :
-                                        "qrc:/img/podium.png"
+                            source: mainWindow.currentBrodcastViewIndex === index?
+                                        "qrc:/img/radio-button-selected.png" :
+                                        "qrc:/img/radio-button.png"
                             fillMode: Image.PreserveAspectFit
-
-                            visible: qtObject.status != "stopped"
                         }
 
                         Text {
@@ -119,14 +137,6 @@ Rectangle {
                             color: control.enabled ? "#0f4932" : "#bdbebf"
                             elide: Text.ElideMiddle
                             verticalAlignment: Text.AlignVCenter
-                        }
-
-                        Button {
-                            id: bt
-                            Layout.preferredWidth: implicitWidth
-                            icon.name: "menu"
-                            icon.height: 16
-                            onClicked: mainWindow.showSerieMenu(index)
                         }
 
                         Item { Layout.preferredWidth: 5; height: 1 }

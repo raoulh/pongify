@@ -7,9 +7,9 @@ SplitView {
     SerieList {
         id: left
 
-        SplitView.minimumWidth: 50
-        SplitView.preferredWidth: 250
-        SplitView.maximumWidth: 500
+        SplitView.minimumWidth: 260
+        SplitView.preferredWidth: 260
+        SplitView.maximumWidth: 600
     }
 
     SerieView {

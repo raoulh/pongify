@@ -22,7 +22,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     leftPadding: 5
-                    text: currentTournament.name
+                    text: currentTournament? currentTournament.name: ""
                     elide: Text.ElideRight
                     color: "white"
                     font {
@@ -37,7 +37,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     leftPadding: 5
-                    text: currentTournament.date.toLocaleString(Qt.locale("fr_FR"), "dddd, d MMMM yyyy")
+                    text: currentTournament? currentTournament.date.toLocaleString(Qt.locale("fr_FR"), "dddd, d MMMM yyyy"): ""
                     elide: Text.ElideRight
                     color: "white"
                     font {

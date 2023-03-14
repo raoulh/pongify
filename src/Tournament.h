@@ -15,6 +15,7 @@ class Tournament: public QObject
     QML_READONLY_PROPERTY(QDateTime, date)
     QML_READONLY_PROPERTY(QString, status)
     QML_READONLY_PROPERTY(QObject *, series)
+    QML_READONLY_PROPERTY(QString, infoText)
 
 public:
     explicit Tournament(QObject *parent = nullptr);
@@ -22,9 +23,13 @@ public:
     void addSerie(TSerie *s);
     void removeSerie(int idx);
     TSerie *getSerie(int idx);
+    int serieCount() { return series->count(); }
 
     static Tournament *fromJson(const QJsonObject &obj);
     QJsonObject toJson();
+
+signals:
+    void seriesStatusChanged(); //emited if any serie has changed its status
 
 private:
     QQmlObjectListModel<TSerie> *series;

@@ -4,6 +4,8 @@
 #include <QQuickView>
 #include <QWidget>
 #include "qqmlhelpers.h"
+#include <QQmlObjectListModel.h>
+#include "BroadcastModel.h"
 
 class Tournament;
 
@@ -27,6 +29,8 @@ class BroadcastWindow : public QWidget
     Q_OBJECT
     QML_READONLY_PROPERTY(bool, fullscreen)
     QML_READONLY_PROPERTY(QScreen *, screen)
+    QML_READONLY_PROPERTY(QObject *, views)
+    QML_READONLY_PROPERTY(int, currentViewIndex)
 
 public:
     explicit BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, QWidget *parent = nullptr);
@@ -35,12 +39,20 @@ public:
 signals:
     void windowClosed();
 
+public slots:
+    void nextView();
+    void previousView();
+
 private slots:
     void quickViewStatusChanged(QQuickView::Status status);
+    void reloadViews();
+    void timerViewTick();
 
 private:
     BWQQuickView *view = nullptr;
     Tournament *currentTournament = nullptr;
+    QQmlObjectListModel<BroadcastView> *views;
+    QTimer *timerViewChange = nullptr;
 
     void loadQmlApp();
 };

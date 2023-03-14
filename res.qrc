@@ -66,5 +66,29 @@
         <file>qml/BroadcastControls.qml</file>
         <file>img/broadcast.svg</file>
         <file>qml/BroadcastWindow.qml</file>
+        <file>qml/broadcast/DefaultView.qml</file>
+        <file>qml/broadcast/SerieBracketView.qml</file>
+        <file>qml/broadcast/RoundRobinView.qml</file>
+        <file>qml/broadcast/HallOfFameView.qml</file>
+        <file>icons/pongify/32x32/next.png</file>
+        <file>icons/pongify/32x32@2/next.png</file>
+        <file>icons/pongify/32x32@3/next.png</file>
+        <file>icons/pongify/32x32@4/next.png</file>
+        <file>icons/pongify/32x32/previous.png</file>
+        <file>icons/pongify/32x32@2/previous.png</file>
+        <file>icons/pongify/32x32@3/previous.png</file>
+        <file>icons/pongify/32x32@4/previous.png</file>
+        <file>img/radio-button.png</file>
+        <file>img/radio-button-selected.png</file>
+        <file>img/text-editor/format_align_center_black_24dp.svg</file>
+        <file>img/text-editor/format_align_justify_black_24dp.svg</file>
+        <file>img/text-editor/format_align_left_black_24dp.svg</file>
+        <file>img/text-editor/format_align_right_black_24dp.svg</file>
+        <file>img/text-editor/format_bold_black_24dp.svg</file>
+        <file>img/text-editor/format_italic_black_24dp.svg</file>
+        <file>img/text-editor/format_list_bulleted_black_24dp.svg</file>
+        <file>img/text-editor/format_strikethrough_black_24dp.svg</file>
+        <file>img/text-editor/format_underlined_black_24dp.svg</file>
+        <file>img/text-editor/palette_black_24dp.svg</file>
     </qresource>
 </RCC>

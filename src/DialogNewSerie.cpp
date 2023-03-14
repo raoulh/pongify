@@ -62,7 +62,7 @@ QString DialogNewSerie::getType()
     if (ui->comboBoxType->currentIndex() == 0)
         return {"single"};
 
-    return {"roundrobbin"};
+    return {"roundrobin"};
 }
 
 void DialogNewSerie::setType(QString t)
@@ -70,7 +70,7 @@ void DialogNewSerie::setType(QString t)
     t = t.trimmed();
     if (t.toLower() == "single")
         ui->comboBoxType->setCurrentIndex(0);
-    else if (t.toLower() == "roundrobbin")
+    else if (t.toLower() == "roundrobin")
         ui->comboBoxType->setCurrentIndex(1);
 }
 

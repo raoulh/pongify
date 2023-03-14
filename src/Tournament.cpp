@@ -19,13 +19,20 @@ void Tournament::addSerie(TSerie *s)
     {
         TStorage::Instance()->saveToDisk(this);
     });
+
+    connect(s, &TSerie::statusChanged, this, &Tournament::seriesStatusChanged);
 }
 
 void Tournament::removeSerie(int idx)
 {
     if (idx < 0 || idx >= series->count())
         return;
+
+    auto s = series->at(idx);
+    disconnect(s, &TSerie::statusChanged, this, &Tournament::seriesStatusChanged);
+
     series->remove(idx);
+    delete s;
 }
 
 TSerie *Tournament::getSerie(int idx)
@@ -51,6 +58,7 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
     t->update_date(QDateTime::fromString(obj["date"].toString(), Qt::ISODate));
     t->update_status(obj["status"].toString());
     t->update_uuid(obj["uuid"].toString());
+    t->update_infoText(obj["info_text"].toString());
 
     QJsonArray arr = obj["series"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -77,5 +85,6 @@ QJsonObject Tournament::toJson()
         { "date", get_date().toString(Qt::ISODate) },
         { "status", get_status() },
         { "series", arr },
+        { "info_text", get_infoText() },
     };
 }

@@ -61,7 +61,6 @@ public:
     Q_INVOKABLE QObject *getPlayer2(int round, int match);
     Q_INVOKABLE int scoreForMatch(int round, int match, int playerIdx);
     Q_INVOKABLE bool winnerForMatch(int round, int match, int playerIdx);
-
     Q_INVOKABLE void clickedOnMatch(int round, int match);
 
 signals:

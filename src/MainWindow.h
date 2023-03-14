@@ -18,6 +18,10 @@ class MainWindow : public QMainWindow
     QML_READONLY_PROPERTY(bool, tournamentOpened)
     QML_READONLY_PROPERTY(bool, broadcastActive)
 
+    //broadcast
+    QML_READONLY_PROPERTY(QObject *, broadcastViews)
+    QML_READONLY_PROPERTY(int, currentBrodcastViewIndex)
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -33,6 +37,9 @@ public:
 
     Q_INVOKABLE void broadcastStart();
     Q_INVOKABLE void broadcastStop();
+    Q_INVOKABLE void broadcastNext();
+    Q_INVOKABLE void broadcastPrevious();
+    Q_INVOKABLE void broadcastEditInfo();
 
 private slots:
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
