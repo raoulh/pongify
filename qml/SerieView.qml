@@ -90,6 +90,9 @@ Rectangle {
 
         BracketView {
             id: brackerView
+
+            serie: selectedSerie
+            isEditable: true
         }
     }
 }

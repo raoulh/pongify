@@ -5,9 +5,17 @@ import QtQuick.Controls
 Rectangle {
     id: bloc
 
+    property bool isEditable: false
+    property real scaleFactor: 1.0
+
+    function sc(v) {
+        return scaleFactor * v
+    }
+
     property string playerFirstName1
     property string playerLastName1
     property string playerRank1
+    property string playerClub1
     property string playerFirstNameSecond1
     property string playerLastNameSecond1
     property string playerRankSecond1
@@ -15,6 +23,7 @@ Rectangle {
     property string playerFirstName2
     property string playerLastName2
     property string playerRank2
+    property string playerClub2
     property string playerFirstNameSecond2
     property string playerLastNameSecond2
     property string playerRankSecond2
@@ -30,10 +39,10 @@ Rectangle {
     signal clicked()
 
     color: bloc.mouseHovered? "#585848": playerFirstName1 == "" || winner2? "#b2b2b2": "#484848"
-    radius: 6
+    radius: sc(6)
 
-    implicitHeight: 110
-    implicitWidth: isDouble? 350 : 250
+    implicitHeight: sc(110)
+    implicitWidth: isDouble || isEditable ? sc(350) : sc(250)
 
     property bool mouseHovered: false
 
@@ -60,10 +69,10 @@ Rectangle {
 
             ColumnLayout {
                 spacing: 0
-                Layout.leftMargin: 6
-                Layout.rightMargin: 6
-                Layout.topMargin: 5
-                Layout.bottomMargin: 5
+                Layout.leftMargin: sc(6)
+                Layout.rightMargin: sc(6)
+                Layout.topMargin: sc(5)
+                Layout.bottomMargin: sc(5)
 
                 RowLayout {
                     spacing: 0
@@ -76,15 +85,15 @@ Rectangle {
                         color: "#ffffff"
                         elide: Text.ElideRight
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
                         }
                     }
                     Image {
                         source: "qrc:/img/medal.png"
                         visible: winner1
 
-                        Layout.preferredHeight: 20
-                        Layout.preferredWidth: 20
+                        Layout.preferredHeight: sc(20)
+                        Layout.preferredWidth: sc(20)
                         fillMode: Image.PreserveAspectFit
                     }
                     Text {
@@ -93,7 +102,7 @@ Rectangle {
                         text: playerRank1
                         color: "#eed67d"
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
                         }
                     }
                 }
@@ -112,7 +121,22 @@ Rectangle {
                         color: "#ffffff"
                         elide: Text.ElideRight
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
+                        }
+                    }
+                    Text {
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        text: playerClub1
+                        color: "#ffffff"
+                        elide: Text.ElideRight
+                        horizontalAlignment: Text.AlignRight
+                        verticalAlignment: Text.AlignTop
+                        visible: !isDouble && isEditable
+                        font {
+                            pointSize: sc(10)
+                            italic: true
                         }
                     }
                     Text {
@@ -121,7 +145,7 @@ Rectangle {
                         text: playerRankSecond1
                         color: "#eed67d"
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
                         }
                         visible: isDouble
                     }
@@ -136,10 +160,10 @@ Rectangle {
 
             ColumnLayout {
                 spacing: 0
-                Layout.leftMargin: 6
-                Layout.rightMargin: 6
-                Layout.topMargin: 5
-                Layout.bottomMargin: 5
+                Layout.leftMargin: sc(6)
+                Layout.rightMargin: sc(6)
+                Layout.topMargin: sc(5)
+                Layout.bottomMargin: sc(5)
 
                 RowLayout {
                     spacing: 0
@@ -153,15 +177,15 @@ Rectangle {
                         color: "#ffffff"
                         elide: Text.ElideRight
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
                         }
                     }
                     Image {
                         source: "qrc:/img/medal.png"
                         visible: winner2
 
-                        Layout.preferredHeight: 20
-                        Layout.preferredWidth: 20
+                        Layout.preferredHeight: sc(20)
+                        Layout.preferredWidth: sc(20)
                         fillMode: Image.PreserveAspectFit
                     }
                     Text {
@@ -170,7 +194,7 @@ Rectangle {
                         text: playerRank2
                         color: "#eed67d"
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
                         }
                     }
                 }
@@ -189,7 +213,22 @@ Rectangle {
                         color: "#ffffff"
                         elide: Text.ElideRight
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
+                        }
+                    }
+                    Text {
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        text: playerClub2
+                        color: "#ffffff"
+                        elide: Text.ElideRight
+                        horizontalAlignment: Text.AlignRight
+                        verticalAlignment: Text.AlignTop
+                        visible: !isDouble && isEditable
+                        font {
+                            pointSize: sc(10)
+                            italic: true
                         }
                     }
                     Text {
@@ -198,7 +237,7 @@ Rectangle {
                         text: playerRankSecond2
                         color: "#eed67d"
                         font {
-                            pointSize: 12
+                            pointSize: sc(12)
                         }
                     }
                 }
@@ -212,7 +251,7 @@ Rectangle {
             bottomLeftRounded: false
             color: winner2 || playerFirstName1 == ""? "#faf1d0" : "#eed67d"
             radius: bloc.radius
-            Layout.preferredWidth: 40
+            Layout.preferredWidth: sc(40)
             Layout.preferredHeight: bloc.height
 
             RoundedRectangle {
@@ -238,7 +277,7 @@ Rectangle {
                     text: score1 == "" || score1 == "-1" ? "-": score1
                     color: winner2? "#8b8b8b" : "#000000"
                     font {
-                        pointSize: 16
+                        pointSize: sc(16)
                         bold: true
                     }
                     horizontalAlignment: Qt.AlignHCenter
@@ -252,7 +291,7 @@ Rectangle {
                     text: score2 == "" || score2 == "-1"? "-": score2
                     color: winner1? "#8b8b8b" : "#000000"
                     font {
-                        pointSize: 16
+                        pointSize: sc(16)
                         bold: true
                     }
                     horizontalAlignment: Qt.AlignHCenter
@@ -265,6 +304,8 @@ Rectangle {
     MouseArea {
         id: mouse
         anchors.fill: parent
+
+        enabled: isEditable
 
         hoverEnabled: true
         onEntered: bloc.mouseHovered = true

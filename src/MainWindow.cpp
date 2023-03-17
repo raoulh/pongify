@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent):
         ui->actionPropri_t_s->setEnabled(en);
 
         //update QML model
+        if (!view) return;
         view->engine()->rootContext()->setContextProperty("currentTournament", currentTournament);
         auto s = currentTournament? currentTournament->getSerie(0): nullptr;
         view->engine()->rootContext()->setContextProperty("selectedSerie", s);

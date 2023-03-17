@@ -50,7 +50,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    QQuickView *view;
+    QQuickView *view = nullptr;
     Tournament *currentTournament = nullptr;
     BroadcastWindow *broadcastWin = nullptr;
 

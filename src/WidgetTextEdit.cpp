@@ -102,6 +102,8 @@ WidgetTextEdit::WidgetTextEdit(QWidget *parent) :
     foreach(int size, QFontDatabase::standardSizes())
         comboSize->addItem(QString::number(size));
 
+    ui->textEdit->setFontPointSize(26);
+
     connect(comboSize, &QComboBox::activated, this, &WidgetTextEdit::textSize);
     comboSize->setCurrentIndex(comboSize->findText(QString::number(QApplication::font()
                                                                    .pointSize())));
