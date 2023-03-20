@@ -9,14 +9,24 @@ RowLayout {
     property bool isEditable: false
     property real scaleFactor: 1.0
 
+    //only display rounds starting/ending at those index
+    property int startRoundIdx: 0
+    property int endRoundIdx: serie? serie.rounds: 0
+
     function sc(v) {
         return scaleFactor * v
+    }
+
+    //return the ColumnLayout item for the round param
+    function itemFromRound(round) {
+        return roundRepeater.itemAt(round)
     }
 
     spacing: sc(30)
 
     Repeater {
-        model: serie? serie.rounds: 0
+        id: roundRepeater
+        model: serie? endRoundIdx - startRoundIdx: 0
 
         ColumnLayout {
             id: colMatchs
@@ -24,8 +34,8 @@ RowLayout {
             spacing: sc(20)
 
             Repeater {
-                id: roundRep
-                property int roundIndex: index
+                id: matchRepeater
+                property int roundIndex: index + rowRounds.startRoundIdx
                 model: serie? serie.matchCountForRound(roundIndex): 0
 
                 Item {
@@ -74,19 +84,19 @@ RowLayout {
 
                         isDouble: serie? serie.isDouble: false
 
-                        onClicked: if (serie && isEditable) serie.clickedOnMatch(roundRep.roundIndex, matchIndex)
+                        onClicked: if (serie && isEditable) serie.clickedOnMatch(matchRepeater.roundIndex, matchIndex)
 
                         function updateMatchData() {
-                            matchBloc.score1 = serie.scoreForMatch(roundRep.roundIndex, matchIndex, 0)
-                            matchBloc.score2 = serie.scoreForMatch(roundRep.roundIndex, matchIndex, 1)
-                            matchBloc.winner1 = serie.winnerForMatch(roundRep.roundIndex, matchIndex, 0)
-                            matchBloc.winner2 = serie.winnerForMatch(roundRep.roundIndex, matchIndex, 1)
+                            matchBloc.score1 = serie.scoreForMatch(matchRepeater.roundIndex, matchIndex, 0)
+                            matchBloc.score2 = serie.scoreForMatch(matchRepeater.roundIndex, matchIndex, 1)
+                            matchBloc.winner1 = serie.winnerForMatch(matchRepeater.roundIndex, matchIndex, 0)
+                            matchBloc.winner2 = serie.winnerForMatch(matchRepeater.roundIndex, matchIndex, 1)
 
-                            let player = serie.getPlayer1(roundRep.roundIndex, matchIndex)
+                            let player = serie.getPlayer1(matchRepeater.roundIndex, matchIndex)
                             if (!player) player = emptyPlayer
                             matchBloc.player1 = player
 
-                            player = serie.getPlayer2(roundRep.roundIndex, matchIndex)
+                            player = serie.getPlayer2(matchRepeater.roundIndex, matchIndex)
                             if (!player) player = emptyPlayer
                             matchBloc.player2 = player
                         }

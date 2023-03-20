@@ -129,7 +129,7 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         text: playerClub1
-                        color: "#ffffff"
+                        color: "#cccccc"
                         elide: Text.ElideRight
                         horizontalAlignment: Text.AlignRight
                         verticalAlignment: Text.AlignTop
@@ -221,7 +221,7 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         text: playerClub2
-                        color: "#ffffff"
+                        color: "#cccccc"
                         elide: Text.ElideRight
                         horizontalAlignment: Text.AlignRight
                         verticalAlignment: Text.AlignTop

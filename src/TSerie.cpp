@@ -53,6 +53,7 @@ TSerie::TSerie(QObject *parent):
     players = PlayerModel::createEmpty();
     QQmlEngine::setObjectOwnership(players, QQmlEngine::CppOwnership);
     update_players(players);
+    update_currentRound(0);
 
     connect(players, &PlayerModel::playersChanged, this, &TSerie::playersModelChanged);
     playersModelChanged();
@@ -453,6 +454,8 @@ void TSerie::prepareMatches()
                 auto match = new TMatch();
                 match->update_player1(idx1 == 0? vplayers[0] : rotated[idx1 - 1]);
                 match->update_player2(rotated[idx2 - 1]);
+                if (!match->get_player1() || !match->get_player2())
+                    match->update_isBye(true);
                 r->append(match);
             }
 
@@ -521,6 +524,42 @@ void TSerie::updateNextMatches()
 
                 if ((j + 1) % 2 == 0)
                     i_next++; //increment next round match on pair idx only
+            }
+        }
+    }
+
+    updateCurrentRound();
+}
+
+void TSerie::updateCurrentRound()
+{
+    //if (get_tournamentType() == "single")
+    {
+        for (int i = 0;i < allMatches.count();i++)
+        {
+            auto round = allMatches.at(i);
+            auto roundIsFinished = true;
+
+            for (int j = 0;j < round->count();j++)
+            {
+                auto match = round->at(j);
+
+                if (match->get_isBye()) continue; //bye is a win
+
+                if (!match->get_playerWinner1() &&
+                    !match->get_playerWinner2())
+                {
+                    roundIsFinished = false;
+                    break;
+                }
+            }
+
+            if (!roundIsFinished ||
+                i == allMatches.count() - 1) //last round
+            {
+                qDebug() << "updateCurrentRound(" << get_name() <<  "): --> " << i;
+                update_currentRound(i);
+                break;
             }
         }
     }
@@ -687,6 +726,7 @@ void TSerie::playersModelChanged()
     if (players->rowCount() < 3)
     {
         update_rounds(0);
+        update_currentRound(0);
         return;
     }
 
@@ -708,6 +748,7 @@ void TSerie::playersModelChanged()
     qDebug() << "Serie: " << get_name() << " players:" << players->rowCount() << " rounds: " << rounds;
 
     prepareMatches();
+    updateCurrentRound();
 
     emit matchesUpdated();
 }

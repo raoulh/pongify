@@ -9,10 +9,17 @@ SwipeView {
 
     currentIndex: broadcastWindow.currentViewIndex
 
+    onCurrentIndexChanged: {
+        if (currentItem && currentItem.item &&
+            currentItem.item.hasOwnProperty('startViewShow'))
+            currentItem.item.startViewShow()
+    }
+
     Repeater {
         model: broadcastWindow.views
 
         Loader {
+            clip: true
             property QtObject serieModel: viewSerie
             source: viewUrl
         }

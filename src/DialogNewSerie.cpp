@@ -13,7 +13,7 @@ DialogNewSerie::DialogNewSerie(bool isnew, QWidget *parent) :
         setWindowTitle("Modifier");
 
     ui->comboBoxType->addItem("Elimination directe");
-    ui->comboBoxType->addItem("Poules");
+    ui->comboBoxType->addItem("A la ronde (Round-Robbin)");
 
     ui->comboBoxRanking->addItem("Open");
     ui->comboBoxRanking->addItem("NC");

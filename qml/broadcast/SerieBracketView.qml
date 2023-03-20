@@ -6,13 +6,17 @@ import ".."
 Rectangle {
     color: "#FAFAFA"
 
+    function startViewShow() {
+        flickable.initPosition()
+    }
+
     Rectangle {
         id: title
         z: 100
         color: "#FAFAFA"
         anchors {
             top: parent.top
-            left: parent.left
+            horizontalCenter: parent.horizontalCenter
             margins: 10
         }
         width: titleTxt.implicitWidth
@@ -30,7 +34,7 @@ Rectangle {
                 elide: Text.ElideRight
                 color: "#7AA4AC"
                 font {
-                    pointSize: 28
+                    pointSize: 38
                     bold: true
                 }
                 horizontalAlignment: Text.AlignLeft
@@ -47,7 +51,7 @@ Rectangle {
                 elide: Text.ElideRight
                 color: "#79A3AB"
                 font {
-                    pointSize: 26
+                    pointSize: 38
                     bold: false
                     italic: true
                 }
@@ -59,6 +63,56 @@ Rectangle {
 
     Flickable {
         id: flickable
+
+        function initPosition() {
+            state = "top"
+            contentX = 0
+            if (flickable.contentItem.height > flickable.height) {
+                timerAnim.restart()
+            } else {
+                //center Y
+                contentY = Qt.binding(() => { return -(flickable.height - flickable.contentItem.height) / 2 })
+            }
+
+            if (flickable.contentItem.width < flickable.width) {
+                //center X
+                contentX = Qt.binding(() => { return -(flickable.width - flickable.contentItem.width) / 2 })
+            }
+        }
+
+        Timer {
+            id: timerAnim
+            running: false
+            repeat: false
+            interval: 1000
+            onTriggered: flickable.state = "bottom"
+        }
+
+        states: [
+            State {
+                name: "top"
+                PropertyChanges {
+                    target: flickable
+                    contentY: 0
+                }
+            },
+            State {
+                name: "bottom"
+                PropertyChanges {
+                    target: flickable
+                    contentY: contentHeight - flickable.height
+                }
+            }
+        ]
+
+        transitions: [
+            Transition {
+                from: "top"
+                to: "bottom"
+                NumberAnimation { target: flickable; properties: "contentY"; duration: 8000 }
+            }
+        ]
+
         anchors {
             left: parent.left; leftMargin: 25
             top: title.bottom; topMargin: 15
@@ -85,14 +139,16 @@ Rectangle {
 
         boundsBehavior: Flickable.StopAtBounds
 
-        contentWidth: brackerView.width
-        contentHeight: brackerView.height
+        contentWidth: bracketView.width
+        contentHeight: bracketView.height
 
         BracketView {
-            id: brackerView
+            id: bracketView
 
             serie: viewSerie
             scaleFactor: 2
+
+            startRoundIdx: viewSerie? viewSerie.currentRound: 0
         }
     }
 }

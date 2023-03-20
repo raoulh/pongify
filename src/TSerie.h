@@ -41,6 +41,9 @@ class TSerie : public QObject
 
     QML_READONLY_PROPERTY(bool, isDouble)
 
+    //This holds the current round. This is used to display the correct round in BroadcastingViews
+    QML_READONLY_PROPERTY(int, currentRound)
+
 public:
     explicit TSerie(QObject *parent = nullptr);
     virtual ~TSerie();
@@ -82,6 +85,7 @@ private:
     void clearAllMatches();
 
     void updateNextMatches();
+    void updateCurrentRound();
 };
 
 #endif // TSERIE_H
