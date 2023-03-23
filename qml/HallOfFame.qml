@@ -7,11 +7,13 @@ ColumnLayout {
     property real scaleFactor: 1.0
     property bool temporary: false
 
+    property QtObject winnerModel
+
     function sc(v) {
         return scaleFactor * v
     }
 
-    width: sc(250)
+    width: sc(300)
     spacing: sc(4)
 
     Rectangle {
@@ -47,10 +49,10 @@ ColumnLayout {
     }
 
     Repeater {
-        model: 8
+        model: winnerModel
 
         RowLayout {
-            Layout.preferredWidth: sc(250)
+            Layout.preferredWidth: sc(300)
             spacing: 0
 
             Rectangle {
@@ -68,7 +70,7 @@ ColumnLayout {
 
                     Text {
                         leftPadding: hof.sc(10)
-                        text: index
+                        text: index + 1
                         font.bold: true
                         color: "#b79217"
                         elide: Text.ElideMiddle
@@ -82,7 +84,7 @@ ColumnLayout {
                     Text {
                         rightPadding: hof.sc(10)
                         Layout.fillWidth: true
-                        text: "John Doe"
+                        text: "%1 %2".arg(firstName).arg(lastName)
                         font.bold: true
                         color: "black"
                         elide: Text.ElideMiddle
@@ -98,7 +100,7 @@ ColumnLayout {
 
             Text {
                 Layout.margins: hof.sc(10)
-                text: "NC"
+                text: ranking
                 font.bold: true
                 color: "#b79217"
                 elide: Text.ElideMiddle

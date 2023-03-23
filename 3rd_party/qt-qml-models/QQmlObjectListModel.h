@@ -191,12 +191,12 @@ public: // C++ API
             updateCounter ();
         }
     }
-    void append (ItemType * item) {
+    void append (ItemType * item, bool reference = true) {
         if (item != Q_NULLPTR) {
             const int pos = m_items.count ();
             beginInsertRows (noParent (), pos, pos);
             m_items.append (item);
-            referenceItem (item);
+            referenceItem (item, reference);
             endInsertRows ();
             updateCounter ();
         }
@@ -353,9 +353,9 @@ protected: // internal stuff
         Q_UNUSED (parent);
         return m_items.count ();
     }
-    void referenceItem (ItemType * item) {
+    void referenceItem (ItemType * item, bool reference = true) {
         if (item != Q_NULLPTR) {
-            if (item->parent () == Q_NULLPTR) {
+            if (item->parent () == Q_NULLPTR && reference) {
                 item->setParent (this);
             }
             const QList<int> signalsIdxList = m_signalIdxToRole.keys ();

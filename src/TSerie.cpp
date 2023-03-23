@@ -55,6 +55,9 @@ TSerie::TSerie(QObject *parent):
     update_players(players);
     update_currentRound(0);
 
+    winners = new QQmlObjectListModel<Player>(this, "name");
+    update_winners(winners);
+
     connect(players, &PlayerModel::playersChanged, this, &TSerie::playersModelChanged);
     playersModelChanged();
 
@@ -529,6 +532,9 @@ void TSerie::updateNextMatches()
     }
 
     updateCurrentRound();
+
+    if (get_tournamentType() == "roundrobin")
+        calculateRRWinners();
 }
 
 void TSerie::updateCurrentRound()
@@ -562,6 +568,136 @@ void TSerie::updateCurrentRound()
                 break;
             }
         }
+    }
+}
+
+//Calculate hall of fame for Round Robin type
+void TSerie::calculateRRWinners()
+{
+    struct Score
+    {
+        int score = 0;
+        int setWin = 0;
+        int setLoose = 0;
+        int winCount = 0;
+    };
+
+    QHash<Player *, Score> scores;
+
+    if (get_currentRound() < 3)
+    {
+        winners->clear();
+        return;
+    }
+
+    /*
+     * Regles:
+     *
+     *  - 2 points pour une victoire en 2 sets gagnants
+     *  - 1 point pour une victoire en 3 sets gagnants
+     *  - 0 point pour une défaite
+     *
+     *  Criteres en cas d'égalité:
+     *
+     *  - Nombre de victoires
+     *  - Résultat du match entre les joueurs à égalité
+     *  - Différence de sets gagnés et perdus
+     *  - Différence de points gagnés et perdus
+     *
+     */
+
+    for (int i = 0;i < get_currentRound();i++)
+    {
+        auto round = allMatches.at(i);
+
+        for (int j = 0;j < round->count();j++)
+        {
+            auto match = round->at(j);
+
+            //do not count this match if not played or bye
+            if ((match->get_playerWinner1() && match->get_playerWinner2()) ||
+                match->get_isBye())
+                continue;
+
+            auto p1 = match->get_player1();
+            auto p2 = match->get_player2();
+
+            auto score1 = scores.value(p1);
+            auto score2 = scores.value(p2);
+
+            if (match->get_playerWinner1())
+            {
+                if (match->get_playerScore2() == 0)
+                    score1.score += 2;
+                else
+                    score1.score += 1;
+
+                score1.winCount++;
+            }
+
+            score1.setWin += match->get_playerScore1();
+            score1.setLoose += match->get_playerScore2();
+
+            if (match->get_playerWinner2())
+            {
+                if (match->get_playerScore1() == 0)
+                    score2.score += 2;
+                else
+                    score2.score += 1;
+
+                score2.winCount++;
+            }
+
+            score2.setWin += match->get_playerScore2();
+            score2.setLoose += match->get_playerScore1();
+
+            scores.insert(p1, score1);
+            scores.insert(p2, score2);
+        }
+    }
+
+    QList<Player *> sortwin = scores.keys();
+
+    std::sort(sortwin.begin(), sortwin.end(),
+              [&scores, this](Player *a, Player *b)
+    {
+        auto score1 = scores.value(a);
+        auto score2 = scores.value(b);
+
+        if (score1.score == score2.score)
+        {
+            if (score1.setWin > score2.setWin)
+                return true;
+            if (score1.setLoose < score2.setLoose)
+                return true;
+
+            //Compare result from match between players only if Serie is finished (to account all matches)
+            if (get_currentRound() == allMatches.count() - 1)
+            {
+                //find match between both player
+                for (int i = 0;i < get_currentRound();i++)
+                {
+                    auto round = allMatches.at(i);
+                    for (int j = 0;j < round->count();j++)
+                    {
+                        auto match = round->at(j);
+                        if ((match->get_player1() == a && match->get_player2() == b) ||
+                            (match->get_player1() == b && match->get_player2() == a))
+                            return match->get_playerWinner1();
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return score1.score > score2.score;
+    });
+
+    winners->clear();
+    for (int i = 0;i < 8 && i < sortwin.count();i++)
+    {
+        winners->append(sortwin.at(i), false);
     }
 }
 

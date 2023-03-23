@@ -47,9 +47,9 @@ Rectangle {
                     padding: 10
                     text: viewSerie?
                               viewSerie.status === "stopped"? "[Non démarré]" :
-                                                              viewSerie.status === "playing"? "[Jeu en cours]" :
-                                                                                              viewSerie.status === "finished"? "[Terminé]" :
-                                                                                                                               "" : ""
+                              viewSerie.status === "playing"? "[Jeu en cours]" :
+                              viewSerie.status === "finished"? "[Terminé]" :
+                              "" : ""
                     elide: Text.ElideRight
                     color: "#79A3AB"
                     font {
@@ -176,6 +176,7 @@ Rectangle {
             HallOfFame {
                 temporary: true
                 scaleFactor: 2
+                winnerModel: viewSerie? viewSerie.winners: null
             }
         }
     }

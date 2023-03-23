@@ -32,6 +32,7 @@ class TSerie : public QObject
     QML_READONLY_PROPERTY(QString, ranking)
     QML_READONLY_PROPERTY(QString, tournamentType)
     QML_READONLY_PROPERTY(QObject *, players)
+    QML_READONLY_PROPERTY(QObject *, winners)
 
     //Status of this serie: stopped, playing, finished
     QML_READONLY_PROPERTY(QString, status)
@@ -74,6 +75,7 @@ private slots:
 
 private:
     PlayerModel *players;
+    QQmlObjectListModel<Player> *winners;
 
     QVector<TRound *> allMatches;
 
@@ -86,6 +88,8 @@ private:
 
     void updateNextMatches();
     void updateCurrentRound();
+
+    void calculateRRWinners();
 };
 
 #endif // TSERIE_H
