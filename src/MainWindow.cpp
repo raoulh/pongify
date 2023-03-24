@@ -11,6 +11,7 @@
 #include "DialogBroadcastOpts.h"
 #include "BroadcastWindow.h"
 #include "DialogEditInfo.h"
+#include "DialogPlayersHtml.h"
 
 #include <QQuickStyle>
 #include <QQuickView>
@@ -47,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent):
     {
         ui->actionFermer->setEnabled(en);
         ui->actionPropri_t_s->setEnabled(en);
+        ui->actionListe_des_joueurs_du_tournoi->setEnabled(en);
 
         //update QML model
         if (!view) return;
@@ -374,4 +376,10 @@ void MainWindow::loadQmlApp()
 
     view->setSource(QUrl("qrc:/qml/main.qml"));
     ui->verticalLayout->addWidget(container);
+}
+
+void MainWindow::on_actionListe_des_joueurs_du_tournoi_triggered()
+{
+    DialogPlayersHtml d(currentTournament);
+    d.exec();
 }

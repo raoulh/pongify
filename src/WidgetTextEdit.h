@@ -34,6 +34,8 @@ private slots:
     void currentCharFormatChanged(const QTextCharFormat &format);
     void cursorPositionChanged();
 
+    void exportHtml();
+
 private:
     Ui::WidgetTextEdit *ui;
 

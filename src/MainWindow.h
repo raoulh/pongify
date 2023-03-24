@@ -47,6 +47,8 @@ private slots:
     void on_actionFermer_triggered();
     void on_actionPropri_t_s_triggered();
 
+    void on_actionListe_des_joueurs_du_tournoi_triggered();
+
 private:
     Ui::MainWindow *ui;
 

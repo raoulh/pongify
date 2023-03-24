@@ -35,7 +35,7 @@
      <x>0</x>
      <y>0</y>
      <width>904</width>
-     <height>17</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -55,6 +55,7 @@
     </property>
     <addaction name="actionListe_des_joueurs"/>
     <addaction name="actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS"/>
+    <addaction name="actionListe_des_joueurs_du_tournoi"/>
    </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuJoueurs"/>
@@ -67,7 +68,7 @@
   </action>
   <action name="actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS">
    <property name="text">
-    <string>Mettre à jour la liste de joueur depuis le CDSLS</string>
+    <string>Mettre à jour la liste de joueur depuis le CDSLS...</string>
    </property>
   </action>
   <action name="actionNouveau_tournoi">
@@ -77,7 +78,7 @@
   </action>
   <action name="actionListe_des_joueurs">
    <property name="text">
-    <string>Liste des joueurs...</string>
+    <string>Liste des joueurs du CDSLS</string>
    </property>
   </action>
   <action name="actionFermer">
@@ -88,6 +89,11 @@
   <action name="actionPropri_t_s">
    <property name="text">
     <string>Propriétés</string>
+   </property>
+  </action>
+  <action name="actionListe_des_joueurs_du_tournoi">
+   <property name="text">
+    <string>Liste des joueurs du tournoi...</string>
    </property>
   </action>
  </widget>

@@ -91,5 +91,10 @@
         <file>img/text-editor/format_underlined_black_24dp.svg</file>
         <file>img/text-editor/palette_black_24dp.svg</file>
         <file>qml/HallOfFame.qml</file>
+        <file>data/footer.html</file>
+        <file>data/header.html</file>
+        <file>data/table_footer.html</file>
+        <file>data/table_header.html</file>
+        <file>data/table_item.html</file>
     </qresource>
 </RCC>

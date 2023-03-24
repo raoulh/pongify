@@ -20,6 +20,7 @@ SOURCES += \
     src/DialogNewTournament.cpp \
     src/DialogPlayerList.cpp \
     src/DialogPlayers.cpp \
+    src/DialogPlayersHtml.cpp \
     src/PlayerModel.cpp \
     src/PlayerSync.cpp \
     src/TSerie.cpp \
@@ -43,6 +44,7 @@ HEADERS += \
     src/DialogNewTournament.h \
     src/DialogPlayerList.h \
     src/DialogPlayers.h \
+    src/DialogPlayersHtml.h \
     src/MainWindow.h \
     src/PlayerModel.h \
     src/PlayerSync.h \
@@ -64,6 +66,7 @@ FORMS += \
     src/DialogNewTournament.ui \
     src/DialogPlayerList.ui \
     src/DialogPlayers.ui \
+    src/DialogPlayersHtml.ui \
     src/MainWindow.ui \
     src/WidgetTextEdit.ui
 

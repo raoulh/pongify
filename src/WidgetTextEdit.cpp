@@ -118,6 +118,9 @@ WidgetTextEdit::WidgetTextEdit(QWidget *parent) :
 
     fontChanged(ui->textEdit->font());
     alignmentChanged(ui->textEdit->alignment());
+
+    auto actionSave = toolbar->addAction(tr("Exporter..."));
+    connect(actionSave, &QAction::triggered, this, &WidgetTextEdit::exportHtml);
 }
 
 WidgetTextEdit::~WidgetTextEdit()
@@ -263,6 +266,22 @@ void WidgetTextEdit::currentCharFormatChanged(const QTextCharFormat &format)
 void WidgetTextEdit::cursorPositionChanged()
 {
     alignmentChanged(ui->textEdit->alignment());
+}
+
+void WidgetTextEdit::exportHtml()
+{
+    QString f = QFileDialog::getSaveFileName(this, "Exporter sous...", {}, "*.html");
+    if (f.isEmpty()) return;
+
+    if (!f.endsWith(".html"))
+        f.append(".html");
+
+    QFile fp(f);
+    if (fp.open(QFile::ReadWrite | QFile::Truncate))
+    {
+        fp.write(getHtml().toUtf8());
+    }
+    fp.close();
 }
 
 void WidgetTextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
