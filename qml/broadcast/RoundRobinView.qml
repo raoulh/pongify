@@ -177,6 +177,8 @@ Rectangle {
                 temporary: true
                 scaleFactor: 2
                 winnerModel: viewSerie? viewSerie.winners: null
+
+                visible: viewSerie.winners.count > 2
             }
         }
     }
