@@ -21,6 +21,7 @@ void Tournament::addSerie(TSerie *s)
     });
 
     connect(s, &TSerie::statusChanged, this, &Tournament::seriesStatusChanged);
+    emit seriesStatusChanged();
 }
 
 void Tournament::removeSerie(int idx)
@@ -33,6 +34,8 @@ void Tournament::removeSerie(int idx)
 
     series->remove(idx);
     delete s;
+
+    emit seriesStatusChanged();
 }
 
 TSerie *Tournament::getSerie(int idx)

@@ -57,6 +57,7 @@ TSerie::TSerie(QObject *parent):
     update_players(players);
     update_currentRound(0);
     update_podiumValidated(false);
+    set_viewVisible(true);
 
     winners = new QQmlObjectListModel<Player>(this, "name");
     update_winners(winners);
@@ -652,6 +653,8 @@ void TSerie::updateNextMatches()
 
     if (get_tournamentType() == "roundrobin")
         calculateRRWinners();
+    else if (get_tournamentType() == "single")
+        calculateSingleWinners();
 }
 
 void TSerie::updateCurrentRound()

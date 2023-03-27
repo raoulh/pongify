@@ -48,6 +48,9 @@ class TSerie : public QObject
     //This holds the current round. This is used to display the correct round in BroadcastingViews
     QML_READONLY_PROPERTY(int, currentRound)
 
+    //This is used to save the visibility of the broadcast view
+    QML_WRITABLE_PROPERTY(bool, viewVisible)
+
 public:
     explicit TSerie(QObject *parent = nullptr);
     virtual ~TSerie();

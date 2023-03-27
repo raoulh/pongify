@@ -37,9 +37,22 @@ BroadcastWindow::~BroadcastWindow()
 void BroadcastWindow::nextView()
 {
     int curr = get_currentViewIndex();
+    int old = curr;
     curr++;
     if (curr >= views->count())
         curr = 0;
+
+    while (!views->at(curr)->get_viewVisible())
+    {
+        curr++;
+
+        if (curr == old)
+            return; //all views are disabled, break loop
+
+        if (curr >= views->count())
+            curr = 0;
+    }
+
     update_currentViewIndex(curr);
 
     timerViewChange->stop();
@@ -49,9 +62,22 @@ void BroadcastWindow::nextView()
 void BroadcastWindow::previousView()
 {
     int curr = get_currentViewIndex();
+    int old = curr;
     curr--;
     if (curr < 0)
         curr = views->count() - 1;
+
+    while (!views->at(curr)->get_viewVisible())
+    {
+        curr--;
+
+        if (curr == old)
+            return; //all views are disabled, break loop
+
+        if (curr < 0)
+            curr = views->count() - 1;
+    }
+
     update_currentViewIndex(curr);
 
     timerViewChange->stop();
@@ -88,6 +114,11 @@ void BroadcastWindow::reloadViews()
             auto v = new BroadcastView(this);
             v->update_viewUrl("qrc:/qml/broadcast/SerieBracketView.qml");
             v->update_viewSerie(s);
+            v->set_viewVisible(s->get_viewVisible());
+            connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
+            {
+                v->set_viewVisible(visible);
+            });
             views->append(v);
         }
         else if (s->get_status() == "playing" && s->get_tournamentType() == "roundrobin")
@@ -95,6 +126,11 @@ void BroadcastWindow::reloadViews()
             auto v = new BroadcastView(this);
             v->update_viewUrl("qrc:/qml/broadcast/RoundRobinView.qml");
             v->update_viewSerie(s);
+            v->set_viewVisible(s->get_viewVisible());
+            connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
+            {
+                v->set_viewVisible(visible);
+            });
             views->append(v);
         }
         else if (s->get_status() == "finished")
@@ -102,6 +138,11 @@ void BroadcastWindow::reloadViews()
             auto v = new BroadcastView(this);
             v->update_viewUrl("qrc:/qml/broadcast/HallOfFameView.qml");
             v->update_viewSerie(s);
+            v->set_viewVisible(s->get_viewVisible());
+            connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
+            {
+                v->set_viewVisible(visible);
+            });
             views->append(v);
         }
     }

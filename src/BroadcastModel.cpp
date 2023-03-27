@@ -5,6 +5,7 @@ BroadcastView::BroadcastView(QObject *parent):
     QObject{parent}
 {
     update_viewSerie(nullptr);
+    set_viewVisible(true);
 
     connect(this, &BroadcastView::viewSerieChanged, this, [=]()
     {

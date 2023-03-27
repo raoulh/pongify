@@ -139,6 +139,17 @@ Rectangle {
                             verticalAlignment: Text.AlignVCenter
                         }
 
+                        Switch {
+                            checked: viewVisible
+                            onCheckedChanged: {
+                                if (viewSerie) {
+                                    viewSerie.viewVisible = checked
+                                } else {
+                                    viewVisible = checked
+                                }
+                            }
+                        }
+
                         Item { Layout.preferredWidth: 5; height: 1 }
                     }
 
