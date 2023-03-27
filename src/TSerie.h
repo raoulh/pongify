@@ -5,6 +5,7 @@
 #include <QQmlObjectListModel.h>
 #include "qqmlhelpers.h"
 #include "PlayerModel.h"
+#include "Score.h"
 
 class TMatch: public QObject
 {
@@ -34,6 +35,8 @@ class TSerie : public QObject
     QML_READONLY_PROPERTY(QObject *, players)
     QML_READONLY_PROPERTY(QObject *, winners)
 
+    QML_READONLY_PROPERTY(bool, podiumValidated)
+
     //Status of this serie: stopped, playing, finished
     QML_READONLY_PROPERTY(QString, status)
 
@@ -59,6 +62,7 @@ public:
     void stopSerie();
     void autoSeedPlayers();
     void removeAllPlayers();
+    void showPodium();
 
     Q_INVOKABLE int matchCountForRound(int round);
     Q_INVOKABLE QObject *getPlayer1(int round, int match);
@@ -79,6 +83,9 @@ private:
 
     QVector<TRound *> allMatches;
 
+    QList<ScoreRR> scoresWinners; //for roundrobin
+    QList<Player *> singleWinners; //for single elemination
+
     int nearestPowerOf2(long long N);
     TMatch *getMatchForRound(int round, int match);
 
@@ -90,6 +97,9 @@ private:
     void updateCurrentRound();
 
     void calculateRRWinners();
+    void calculateSingleWinners();
+
+    bool allMatchesPlayed();
 };
 
 #endif // TSERIE_H

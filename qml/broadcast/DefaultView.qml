@@ -5,6 +5,16 @@ import QtQuick.Layouts
 Rectangle {
     color: "#FAFAFA"
 
+    Image {
+        source: "qrc:/img/logo.svg"
+        anchors {
+            top: parent.top
+            left: parent.left
+            topMargin: 5
+            leftMargin: 5
+        }
+    }
+
     Text {
         id: title
         text: currentTournament.name

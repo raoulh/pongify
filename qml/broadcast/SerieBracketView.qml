@@ -61,8 +61,30 @@ Rectangle {
         }
     }
 
+    Text {
+        anchors {
+            top: title.bottom
+            horizontalCenter: title.horizontalCenter
+            topMargin: 50
+        }
+
+        padding: 10
+        text: "Finale"
+        visible: viewSerie && viewSerie.status === "playing" && viewSerie.currentRound === viewSerie.rounds - 1
+        elide: Text.ElideRight
+        color: "#7AA4AC"
+        font {
+            pointSize: 46
+            bold: true
+        }
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+    }
+
+
     Flickable {
         id: flickable
+        interactive: false
 
         function initPosition() {
             state = "top"
@@ -148,7 +170,7 @@ Rectangle {
             serie: viewSerie
             scaleFactor: 2
 
-            startRoundIdx: viewSerie? viewSerie.currentRound: 0
+            startRoundIdx: viewSerie? viewSerie.currentRound === viewSerie.rounds - 1? viewSerie.currentRound - 1: viewSerie.currentRound: 0
         }
     }
 }

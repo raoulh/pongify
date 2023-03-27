@@ -182,6 +182,15 @@ void MainWindow::showSerieMenu(int idx)
     if (serie->get_status() != "stopped")
         action->setDisabled(true);
 
+    action = menu.addAction(QIcon::fromTheme("high-score"), tr("Podium"));
+    connect(action, &QAction::triggered, this, [serie]()
+    {
+        serie->showPodium();
+    });
+    if (serie->get_status() == "playing" && serie->get_tournamentType() == "single" &&
+        serie->get_currentRound() < serie->get_rounds() - 1)
+        action->setDisabled(true);
+
     menu.addSeparator();
 
     action = menu.addAction(QIcon::fromTheme("trash"), tr("Supprimer"));

@@ -66,6 +66,7 @@ Rectangle {
 
     Flickable {
         id: flickable
+        interactive: false
 
         function initPosition() {
             state = "top"

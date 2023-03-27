@@ -22,6 +22,14 @@
         <file>icons/pongify/32x32@2/add.png</file>
         <file>icons/pongify/32x32@3/add.png</file>
         <file>icons/pongify/32x32@4/add.png</file>
+		<file>icons/pongify/32x32/go-up.png</file>
+        <file>icons/pongify/32x32@2/go-up.png</file>
+        <file>icons/pongify/32x32@3/go-up.png</file>
+        <file>icons/pongify/32x32@4/go-up.png</file>
+		<file>icons/pongify/32x32/go-down.png</file>
+        <file>icons/pongify/32x32@2/go-down.png</file>
+        <file>icons/pongify/32x32@3/go-down.png</file>
+        <file>icons/pongify/32x32@4/go-down.png</file>
         <file>icons/pongify/32x32/menu.png</file>
         <file>icons/pongify/32x32@2/menu.png</file>
         <file>icons/pongify/32x32@3/menu.png</file>

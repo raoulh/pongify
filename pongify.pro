@@ -21,6 +21,8 @@ SOURCES += \
     src/DialogPlayerList.cpp \
     src/DialogPlayers.cpp \
     src/DialogPlayersHtml.cpp \
+    src/DialogPodiumRR.cpp \
+    src/DialogPodiumSingle.cpp \
     src/PlayerModel.cpp \
     src/PlayerSync.cpp \
     src/TSerie.cpp \
@@ -45,9 +47,12 @@ HEADERS += \
     src/DialogPlayerList.h \
     src/DialogPlayers.h \
     src/DialogPlayersHtml.h \
+    src/DialogPodiumRR.h \
+    src/DialogPodiumSingle.h \
     src/MainWindow.h \
     src/PlayerModel.h \
     src/PlayerSync.h \
+    src/Score.h \
     src/TSerie.h \
     src/TStorage.h \
     src/Tournament.h \
@@ -67,6 +72,8 @@ FORMS += \
     src/DialogPlayerList.ui \
     src/DialogPlayers.ui \
     src/DialogPlayersHtml.ui \
+    src/DialogPodiumRR.ui \
+    src/DialogPodiumSingle.ui \
     src/MainWindow.ui \
     src/WidgetTextEdit.ui
 

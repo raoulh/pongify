@@ -9,6 +9,8 @@
 #include "DialogEditScore.h"
 #include <QMessageBox>
 #include "DialogChangePlayer.h"
+#include "DialogPodiumRR.h"
+#include "DialogPodiumSingle.h"
 
 TMatch::TMatch(QObject *parent):
     QObject(parent)
@@ -54,6 +56,7 @@ TSerie::TSerie(QObject *parent):
     QQmlEngine::setObjectOwnership(players, QQmlEngine::CppOwnership);
     update_players(players);
     update_currentRound(0);
+    update_podiumValidated(false);
 
     winners = new QQmlObjectListModel<Player>(this, "name");
     update_winners(winners);
@@ -126,6 +129,47 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
         t->allMatches.append(r);
     }
 
+    t->update_podiumValidated(false);
+    arr = obj["podium"].toArray();
+    if (!arr.isEmpty())
+    {
+        t->update_podiumValidated(true);
+
+        if (t->get_tournamentType() == "single")
+        {
+            t->singleWinners.clear();
+
+            for (int i = 0;i < arr.count();i++)
+            {
+                auto playerLic = arr.at(i).toString();
+
+                auto player = t->players->getFromLicense(playerLic);
+                if (player)
+                    t->singleWinners.append(player);
+            }
+        }
+        else if (t->get_tournamentType() == "roundrobin")
+        {
+            t->scoresWinners.clear();
+
+            for (int i = 0;i < arr.count();i++)
+            {
+                auto playerScore = arr.at(i).toObject();
+
+                auto player = t->players->getFromLicense(playerScore["player"].toString());
+                ScoreRR s{ player,
+                            playerScore["score"].toInt(),
+                            playerScore["setWin"].toInt(),
+                            playerScore["setLoose"].toInt(),
+                            playerScore["winCount"].toInt()
+                         };
+
+                if (s.player)
+                    t->scoresWinners.append(s);
+            }
+        }
+    }
+
     t->updateNextMatches();
     return t;
 }
@@ -169,6 +213,34 @@ QJsonObject TSerie::toJson()
         arr.append(roundArr);
     }
     obj.insert("rounds", arr);
+
+    if (get_podiumValidated())
+    {
+        QJsonArray arr;
+
+        if (get_tournamentType() == "single")
+        {
+            for (int i = 0;i < singleWinners.count();i++)
+                arr.append(singleWinners.at(i)->get_license());
+        }
+        else if (get_tournamentType() == "roundrobin")
+        {
+            for (int i = 0;i < scoresWinners.count();i++)
+            {
+                const auto &s = scoresWinners.at(i);
+
+                QJsonObject mObj = {
+                    { "player", s.player? s.player->get_license(): "" },
+                    { "score", s.score },
+                    { "setWin", s.setWin },
+                    { "setLoose", s.setLoose },
+                    { "winCount", s.winCount },
+                };
+                arr.append(mObj);
+            }
+        }
+        obj.insert("podium", arr);
+    }
 
     return obj;
 }
@@ -214,7 +286,8 @@ void TSerie::startSerie()
             if (!found)
             {
                 QMessageBox::warning(nullptr, "Attention",
-                                     "Tous les joueurs ne sont pas placés dans le premier tour.\nImpossible de démarrer la série.");
+                                     "Tous les joueurs ne sont pas placés dans le premier tour.\n"
+                                     "Impossible de démarrer la série.");
 
                 return;
             }
@@ -257,7 +330,15 @@ void TSerie::stopSerie()
 {
     if (get_status() != "playing") return;
 
+    if (!get_podiumValidated())
+    {
+        QMessageBox::warning(nullptr, "Attention",
+                             "Le podium n'a pas été validé.\n"
+                             "Veuillez ouvrir le fenetre du podium pour cette série et valider les résultats.\n\n"
+                             "Une fois le podium validé aucun changement ne pourra plus être effectué.");
 
+        return;
+    }
 
     update_status("finished");
 }
@@ -381,6 +462,42 @@ void TSerie::removeAllPlayers()
 {
     clearAllMatches();
     prepareMatches();
+}
+
+void TSerie::showPodium()
+{
+    if (allMatches.isEmpty()) return;
+
+    bool allPlayed = allMatchesPlayed();
+
+    if (get_tournamentType() == "roundrobin")
+    {
+        calculateRRWinners();
+
+        DialogPodiumRR d(allPlayed, scoresWinners, get_isDouble(), get_status() == "finished");
+        if (d.exec() == QDialog::Accepted && allPlayed)
+        {
+            update_podiumValidated(true);
+            scoresWinners = d.getWinners();
+            calculateRRWinners(); //update QML model
+
+            emit matchesUpdated(); //save to disk
+        }
+    }
+    else if (get_tournamentType() == "single")
+    {
+        calculateSingleWinners();
+
+        DialogPodiumSingle d(allPlayed, singleWinners, get_isDouble());
+        if (d.exec() == QDialog::Accepted && allPlayed)
+        {
+            update_podiumValidated(true);
+            singleWinners = d.getWinners();
+            calculateSingleWinners(); //update QML model
+
+            emit matchesUpdated(); //save to disk
+        }
+    }
 }
 
 int TSerie::nearestPowerOf2(long long N)
@@ -574,18 +691,22 @@ void TSerie::updateCurrentRound()
 //Calculate hall of fame for Round Robin type
 void TSerie::calculateRRWinners()
 {
-    struct Score
-    {
-        int score = 0;
-        int setWin = 0;
-        int setLoose = 0;
-        int winCount = 0;
-    };
+    QHash<Player *, ScoreRR> scores;
 
-    QHash<Player *, Score> scores;
+    //Podium already validated, fill the QML model and leave
+    if (get_podiumValidated())
+    {
+        winners->clear();
+
+        for (int i = 0;i < 8 && i < scoresWinners.count();i++)
+            winners->append(scoresWinners.at(i).player, false);
+
+        return;
+    }
 
     if (get_currentRound() < 3)
     {
+        scoresWinners.clear();
         winners->clear();
         return;
     }
@@ -694,11 +815,135 @@ void TSerie::calculateRRWinners()
         return score1.score > score2.score;
     });
 
+    scoresWinners.clear();
     winners->clear();
-    for (int i = 0;i < 8 && i < sortwin.count();i++)
+    for (int i = 0;i < sortwin.count();i++)
     {
-        winners->append(sortwin.at(i), false);
+        if (i < 8)
+            winners->append(sortwin.at(i), false);
+
+        auto p = sortwin.at(i);
+        auto score = scores.value(p);
+        score.player = p;
+        scoresWinners.append(score);
     }
+}
+
+void TSerie::calculateSingleWinners()
+{
+    //Podium already validated, fill the QML model and leave
+    if (get_podiumValidated())
+    {
+        winners->clear();
+
+        for (int i = 0;i < 8 && i < singleWinners.count();i++)
+            winners->append(singleWinners.at(i), false);
+
+        return;
+    }
+
+    if ((get_currentRound() < get_rounds() - 1 && !allMatchesPlayed()) ||
+        get_rounds() <= 0)
+    {
+        singleWinners.clear();
+        winners->clear();
+        return;
+    }
+
+    //rank winners
+    QList<Player *> ranks(8, nullptr);
+
+    for (int i = get_rounds() - 1;i > 0 && i > get_rounds() - 4;i--)
+    {
+        for (int j = 0;j < allMatches.at(i)->count();j++)
+        {
+            auto match = allMatches.at(i)->at(j);
+
+            if (i == get_rounds() - 1) //last round -> 1st & 2nd rank
+            {
+                if (match->get_playerWinner1())
+                {
+                    ranks[0] = match->get_player1();
+                    ranks[1] = match->get_player2();
+                }
+                else
+                {
+                    ranks[1] = match->get_player1();
+                    ranks[0] = match->get_player2();
+                }
+            }
+            else if (i == get_rounds() - 2) //3rd & 4th rank
+            {
+                if (match->get_player1() == ranks[0])
+                    ranks[2] = match->get_player2();
+                else if (match->get_player2() == ranks[0])
+                    ranks[2] = match->get_player1();
+
+                if (match->get_player1() == ranks[1])
+                    ranks[3] = match->get_player2();
+                else if (match->get_player2() == ranks[1])
+                    ranks[3] = match->get_player1();
+            }
+            else if (i == get_rounds() - 3) //5th & 6th rank
+            {
+                if (match->get_player1() == ranks[0])
+                    ranks[4] = match->get_player2();
+                else if (match->get_player2() == ranks[0])
+                    ranks[4] = match->get_player1();
+
+                if (match->get_player1() == ranks[1])
+                    ranks[5] = match->get_player2();
+                else if (match->get_player2() == ranks[1])
+                    ranks[5] = match->get_player1();
+
+                if (match->get_player1() == ranks[2])
+                    ranks[6] = match->get_player2();
+                else if (match->get_player2() == ranks[2])
+                    ranks[6] = match->get_player1();
+
+                if (match->get_player1() == ranks[3])
+                    ranks[7] = match->get_player2();
+                else if (match->get_player2() == ranks[3])
+                    ranks[7] = match->get_player1();
+            }
+        }
+    }
+
+    singleWinners.clear();
+    winners->clear();
+    for (int i = 0;i < 8;i++)
+    {
+        if (ranks[i])
+        {
+            winners->append(ranks[i], false);
+            singleWinners.append(ranks[i]);
+        }
+    }
+}
+
+bool TSerie::allMatchesPlayed()
+{
+    bool lastRoundPlayed = true;
+
+    //check if last round has been played entirely
+    auto round = allMatches.last();
+    for (int i = 0;i < round->count();i++)
+    {
+        auto match = round->at(i);
+
+        if (match->get_isBye()) continue; //bye is a win
+
+        if (!match->get_playerWinner1() &&
+            !match->get_playerWinner2())
+        {
+            lastRoundPlayed = false;
+            break;
+        }
+    }
+
+    return get_currentRound() == allMatches.count() - 1 &&
+            lastRoundPlayed &&
+            get_status() == "playing";
 }
 
 int TSerie::matchCountForRound(int round)
