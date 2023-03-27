@@ -813,6 +813,7 @@ void TSerie::clickedOnMatch(int round, int match)
 
             updateNextMatches();
             emit matchesUpdated();
+            emit currentRoundChanged(m_currentRound); //force emit this signal to update broadcast layout if needed
         }
     });
 
@@ -823,6 +824,7 @@ void TSerie::clickedOnMatch(int round, int match)
         m->clearScore();
         updateNextMatches();
         emit matchesUpdated();
+        emit currentRoundChanged(m_currentRound); //force emit this signal to update broadcast layout if needed
     });
 
     if (round == 0 &&
