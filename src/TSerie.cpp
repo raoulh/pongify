@@ -730,7 +730,7 @@ void TSerie::calculateRRWinners()
      *
      */
 
-    for (int i = 0;i < get_currentRound();i++)
+    for (int i = 0;i <= get_currentRound();i++)
     {
         auto round = allMatches.at(i);
 
@@ -739,7 +739,8 @@ void TSerie::calculateRRWinners()
             auto match = round->at(j);
 
             //do not count this match if not played or bye
-            if ((match->get_playerWinner1() && match->get_playerWinner2()) ||
+            if (!match->get_player1() ||
+                !match->get_player2() ||
                 match->get_isBye())
                 continue;
 
@@ -749,6 +750,9 @@ void TSerie::calculateRRWinners()
             auto score1 = scores.value(p1);
             auto score2 = scores.value(p2);
 
+            qDebug() << "Match (" << i << "," << j << "): " << p1->get_firstName() << " " << p1->get_lastName() << " VS " <<
+                p2->get_firstName() << " " << p2->get_lastName();
+
             if (match->get_playerWinner1())
             {
                 if (match->get_playerScore2() == 0)
@@ -757,6 +761,7 @@ void TSerie::calculateRRWinners()
                     score1.score += 1;
 
                 score1.winCount++;
+                qDebug() << "Score " << p1->get_firstName() << " " << p1->get_lastName() << ": " << score1.winCount;
             }
 
             score1.setWin += match->get_playerScore1();
@@ -770,6 +775,7 @@ void TSerie::calculateRRWinners()
                     score2.score += 1;
 
                 score2.winCount++;
+                qDebug() << "Score " << p2->get_firstName() << " " << p2->get_lastName() << ": " << score2.winCount;
             }
 
             score2.setWin += match->get_playerScore2();
@@ -788,8 +794,10 @@ void TSerie::calculateRRWinners()
         auto score1 = scores.value(a);
         auto score2 = scores.value(b);
 
-        if (score1.score == score2.score)
+        if (score1.winCount == score2.winCount)
         {
+            if (score1.score > score2.score)
+                return true;
             if (score1.setWin > score2.setWin)
                 return true;
             if (score1.setLoose < score2.setLoose)
@@ -812,10 +820,10 @@ void TSerie::calculateRRWinners()
                 }
             }
 
-            return true;
+            return false;
         }
 
-        return score1.score > score2.score;
+        return score1.winCount > score2.winCount;
     });
 
     scoresWinners.clear();
@@ -856,7 +864,7 @@ void TSerie::calculateSingleWinners()
     //rank winners
     QList<Player *> ranks(8, nullptr);
 
-    for (int i = get_rounds() - 1;i > 0 && i > get_rounds() - 4;i--)
+    for (int i = get_rounds() - 1;i >= 0 && i > get_rounds() - 4;i--)
     {
         for (int j = 0;j < allMatches.at(i)->count();j++)
         {

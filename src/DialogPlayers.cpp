@@ -35,7 +35,7 @@ DialogPlayers::DialogPlayers(PlayerModel *m, bool isAddDialog, QWidget *parent) 
     {
         ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
-        connect(ui->treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex &index)
+        connect(ui->treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex &)
         {
             accept();
         });

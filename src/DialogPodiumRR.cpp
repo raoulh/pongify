@@ -29,10 +29,10 @@ DialogPodiumRR::DialogPodiumRR(bool editable, QList<ScoreRR> _playerScores, bool
     ui->treeWidget->setHeaderLabels(QStringList()
                                         << "#"
                                         << (isDouble? "Joueurs": "Joueur")
-                                        << "Score"
                                         << "Matchs gagnés"
                                         << "Set gagnés"
-                                        << "Set perdus");
+                                        << "Set perdus"
+                                        << "Score");
 
 
     for (int i = 0;i < playerScores.count();i++)
@@ -45,10 +45,10 @@ DialogPodiumRR::DialogPodiumRR(bool editable, QList<ScoreRR> _playerScores, bool
             it->setText(1, QStringLiteral("%1 %2 / %1 %2").arg(p.player->get_firstName(), p.player->get_lastName(), p.player->get_firstNameSecond(), p.player->get_lastNameSecond()));
         else
             it->setText(1, QStringLiteral("%1 %2 [%3]").arg(p.player->get_firstName(), p.player->get_lastName(), p.player->get_ranking()));
-        it->setText(2, QString::number(p.score));
-        it->setText(3, QString::number(p.winCount));
-        it->setText(4, QString::number(p.setWin));
-        it->setText(5, QString::number(p.setLoose));
+        it->setText(2, QString::number(p.winCount));
+        it->setText(3, QString::number(p.setWin));
+        it->setText(4, QString::number(p.setLoose));
+        it->setText(5, QString::number(p.score));
     }
 
     for (int i = 0;i < 6;i++) ui->treeWidget->resizeColumnToContents(i);
