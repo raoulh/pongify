@@ -18,6 +18,7 @@ class TMatch: public QObject
     QML_READONLY_PROPERTY(bool, playerWinner2)
     QML_READONLY_PROPERTY(bool, isBye)
     QML_READONLY_PROPERTY(bool, isDouble)
+    QML_READONLY_PROPERTY(bool, isHandicap)
 public:
     explicit TMatch(QObject *parent = nullptr);
 
@@ -44,6 +45,7 @@ class TSerie : public QObject
     QML_READONLY_PROPERTY(int, rounds)
 
     QML_READONLY_PROPERTY(bool, isDouble)
+    QML_READONLY_PROPERTY(bool, isHandicap)
 
     //This holds the current round. This is used to display the correct round in BroadcastingViews
     QML_READONLY_PROPERTY(int, currentRound)
@@ -60,6 +62,8 @@ public:
 
     QStringList getPlayerLicences();
     PlayerModel *getPlayerModel() { return players; }
+
+    void clearPlayers();
 
     void startSerie();
     void stopSerie();

@@ -83,6 +83,7 @@ RowLayout {
                         playerRankSecond2: player2.rankingSecond
 
                         isDouble: serie? serie.isDouble: false
+                        isHandicap: serie? serie.isHandicap: false
 
                         onClicked: if (serie && isEditable) serie.clickedOnMatch(matchRepeater.roundIndex, matchIndex)
 
@@ -92,13 +93,38 @@ RowLayout {
                             matchBloc.winner1 = serie.winnerForMatch(matchRepeater.roundIndex, matchIndex, 0)
                             matchBloc.winner2 = serie.winnerForMatch(matchRepeater.roundIndex, matchIndex, 1)
 
-                            let player = serie.getPlayer1(matchRepeater.roundIndex, matchIndex)
-                            if (!player) player = emptyPlayer
-                            matchBloc.player1 = player
+                            let player1 = serie.getPlayer1(matchRepeater.roundIndex, matchIndex)
+                            let player2 = serie.getPlayer2(matchRepeater.roundIndex, matchIndex)
 
-                            player = serie.getPlayer2(matchRepeater.roundIndex, matchIndex)
-                            if (!player) player = emptyPlayer
-                            matchBloc.player2 = player
+                            let handicapP1 = 0
+                            let handicapP2 = 0
+                            if (serie.isHandicap && player1 && player2) {
+                                let rankP1 = player1.ranking === "NC"? 95 : player1.ranking
+                                let rankP2 = player2.ranking === "NC"? 95 : player2.ranking
+
+                                if (rankP1 > rankP2)
+                                {
+                                    //handicap for P1
+                                    handicapP1 = (rankP1 - rankP2) / 5
+                                    if (handicapP1 > 4) {
+                                        handicapP1 = 4
+                                    }
+                                } else if (rankP2 > rankP1) {
+                                    //handicap for P2
+                                    handicapP2 = (rankP2 - rankP1) / 5
+                                    if (handicapP2 > 4) {
+                                        handicapP2 = 4
+                                    }
+                                }
+                            }
+
+                            if (!player1) player1 = emptyPlayer
+                            matchBloc.player1 = player1
+                            if (!player2) player2 = emptyPlayer
+                            matchBloc.player2 = player2
+
+                            matchBloc.handicap1 = handicapP1
+                            matchBloc.handicap2 = handicapP2
                         }
 
                         Component.onCompleted: updateMatchData()

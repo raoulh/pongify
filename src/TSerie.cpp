@@ -23,6 +23,7 @@ TMatch::TMatch(QObject *parent):
     update_playerWinner2(false);
     update_isBye(false);
     update_isDouble(false);
+    update_isHandicap(false);
 
     connect(this, &TMatch::player1Changed, this, [this](auto *player)
     {
@@ -66,6 +67,7 @@ TSerie::TSerie(QObject *parent):
     playersModelChanged();
 
     update_isDouble(false);
+    update_isHandicap(false);
     connect(this, &TSerie::tournamentTypeChanged, this, &TSerie::playersModelChanged);
 }
 
@@ -92,6 +94,7 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
     if (t->get_status().isEmpty())
         t->update_status("stopped");
     t->update_isDouble(obj["double"].toBool());
+    t->update_isHandicap(obj["handicap"].toBool());
 
     QJsonArray arr = obj["players"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -114,6 +117,7 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
             auto m = new TMatch();
 
             m->update_isDouble(t->get_isDouble());
+            m->update_isHandicap(t->get_isHandicap());
             m->update_playerScore1(match["playerScore1"].toInt());
             m->update_playerScore2(match["playerScore2"].toInt());
             m->update_playerWinner1(match["playerWinner1"].toBool());
@@ -183,6 +187,7 @@ QJsonObject TSerie::toJson()
     obj.insert("ranking", get_ranking());
     obj.insert("status", get_status());
     obj.insert("double", get_isDouble());
+    obj.insert("handicap", get_isHandicap());
 
     QJsonArray arr;
     for (int i = 0;i < players->rowCount();i++)
@@ -252,6 +257,13 @@ QStringList TSerie::getPlayerLicences()
     for (int i = 0;i < players->rowCount();i++)
         lst.append(players->item(i)->get_license());
     return lst;
+}
+
+void TSerie::clearPlayers()
+{
+    singleWinners.clear();
+    winners->clear();
+    players->clear();
 }
 
 void TSerie::startSerie()
@@ -543,6 +555,8 @@ void TSerie::prepareMatches()
             while (r->count() < matchCountForRound(i))
             {
                 auto m = new TMatch();
+                m->update_isDouble(get_isDouble());
+                m->update_isHandicap(get_isHandicap());
                 r->append(m);
             }
         }
@@ -573,6 +587,8 @@ void TSerie::prepareMatches()
                 int idx2 = vplayers.count() - 1 - m;
 
                 auto match = new TMatch();
+                match->update_isDouble(get_isDouble());
+                match->update_isHandicap(get_isHandicap());
                 match->update_player1(idx1 == 0? vplayers[0] : rotated[idx1 - 1]);
                 match->update_player2(rotated[idx2 - 1]);
                 if (!match->get_player1() || !match->get_player2())

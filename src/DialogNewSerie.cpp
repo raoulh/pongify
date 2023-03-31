@@ -83,3 +83,17 @@ void DialogNewSerie::setDouble(bool en)
 {
     ui->checkBoxDouble->setChecked(en);
 }
+
+bool DialogNewSerie::getHandicap()
+{
+    if (getDouble())
+        return false;
+    return ui->checkBoxHandicap->isChecked();
+}
+
+void DialogNewSerie::setHandicap(bool en)
+{
+    if (getDouble())
+        return;
+    ui->checkBoxHandicap->setChecked(en);
+}

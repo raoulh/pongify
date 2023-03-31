@@ -35,6 +35,10 @@ Rectangle {
     property bool winner2
 
     property bool isDouble: false
+    property bool isHandicap: false
+
+    property int handicap1: 0
+    property int handicap2: 0
 
     signal clicked()
 
@@ -96,6 +100,25 @@ Rectangle {
                         Layout.preferredWidth: sc(20)
                         fillMode: Image.PreserveAspectFit
                     }
+
+                    Text {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: implicitWidth
+                        text: "+ %1".arg(handicap1)
+                        color: "#84fa78"
+                        font {
+                            pointSize: sc(12)
+                            bold: true
+                        }
+                        visible: isHandicap && handicap1 > 0
+                    }
+
+                    Item {
+                        Layout.preferredWidth: sc(15)
+                        height: 1
+                        visible: isHandicap && handicap1 > 0
+                    }
+
                     Text {
                         Layout.fillHeight: true
                         Layout.preferredWidth: implicitWidth
@@ -188,6 +211,25 @@ Rectangle {
                         Layout.preferredWidth: sc(20)
                         fillMode: Image.PreserveAspectFit
                     }
+
+                    Text {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: implicitWidth
+                        text: "+ %1".arg(handicap2)
+                        color: "#84fa78"
+                        font {
+                            pointSize: sc(12)
+                            bold: true
+                        }
+                        visible: isHandicap && handicap2 > 0
+                    }
+
+                    Item {
+                        Layout.preferredWidth: sc(15)
+                        height: 1
+                        visible: isHandicap && handicap2 > 0
+                    }
+
                     Text {
                         Layout.fillHeight: true
                         Layout.preferredWidth: implicitWidth

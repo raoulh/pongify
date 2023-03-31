@@ -24,6 +24,8 @@ public:
     void setType(QString t);
     bool getDouble();
     void setDouble(bool en);
+    bool getHandicap();
+    void setHandicap(bool en);
 
 private:
     Ui::DialogNewSerie *ui;

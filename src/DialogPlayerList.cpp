@@ -209,7 +209,7 @@ void DialogPlayerList::on_pushButtonRemove_clicked()
 void DialogPlayerList::on_buttonBox_accepted()
 {
     //save current player list in serie
-    serie->getPlayerModel()->clear();
+    serie->clearPlayers();
     for (int i = 0;i < playerModel->rowCount();i++)
     {
         serie->getPlayerModel()->appendClone(playerModel->item(i));
