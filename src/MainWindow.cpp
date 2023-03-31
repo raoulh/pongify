@@ -12,6 +12,7 @@
 #include "BroadcastWindow.h"
 #include "DialogEditInfo.h"
 #include "DialogPlayersHtml.h"
+#include "DialogAbout.h"
 
 #include <QQuickStyle>
 #include <QQuickView>
@@ -65,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent):
         restoreState(settings.value("MainWindow/windowState").toByteArray());
 
     update_tournamentOpened(false);
+    emit tournamentOpenedChanged(false);
     update_broadcastActive(false);
     update_currentBrodcastViewIndex(0);
     update_broadcastViews(nullptr);
@@ -393,5 +395,11 @@ void MainWindow::loadQmlApp()
 void MainWindow::on_actionListe_des_joueurs_du_tournoi_triggered()
 {
     DialogPlayersHtml d(currentTournament);
+    d.exec();
+}
+
+void MainWindow::on_actionA_propos_triggered()
+{
+    DialogAbout d(this);
     d.exec();
 }

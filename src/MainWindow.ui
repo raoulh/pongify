@@ -57,8 +57,15 @@
     <addaction name="actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS"/>
     <addaction name="actionListe_des_joueurs_du_tournoi"/>
    </widget>
+   <widget class="QMenu" name="menuAide">
+    <property name="title">
+     <string>Aide</string>
+    </property>
+    <addaction name="actionA_propos"/>
+   </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuJoueurs"/>
+   <addaction name="menuAide"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionQuitter">
@@ -94,6 +101,11 @@
   <action name="actionListe_des_joueurs_du_tournoi">
    <property name="text">
     <string>Liste des joueurs du tournoi...</string>
+   </property>
+  </action>
+  <action name="actionA_propos">
+   <property name="text">
+    <string>A propos</string>
    </property>
   </action>
  </widget>

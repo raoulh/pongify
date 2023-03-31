@@ -10,6 +10,7 @@ INCLUDEPATH += src
 SOURCES += \
     src/BroadcastModel.cpp \
     src/BroadcastWindow.cpp \
+    src/DialogAbout.cpp \
     src/DialogAddDoublePlayers.cpp \
     src/DialogAddPlayer.cpp \
     src/DialogBroadcastOpts.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
 HEADERS += \
     src/BroadcastModel.h \
     src/BroadcastWindow.h \
+    src/DialogAbout.h \
     src/DialogAddDoublePlayers.h \
     src/DialogAddPlayer.h \
     src/DialogBroadcastOpts.h \
@@ -58,9 +60,11 @@ HEADERS += \
     src/Tournament.h \
     src/Utils.h \
     src/WidgetTextEdit.h \
-    src/qqmlhelpers.h
+    src/qqmlhelpers.h \
+    version.h
 
 FORMS += \
+    src/DialogAbout.ui \
     src/DialogAddDoublePlayers.ui \
     src/DialogAddPlayer.ui \
     src/DialogBroadcastOpts.ui \
