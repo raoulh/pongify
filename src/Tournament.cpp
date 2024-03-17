@@ -8,6 +8,8 @@ Tournament::Tournament(QObject *parent):
 {
     series = new QQmlObjectListModel<TSerie>(this, "name");
     update_series(series);
+    tables = new QQmlObjectListModel<TTable>(this, "tableNumber");
+    update_tables(tables);
 }
 
 void Tournament::addSerie(TSerie *s)
@@ -45,6 +47,34 @@ TSerie *Tournament::getSerie(int idx)
     return series->at(idx);
 }
 
+void Tournament::addTable(TTable *t)
+{
+    t->setParent(this);
+    tables->append(t);
+
+    connect(t, &TTable::matchChanged, this, [this]()
+            {
+                TStorage::Instance()->saveToDisk(this);
+            });
+}
+
+void Tournament::removeTable(int idx)
+{
+    if (idx < 0 || idx >= tables->count())
+        return;
+
+    auto t = tables->at(idx);
+    tables->remove(idx);
+    delete t;
+}
+
+TTable *Tournament::getTable(int idx)
+{
+    if (idx < 0 || idx >= tables->count())
+        return nullptr;
+    return tables->at(idx);
+}
+
 Tournament *Tournament::fromJson(const QJsonObject &obj)
 {
     if (!obj.contains("name") ||
@@ -76,6 +106,16 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
             t->addSerie(s);
     }
 
+    arr = obj["tables"].toArray();
+    for (int i = 0;i < arr.count();i++)
+    {
+        auto o = arr.at(i).toObject();
+        TTable *table = TTable::fromJson(o);
+
+        if (table)
+            t->addTable(table);
+    }
+
     return t;
 }
 
@@ -85,12 +125,17 @@ QJsonObject Tournament::toJson()
     for (int i = 0;i < series->count();i++)
         arr.append(series->at(i)->toJson());
 
+    QJsonArray arr2;
+    for (int i = 0;i < tables->count();i++)
+        arr2.append(tables->at(i)->toJson());
+
     return {
         { "uuid", get_uuid() },
         { "name", get_name() },
         { "date", get_date().toString(Qt::ISODate) },
         { "status", get_status() },
         { "series", arr },
+        { "tables", arr2 },
         { "info_text", get_infoText() },
         { "time_broadcast_change", get_timeBroadcastChange() },
     };

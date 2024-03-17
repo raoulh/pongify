@@ -1,0 +1,135 @@
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+
+Rectangle {
+    color: "#DADEDA"
+
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        Rectangle {
+            color: "#4fc1e9"
+            Layout.preferredHeight: 50
+            Layout.fillWidth: true
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 5
+
+                Text {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    leftPadding: 5
+                    text: "Gestion des tables"
+                    elide: Text.ElideRight
+                    color: "white"
+                    font {
+                        pointSize: 14
+                        bold: true
+                    }
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+        }
+
+        ToolBar {
+            Layout.fillWidth: true
+
+            RowLayout {
+                anchors.fill: parent
+
+                ToolButtonTip {
+                    icon.name: "add"
+                    onClicked: mainWindow.newTable()
+                    tooltipText: "Ajouter une nouvelle table"
+                }
+
+                ToolButtonTip {
+                    icon.name: "trash"
+                    onClicked: mainWindow.deleteTable()
+                    tooltipText: "Supprimer une table"
+                }
+
+                Item { Layout.fillWidth: true; height: 1 }
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+
+            ListView {
+                id: listTable
+                anchors.fill: parent
+
+                model: currentTournament? currentTournament.tables: undefined
+
+                delegate: ItemDelegate {
+                    id: control
+
+                    width: parent? parent.width: 0
+                    height: 200
+                    text: tableNumber
+
+                    onClicked: {
+                        //listSerie.currentIndex = index
+                        //mainWindow.selectSerie(index)
+                    }
+
+                    contentItem: RowLayout {
+                        width: 300
+                        spacing: 4
+
+                        Item { Layout.preferredWidth: 5; height: 1 }
+
+                        Image {
+                            Layout.preferredHeight: 20
+                            Layout.preferredWidth: 20
+                            source: qtObject.status == "playing"?
+                                        "qrc:/icons/pongify/32x32@4/play-button.png" :
+                                        "qrc:/img/podium.png"
+                            fillMode: Image.PreserveAspectFit
+
+                            visible: qtObject.status != "stopped"
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            rightPadding: control.spacing
+                            text: control.text
+                            font.bold: true
+                            color: control.enabled ? "#0f4932" : "#bdbebf"
+                            elide: Text.ElideMiddle
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        Button {
+                            id: bt
+                            Layout.preferredWidth: implicitWidth
+                            icon.name: "menu"
+                            icon.height: 16
+                            onClicked: mainWindow.showSerieMenu(index)
+                        }
+
+                        Item { Layout.preferredWidth: 5; height: 1 }
+                    }
+
+                    background: Rectangle {
+                        border.color: listSerie.currentIndex == index?  "#489258": "#D7DED9"
+                        border.width: 1
+                        radius: 6
+                        color: control.down ? "#eeeeee" :
+                               listSerie.currentIndex == index? "#dedade":
+                                                                "#fefefe"
+                    }
+                }
+
+                ScrollBar.vertical: ScrollBar {}
+            }
+        }
+    }
+}

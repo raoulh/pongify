@@ -6,6 +6,7 @@
 #include <QQmlObjectListModel.h>
 #include "qqmlhelpers.h"
 #include "TSerie.h"
+#include "TTable.h"
 
 class Tournament: public QObject
 {
@@ -17,6 +18,7 @@ class Tournament: public QObject
     QML_READONLY_PROPERTY(QObject *, series)
     QML_READONLY_PROPERTY(QString, infoText)
     QML_READONLY_PROPERTY(int, timeBroadcastChange)
+    QML_READONLY_PROPERTY(QObject *, tables)
 
 public:
     explicit Tournament(QObject *parent = nullptr);
@@ -26,6 +28,11 @@ public:
     TSerie *getSerie(int idx);
     int serieCount() { return series->count(); }
 
+    void addTable(TTable *t);
+    void removeTable(int idx);
+    TTable *getTable(int idx);
+    int tableCount() { return tables->count(); }
+
     static Tournament *fromJson(const QJsonObject &obj);
     QJsonObject toJson();
 
@@ -34,6 +41,7 @@ signals:
 
 private:
     QQmlObjectListModel<TSerie> *series;
+    QQmlObjectListModel<TTable> *tables;
 };
 
 #endif // TOURNAMENT_H

@@ -14,5 +14,15 @@ SplitView {
 
     SerieView {
         id: center
+
+        SplitView.fillWidth: true
+    }
+
+    TableMgmt {
+        id: right
+
+        SplitView.minimumWidth: 260
+        SplitView.preferredWidth: 260
+        SplitView.maximumWidth: 600
     }
 }

@@ -35,6 +35,9 @@ public:
     Q_INVOKABLE void editSerie(int idx);
     Q_INVOKABLE void selectSerie(int idx);
 
+    Q_INVOKABLE void newTable();
+    Q_INVOKABLE void deleteTable();
+
     Q_INVOKABLE void broadcastStart();
     Q_INVOKABLE void broadcastStop();
     Q_INVOKABLE void broadcastNext();

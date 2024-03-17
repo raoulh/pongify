@@ -270,6 +270,34 @@ void MainWindow::selectSerie(int idx)
     emit s->matchesUpdated(); //force update matches in QML
 }
 
+void MainWindow::newTable()
+{
+    auto t = new TTable();
+    t->update_tableNumber(currentTournament->tableCount() + 1);
+
+    currentTournament->addTable(t);
+    TStorage::Instance()->saveToDisk(currentTournament);
+}
+
+void MainWindow::deleteTable()
+{
+    if (currentTournament->tableCount() == 0) return;
+
+    auto idx = currentTournament->tableCount() - 1;
+
+    auto t = currentTournament->getTable(idx);
+    if (!t) return;
+
+    auto ret = QMessageBox::question(this, "Confirmation",
+                                     QStringLiteral("Supprimer la table \"%1\" ?")
+                                         .arg(t->get_tableNumber()));
+    if (ret == QMessageBox::Yes)
+    {
+        currentTournament->removeTable(idx);
+        TStorage::Instance()->saveToDisk(currentTournament);
+    }
+}
+
 void MainWindow::broadcastStart()
 {
     DialogBroadcastOpts d;

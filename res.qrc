@@ -22,11 +22,11 @@
         <file>icons/pongify/32x32@2/add.png</file>
         <file>icons/pongify/32x32@3/add.png</file>
         <file>icons/pongify/32x32@4/add.png</file>
-		<file>icons/pongify/32x32/go-up.png</file>
+        <file>icons/pongify/32x32/go-up.png</file>
         <file>icons/pongify/32x32@2/go-up.png</file>
         <file>icons/pongify/32x32@3/go-up.png</file>
         <file>icons/pongify/32x32@4/go-up.png</file>
-		<file>icons/pongify/32x32/go-down.png</file>
+        <file>icons/pongify/32x32/go-down.png</file>
         <file>icons/pongify/32x32@2/go-down.png</file>
         <file>icons/pongify/32x32@3/go-down.png</file>
         <file>icons/pongify/32x32@4/go-down.png</file>
@@ -104,5 +104,6 @@
         <file>data/table_footer.html</file>
         <file>data/table_header.html</file>
         <file>data/table_item.html</file>
+        <file>qml/TableMgmt.qml</file>
     </qresource>
 </RCC>
