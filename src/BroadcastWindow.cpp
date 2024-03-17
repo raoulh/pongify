@@ -18,7 +18,13 @@ BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, Q
 
     timerViewChange = new QTimer(this);
     connect(timerViewChange, &QTimer::timeout, this, &BroadcastWindow::timerViewTick);
-    timerViewChange->start(10000); //TODO make it configurable?
+    timerViewChange->start(currentTournament->get_timeBroadcastChange());
+
+    connect(currentTournament, &Tournament::timeBroadcastChangeChanged, this, [this]()
+    {
+        timerViewChange->stop();
+        timerViewChange->start(currentTournament->get_timeBroadcastChange());
+    });
 
     connect(currentTournament, &Tournament::seriesStatusChanged, this, &BroadcastWindow::reloadViews);
     reloadViews();

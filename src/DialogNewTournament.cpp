@@ -12,6 +12,9 @@ DialogNewTournament::DialogNewTournament(bool newTournament, QWidget *parent) :
         setWindowTitle("Modifier");
 
     ui->dateEdit->setDate(QDate::currentDate());
+    ui->spinBoxTime->setValue(15000);
+    ui->spinBoxTime->setMinimum(2000);
+    ui->spinBoxTime->setMaximum(99999999);
 }
 
 DialogNewTournament::~DialogNewTournament()
@@ -37,4 +40,14 @@ void DialogNewTournament::setDate(QDate date)
 QDate DialogNewTournament::getDate()
 {
     return ui->dateEdit->date();
+}
+
+void DialogNewTournament::setTime(int time)
+{
+    ui->spinBoxTime->setValue(time);
+}
+
+int DialogNewTournament::getTime()
+{
+    return ui->spinBoxTime->value();
 }

@@ -16,6 +16,7 @@ class Tournament: public QObject
     QML_READONLY_PROPERTY(QString, status)
     QML_READONLY_PROPERTY(QObject *, series)
     QML_READONLY_PROPERTY(QString, infoText)
+    QML_READONLY_PROPERTY(int, timeBroadcastChange)
 
 public:
     explicit Tournament(QObject *parent = nullptr);

@@ -62,6 +62,9 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
     t->update_status(obj["status"].toString());
     t->update_uuid(obj["uuid"].toString());
     t->update_infoText(obj["info_text"].toString());
+    t->update_timeBroadcastChange(obj["time_broadcast_change"].toInt());
+    if (t->get_timeBroadcastChange() < 2000)
+        t->update_timeBroadcastChange(10000);
 
     QJsonArray arr = obj["series"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -89,5 +92,6 @@ QJsonObject Tournament::toJson()
         { "status", get_status() },
         { "series", arr },
         { "info_text", get_infoText() },
+        { "time_broadcast_change", get_timeBroadcastChange() },
     };
 }

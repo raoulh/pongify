@@ -85,6 +85,7 @@ void MainWindow::newTournament()
     {
         currentTournament = TStorage::Instance()->createNewTournament(d.getName());
         currentTournament->update_date(QDateTime(d.getDate(), QTime::currentTime()));
+        currentTournament->update_timeBroadcastChange(d.getTime());
         update_tournamentOpened(true);
     }
 }
@@ -349,10 +350,12 @@ void MainWindow::on_actionPropri_t_s_triggered()
     DialogNewTournament d(false);
     d.setName(currentTournament->get_name());
     d.setDate(currentTournament->get_date().date());
+    d.setTime(currentTournament->get_timeBroadcastChange());
     if (d.exec() == QDialog::Accepted)
     {
         currentTournament->update_name(d.getName());
         currentTournament->update_date(QDateTime(d.getDate(), QTime::currentTime()));
+        currentTournament->update_timeBroadcastChange(d.getTime());
         TStorage::Instance()->saveToDisk(currentTournament);
     }
 }

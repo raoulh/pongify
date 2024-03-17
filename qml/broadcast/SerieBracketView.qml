@@ -131,7 +131,7 @@ Rectangle {
             Transition {
                 from: "top"
                 to: "bottom"
-                NumberAnimation { target: flickable; properties: "contentY"; duration: 8000 }
+                NumberAnimation { target: flickable; properties: "contentY"; duration: currentTournament.timeBroadcastChange - 2000 }
             }
         ]
 

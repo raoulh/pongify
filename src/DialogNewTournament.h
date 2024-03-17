@@ -19,6 +19,8 @@ public:
     QString getName();
     void setDate(QDate date);
     QDate getDate();
+    void setTime(int time);
+    int getTime();
 
 private:
     Ui::DialogNewTournament *ui;
