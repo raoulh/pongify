@@ -11,6 +11,13 @@ class TTable: public QObject
     Q_OBJECT
     QML_READONLY_PROPERTY(int, tableNumber)
     QML_READONLY_PROPERTY(QObject *, match) //current match being played on this table
+    QML_READONLY_PROPERTY(bool, free)
+
+    QML_READONLY_PROPERTY(QString, player1_firstName)
+    QML_READONLY_PROPERTY(QString, player1_lastName)
+    QML_READONLY_PROPERTY(QString, player2_firstName)
+    QML_READONLY_PROPERTY(QString, player2_lastName)
+    QML_READONLY_PROPERTY(QString, serieName)
 
 public:
     explicit TTable(QObject *parent = nullptr);
@@ -21,9 +28,11 @@ public:
 
     void setRoundMatch(TSerie *serie, int round, int match);
 
-    void clearMatch();
+    TSerie *getSerie() { return currentSerie; }
+    int getRoundIdx() { return currentRound; }
+    int getMatchIdx() { return currentMatchIndex; }
 
-    Q_INVOKABLE bool isFree();
+    void clearMatch();
 
 private:
     TSerie *currentSerie = nullptr;

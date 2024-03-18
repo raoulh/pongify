@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QuickFlux
+import "quickflux"
 
 SplitView {
 
@@ -24,5 +26,18 @@ SplitView {
         SplitView.minimumWidth: 260
         SplitView.preferredWidth: 260
         SplitView.maximumWidth: 600
+    }
+
+    AppListener {
+        Filter {
+            type: ActionTypes.showMatchSelector
+            onDispatched: (filtertype, message) => {
+                              dialogMatchSelector.show((idx) => { }, message.tableNum)
+                          }
+        }
+    }
+
+    DialogMatchSelector {
+        id: dialogMatchSelector
     }
 }

@@ -53,7 +53,14 @@ Rectangle {
                     tooltipText: "Supprimer une table"
                 }
 
+
                 Item { Layout.fillWidth: true; height: 1 }
+
+                ToolButtonTip {
+                    icon.name: "play-button2"
+                    onClicked: mainWindow.startMatchTable(listTable.currentIndex)
+                    tooltipText: "Démarrer un match sur la table sélectionnée"
+                }
             }
         }
 
@@ -72,58 +79,147 @@ Rectangle {
                     id: control
 
                     width: parent? parent.width: 0
-                    height: 200
+                    height: contentItem.height
                     text: tableNumber
 
                     onClicked: {
-                        //listSerie.currentIndex = index
-                        //mainWindow.selectSerie(index)
+                        listTable.currentIndex = index
+                        mainWindow.selectTable(index)
                     }
 
-                    contentItem: RowLayout {
-                        width: 300
-                        spacing: 4
+                    contentItem: Item {
+                        width: parent.width
+                        height: colTable.height
 
-                        Item { Layout.preferredWidth: 5; height: 1 }
+                        ColumnLayout {
+                            id: colTable
+                            width: parent.width
+                            spacing: 0
 
-                        Image {
-                            Layout.preferredHeight: 20
-                            Layout.preferredWidth: 20
-                            source: qtObject.status == "playing"?
-                                        "qrc:/icons/pongify/32x32@4/play-button.png" :
-                                        "qrc:/img/podium.png"
-                            fillMode: Image.PreserveAspectFit
+                            Item { Layout.fillWidth: true; height: 8 }
 
-                            visible: qtObject.status != "stopped"
+                            RowLayout {
+                                height: rect.height
+
+                                Rectangle {
+                                    id: rect
+                                    Layout.preferredHeight: tableNumTxt.implicitHeight + 8
+                                    Layout.preferredWidth: tableNumTxt.implicitWidth + 8
+                                    color: listTable.currentIndex == index ? "#de8787" : "#2c9f59"
+
+                                    Text {
+                                        id: tableNumTxt
+                                        anchors.centerIn: parent
+                                        text: "Table #%1".arg(control.text)
+                                        font.bold: true
+                                        color: "white"
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+
+                                    text: free? "": serieName
+                                    font.bold: false
+                                    color: "#4d4d4d"
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+
+                                Text {
+                                    text: free? "Libre" : "En cours"
+                                    font.bold: false
+                                    color: "#808080"
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+
+                                Item { Layout.preferredWidth: 4; height: 1 }
+                            }
+
+                            RowLayout {
+                                spacing: 0
+                                height: colA.implicitHeight
+
+                                Rectangle {
+                                    id: rectA
+                                    height: colA.implicitHeight + 16
+                                    Layout.fillWidth: true
+
+                                    color: "#2c9f59"
+
+                                    opacity: free? 0.6: 1.0
+
+                                    ColumnLayout {
+                                        id: colA
+                                        anchors {
+                                            margins: 8
+                                            fill: parent
+                                        }
+
+                                        Text {
+                                            text: free? "": player1_firstName
+                                            elide: Text.ElideRight
+                                            font.pointSize: 12
+                                            color: "white"
+                                            width: rectA.width - 16
+                                        }
+
+                                        Text {
+                                            text: free? "": player1_lastName
+                                            elide: Text.ElideRight
+                                            font.pointSize: 12
+                                            color: "white"
+                                            width: rectA.width - 16
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    color: "white"
+                                    opacity: free? 0.6: 1.0
+                                    Layout.preferredWidth: 4
+                                    height: colA.implicitHeight + 16
+                                }
+
+                                Rectangle {
+                                    id: rectB
+                                    color: "#2c9f59"
+
+                                    opacity: free? 0.6: 1.0
+
+                                    height: colA.implicitHeight + 16
+                                    Layout.fillWidth: true
+
+                                    ColumnLayout {
+                                        anchors {
+                                            margins: 8
+                                            fill: parent
+                                        }
+
+                                        Text {
+                                            text: free? "": player2_firstName
+                                            elide: Text.ElideRight
+                                            font.pointSize: 12
+                                            color: "white"
+                                            width: rectB.width - 16
+                                        }
+
+                                        Text {
+                                            text: free? "": player2_lastName
+                                            elide: Text.ElideRight
+                                            font.pointSize: 12
+                                            color: "white"
+                                            width: rectB.width - 16
+                                        }
+                                    }
+                                }
+                            }
                         }
-
-                        Text {
-                            Layout.fillWidth: true
-                            rightPadding: control.spacing
-                            text: control.text
-                            font.bold: true
-                            color: control.enabled ? "#0f4932" : "#bdbebf"
-                            elide: Text.ElideMiddle
-                            verticalAlignment: Text.AlignVCenter
-                        }
-
-                        Button {
-                            id: bt
-                            Layout.preferredWidth: implicitWidth
-                            icon.name: "menu"
-                            icon.height: 16
-                            onClicked: mainWindow.showSerieMenu(index)
-                        }
-
-                        Item { Layout.preferredWidth: 5; height: 1 }
                     }
 
                     background: Rectangle {
-                        border.color: listSerie.currentIndex == index?  "#489258": "#D7DED9"
-                        border.width: 1
-                        radius: 6
                         color: control.down ? "#eeeeee" :
-                               listSerie.currentIndex == index? "#dedade":
+                               listTable.currentIndex === index? "#dedade":
                                                                 "#fefefe"
                     }
                 }

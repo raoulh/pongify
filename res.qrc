@@ -105,5 +105,9 @@
         <file>data/table_header.html</file>
         <file>data/table_item.html</file>
         <file>qml/TableMgmt.qml</file>
+        <file>qml/quickflux/ActionTypes.qml</file>
+        <file>qml/quickflux/AppActions.qml</file>
+        <file>qml/quickflux/qmldir</file>
+        <file>qml/DialogMatchSelector.qml</file>
     </qresource>
 </RCC>

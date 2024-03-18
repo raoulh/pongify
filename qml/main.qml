@@ -1,6 +1,8 @@
 import QtQuick
 
 Item {
+    id: window
+
     anchors.fill: parent
 
     DashboardPage {

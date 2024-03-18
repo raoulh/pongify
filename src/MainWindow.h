@@ -37,6 +37,8 @@ public:
 
     Q_INVOKABLE void newTable();
     Q_INVOKABLE void deleteTable();
+    Q_INVOKABLE void selectTable(int idx);
+    Q_INVOKABLE void startMatchTable(int idx);
 
     Q_INVOKABLE void broadcastStart();
     Q_INVOKABLE void broadcastStop();

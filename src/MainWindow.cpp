@@ -14,6 +14,8 @@
 #include "DialogPlayersHtml.h"
 #include "DialogAbout.h"
 
+#include <qfappdispatcher.h>
+
 #include <QQuickStyle>
 #include <QQuickView>
 #include <QQmlEngine>
@@ -34,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent):
 
     setWindowTitle("Pongify - Gestion de tournoi");
 
-    QLabel *cpyLabel = new QLabel("(c) 2023 Raoul Hecky");
+    QLabel *cpyLabel = new QLabel("(c) 2024 Raoul Hecky");
     ui->statusbar->addPermanentWidget(cpyLabel, 1);
 
     QTimer::singleShot(100, this, []()
@@ -296,6 +298,36 @@ void MainWindow::deleteTable()
         currentTournament->removeTable(idx);
         TStorage::Instance()->saveToDisk(currentTournament);
     }
+}
+
+void MainWindow::selectTable(int idx)
+{
+    auto t = currentTournament->getTable(idx);
+    if (!t) return;
+
+    auto s = t->getSerie();
+    if (!s) return;
+
+    view->engine()->rootContext()->setContextProperty("selectedSerie", s);
+    emit s->matchesUpdated(); //force update matches in QML
+}
+
+void MainWindow::startMatchTable(int idx)
+{
+    //get table
+    auto t = currentTournament->getTable(idx);
+    if (!t) return;
+
+    //check if this table is already playing
+    if (!t->get_free())
+    {
+        QMessageBox::warning(this, "Erreur", "La table est déjà en cours de jeu.");
+        return;
+    }
+
+    QFAppDispatcher *appDispatcher = QFAppDispatcher::instance(view->engine());
+    QVariantMap m = {{ "tableNum", t->get_tableNumber() }};
+    appDispatcher->dispatch("showMatchSelector", m);
 }
 
 void MainWindow::broadcastStart()
