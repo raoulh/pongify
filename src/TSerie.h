@@ -53,6 +53,8 @@ class TSerie : public QObject
     //This is used to save the visibility of the broadcast view
     QML_WRITABLE_PROPERTY(bool, viewVisible)
 
+    QML_WRITABLE_PROPERTY(QString, serieUid)
+
 public:
     explicit TSerie(QObject *parent = nullptr);
     virtual ~TSerie();
@@ -78,6 +80,17 @@ public:
     Q_INVOKABLE bool winnerForMatch(int round, int match, int playerIdx);
     Q_INVOKABLE void clickedOnMatch(int round, int match);
 
+    typedef struct UnplayedMatch
+    {
+        int round;
+        int match;
+        TMatch *p_match = nullptr;
+    } UnplayedMatch;
+
+    QList<UnplayedMatch> unplayedNextMatches();
+
+    TMatch *getMatchForRound(int round, int match);
+
 signals:
     void matchesUpdated();
 
@@ -94,7 +107,6 @@ private:
     QList<Player *> singleWinners; //for single elemination
 
     int nearestPowerOf2(long long N);
-    TMatch *getMatchForRound(int round, int match);
 
     int seedPlayer(int rank, int partSize);
     void prepareMatches();

@@ -62,19 +62,14 @@ Dialog {
 
                 ScrollBar.vertical: ScrollBar {}
 
-                model: ListModel {
-                    ListElement { serieName: "NC - 65"; player1_firstName: "Pierre"; player1_lastName: "Lapointe"; player2_firstName: "Jean"; player2_lastName: "Tremblay" }
-                    ListElement { serieName: "NC - 65"; player1_firstName: "Pierre"; player1_lastName: "Lapointe"; player2_firstName: "Jean"; player2_lastName: "Tremblay" }
-                    ListElement { serieName: "NC - 65"; player1_firstName: "Pierre"; player1_lastName: "Lapointe"; player2_firstName: "Jean"; player2_lastName: "Tremblay" }
-                    ListElement { serieName: "NC - 65"; player1_firstName: "Pierre"; player1_lastName: "Lapointe"; player2_firstName: "Jean"; player2_lastName: "Tremblay" }
-                }
+                model: mainWindow.matchTableModel
 
                 delegate: RadioDelegate {
                     id: control
-                    width: parent? parent.width: 0
+                    width: listMatch.width
                     height: contentItem.height
 
-                    checked: false
+                    checked: index == listMatch.currentIndex
                     ButtonGroup.group: buttonGroup
 
                     onClicked: {
@@ -114,6 +109,14 @@ Dialog {
                                                                 "#fefefe"
                     }
                 }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: "Aucun match possible pour le moment"
+                visible: mainWindow.matchTableModel.count === 0
+                font.pixelSize: 18
+                font.bold: true
             }
         }
     }

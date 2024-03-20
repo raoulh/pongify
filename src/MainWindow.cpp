@@ -72,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent):
     update_broadcastActive(false);
     update_currentBrodcastViewIndex(0);
     update_broadcastViews(nullptr);
+    matchTableModel = new QQmlObjectListModel<TableMatchItem>(this, "name");
+    update_matchTableModel(matchTableModel);
     loadQmlApp();
 }
 
@@ -308,11 +310,24 @@ void MainWindow::selectTable(int idx)
     auto s = t->getSerie();
     if (!s) return;
 
-    view->engine()->rootContext()->setContextProperty("selectedSerie", s);
-    emit s->matchesUpdated(); //force update matches in QML
+    auto sidx = currentTournament->getSerieIndex(s);
+    if (sidx < 0) return;
+
+    QFAppDispatcher *appDispatcher = QFAppDispatcher::instance(view->engine());
+    QVariantMap m = {{ "index", sidx }};
+    appDispatcher->dispatch("selectSerie", m);
+
+    QTimer::singleShot(100, this, [appDispatcher, t, s]()
+    {
+        QVariantMap m = {{ "serieUid", s->get_serieUid() },
+                         { "round", t->getRoundIdx() },
+                         { "match", t->getMatchIdx() }};
+        appDispatcher->dispatch("moveToMatchBlock", m);
+        appDispatcher->dispatch("flashMatchBlock", m);
+    });
 }
 
-void MainWindow::startMatchTable(int idx)
+void MainWindow::selectMatchTable(int idx)
 {
     //get table
     auto t = currentTournament->getTable(idx);
@@ -325,9 +340,53 @@ void MainWindow::startMatchTable(int idx)
         return;
     }
 
+    buildMatchTableModel();
+
     QFAppDispatcher *appDispatcher = QFAppDispatcher::instance(view->engine());
     QVariantMap m = {{ "tableNum", t->get_tableNumber() }};
     appDispatcher->dispatch("showMatchSelector", m);
+}
+
+void MainWindow::startMatchOnTable(int idx, int table)
+{
+    if (idx < 0 || idx >= matchTableModel->count())
+        return;
+
+    auto m = matchTableModel->at(idx);
+    auto t = currentTournament->getTableFromNumber(table);
+
+    if (!m || !t)
+        return;
+
+    qDebug() << "Start match " << m->getMatchIdx() << " on table " << t->get_tableNumber();
+
+    t->setRoundMatch(m->getSerie(), m->getRoundIdx(), m->getMatchIdx());
+}
+
+void MainWindow::showTableMenu(int idx)
+{
+    QMenu menu;
+    QAction *action = nullptr;
+    auto table = currentTournament->getTable(idx);
+    if (!table) return;
+
+    if (!table->get_free())
+    {
+        action = menu.addAction(QIcon::fromTheme("trash"), tr("Annuler le match"));
+        connect(action, &QAction::triggered, this, [this, table]()
+        {
+            auto ret = QMessageBox::question(this, "Confirmation",
+                                             QStringLiteral("Annuler le match de la table \"%1\" ?")
+                                                 .arg(table->get_tableNumber()));
+            if (ret == QMessageBox::Yes)
+            {
+                table->clearTable();
+            }
+        });
+    }
+
+    if (!menu.isEmpty())
+        menu.exec(QCursor::pos());
 }
 
 void MainWindow::broadcastStart()
@@ -450,9 +509,68 @@ void MainWindow::loadQmlApp()
     view->engine()->rootContext()->setContextProperty("playerModel", PlayerModel::Instance());
     view->engine()->rootContext()->setContextProperty("selectedSerie", nullptr);
     view->engine()->rootContext()->setContextProperty("currentTournament", nullptr);
+    view->engine()->rootContext()->setContextProperty("matchTableModel", matchTableModel);
 
     view->setSource(QUrl("qrc:/qml/main.qml"));
     ui->verticalLayout->addWidget(container);
+}
+
+void MainWindow::buildMatchTableModel()
+{
+    for (int i = 0; i < matchTableModel->count(); ++i)
+    {
+        auto m = matchTableModel->get(i);
+        if (m) delete m;
+    }
+    matchTableModel->clear();
+
+    //search all series
+    for (int i = 0; i < currentTournament->serieCount(); ++i)
+    {
+        auto s = currentTournament->getSerie(i);
+        if (!s) continue;
+
+        if (s->get_status() != "playing")
+            continue;
+
+        //search all unplayed matches
+        auto matches = s->unplayedNextMatches();
+        for (int j = 0; j < matches.count(); ++j)
+        {
+            auto m = matches.at(j);
+
+            //check if player1 or player2 is already playing
+            bool playerAlreadyPlaying = false;
+            for (int k = 0;k < currentTournament->tableCount() && !playerAlreadyPlaying;k++)
+            {
+                auto t = currentTournament->getTable(k);
+                if (!t || t->get_free()) continue;
+                if (t->get_player1()->get_license() == m.p_match->get_player1()->get_license() ||
+                    t->get_player2()->get_license() == m.p_match->get_player1()->get_license() ||
+                    t->get_player1()->get_license() == m.p_match->get_player2()->get_license() ||
+                    t->get_player2()->get_license() == m.p_match->get_player2()->get_license())
+                {
+                    playerAlreadyPlaying = true;
+
+                    qDebug() << "Match " << m.p_match->get_player1()->get_firstName() << " " << m.p_match->get_player1()->get_lastName() <<
+                        " vs " << m.p_match->get_player2()->get_firstName() << " " << m.p_match->get_player2()->get_lastName() <<
+                        " already playing on table " << t->get_tableNumber() << " - skip it.";
+
+                    break;
+                }
+            }
+            if (playerAlreadyPlaying) continue;
+
+            //add to model
+            TableMatchItem *item = new TableMatchItem(this);
+            item->setRoundMatch(s, m.round, m.match);
+            matchTableModel->append(item);
+
+            qDebug() << "Add match " << m.p_match->get_player1()->get_firstName() << " " << m.p_match->get_player1()->get_lastName() <<
+                " vs " << m.p_match->get_player2()->get_firstName() << " " << m.p_match->get_player2()->get_lastName() <<
+                " to tableMatchModel";
+        }
+    }
 }
 
 void MainWindow::on_actionListe_des_joueurs_du_tournoi_triggered()

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "qqmlhelpers.h"
+#include "TableMatchModel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,6 +23,8 @@ class MainWindow : public QMainWindow
     QML_READONLY_PROPERTY(QObject *, broadcastViews)
     QML_READONLY_PROPERTY(int, currentBrodcastViewIndex)
 
+    QML_READONLY_PROPERTY(QObject *, matchTableModel)
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -38,7 +41,9 @@ public:
     Q_INVOKABLE void newTable();
     Q_INVOKABLE void deleteTable();
     Q_INVOKABLE void selectTable(int idx);
-    Q_INVOKABLE void startMatchTable(int idx);
+    Q_INVOKABLE void selectMatchTable(int idx);
+    Q_INVOKABLE void startMatchOnTable(int idx, int table);
+    Q_INVOKABLE void showTableMenu(int idx);
 
     Q_INVOKABLE void broadcastStart();
     Q_INVOKABLE void broadcastStop();
@@ -60,9 +65,12 @@ private:
     QQuickView *view = nullptr;
     Tournament *currentTournament = nullptr;
     BroadcastWindow *broadcastWin = nullptr;
+    QQmlObjectListModel<TableMatchItem> *matchTableModel = nullptr;
 
     virtual void closeEvent(QCloseEvent *event) override;
 
     void loadQmlApp();
+
+    void buildMatchTableModel();
 };
 #endif // MAINWINDOW_H

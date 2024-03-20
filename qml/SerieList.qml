@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QuickFlux
+import "quickflux"
 
 Rectangle {
     color: "#DADEDA"
@@ -84,10 +86,7 @@ Rectangle {
                     height: bt.implicitHeight + 10
                     text: name
 
-                    onClicked: {
-                        listSerie.currentIndex = index
-                        mainWindow.selectSerie(index)
-                    }
+                    onClicked: AppActions.selectSerie(index)
 
                     contentItem: RowLayout {
                         width: 300
@@ -145,6 +144,16 @@ Rectangle {
         BroadcastControls {
             Layout.preferredHeight: implicitHeight
             Layout.fillWidth: true
+        }
+    }
+
+    AppListener {
+        Filter {
+            type: ActionTypes.selectSerie
+            onDispatched: (filtertype, message) => {
+                              listSerie.currentIndex = message.index
+                              mainWindow.selectSerie(message.index)
+                          }
         }
     }
 }

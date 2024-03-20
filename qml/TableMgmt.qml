@@ -58,7 +58,7 @@ Rectangle {
 
                 ToolButtonTip {
                     icon.name: "play-button2"
-                    onClicked: mainWindow.startMatchTable(listTable.currentIndex)
+                    onClicked: mainWindow.selectMatchTable(listTable.currentIndex)
                     tooltipText: "Démarrer un match sur la table sélectionnée"
                 }
             }
@@ -90,6 +90,16 @@ Rectangle {
                     contentItem: Item {
                         width: parent.width
                         height: colTable.height
+
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.RightButton
+                            onClicked: (mouse) => {
+                                if (mouse.button === Qt.RightButton) {
+                                    mainWindow.showTableMenu(index)
+                                }
+                            }
+                        }
 
                         ColumnLayout {
                             id: colTable

@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QuickFlux
+import "quickflux"
 
 Rectangle {
     id: bloc
@@ -40,7 +42,84 @@ Rectangle {
     property int handicap1: 0
     property int handicap2: 0
 
+    property int roundIdx: 0
+    property int matchIdx: 0
+
     signal clicked()
+
+    function flash() {
+        flashAnim.start()
+    }
+
+    SequentialAnimation {
+        id: flashAnim
+
+        PauseAnimation {
+            duration: 400
+        }
+
+        ScriptAction {
+            script: flashRect.visible = true
+        }
+
+        ColorAnimation {
+            target: flashRect.border
+            property: "color"
+            from: "#ffffff"
+            to: "#ff0000"
+            duration: 160
+            easing: Easing.OutInCubic
+        }
+
+        ColorAnimation {
+            target: flashRect.border
+            property: "color"
+            from: "#ff0000"
+            to: "#ffffff"
+            duration: 160
+            easing: Easing.OutInCubic
+        }
+
+        ColorAnimation {
+            target: flashRect.border
+            property: "color"
+            from: "#ffffff"
+            to: "#ff0000"
+            duration: 160
+            easing: Easing.OutInCubic
+        }
+
+        ColorAnimation {
+            target: flashRect.border
+            property: "color"
+            from: "#ff0000"
+            to: "#ffffff"
+            duration: 160
+            easing: Easing.OutInCubic
+        }
+
+        ColorAnimation {
+            target: flashRect.border
+            property: "color"
+            from: "#ffffff"
+            to: "#ff0000"
+            duration: 160
+            easing: Easing.OutInCubic
+        }
+
+        ColorAnimation {
+            target: flashRect.border
+            property: "color"
+            from: "#ff0000"
+            to: "#ffffff"
+            duration: 160
+            easing: Easing.OutInCubic
+        }
+
+        ScriptAction {
+            script: flashRect.visible = false
+        }
+    }
 
     color: bloc.mouseHovered? "#585848": playerFirstName1 == "" || winner2? "#b2b2b2": "#484848"
     radius: sc(6)
@@ -353,5 +432,25 @@ Rectangle {
         onEntered: bloc.mouseHovered = true
         onExited: bloc.mouseHovered = false
         onClicked: bloc.clicked()
+    }
+
+    Rectangle {
+        id: flashRect
+        color: "transparent"
+        anchors.fill: parent
+        radius: parent.radius
+        visible: false
+        border.width: sc(5)
+    }
+
+    AppListener {
+        Filter {
+            type: ActionTypes.flashMatchBlock
+            onDispatched: (filtertype, message) => {
+                              if (message.serieUuid !== selectedSerie.uuid) return
+                              if (message.round !== bloc.roundIdx || message.match !== bloc.matchIdx) return
+                              bloc.flash()
+                          }
+        }
     }
 }

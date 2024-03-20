@@ -42,7 +42,7 @@ DialogPodiumRR::DialogPodiumRR(bool editable, QList<ScoreRR> _playerScores, bool
         auto it = new QTreeWidgetItem(ui->treeWidget);
         it->setText(0, QString::number(i + 1));
         if (isDouble)
-            it->setText(1, QStringLiteral("%1 %2 / %1 %2").arg(p.player->get_firstName(), p.player->get_lastName(), p.player->get_firstNameSecond(), p.player->get_lastNameSecond()));
+            it->setText(1, QStringLiteral("%1 %2 / %3 %4").arg(p.player->get_firstName(), p.player->get_lastName(), p.player->get_firstNameSecond(), p.player->get_lastNameSecond()));
         else
             it->setText(1, QStringLiteral("%1 %2 [%3]").arg(p.player->get_firstName(), p.player->get_lastName(), p.player->get_ranking()));
         it->setText(2, QString::number(p.winCount));

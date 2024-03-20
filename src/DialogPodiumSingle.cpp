@@ -35,7 +35,7 @@ DialogPodiumSingle::DialogPodiumSingle(bool editable, QList<Player *> _players, 
         auto it = new QTreeWidgetItem(ui->treeWidget);
         it->setText(0, QString::number(i + 1));
         if (isDouble)
-            it->setText(1, QStringLiteral("%1 %2 / %1 %2").arg(p->get_firstName(), p->get_lastName(), p->get_firstNameSecond(), p->get_lastNameSecond()));
+            it->setText(1, QStringLiteral("%1 %2 / %3 %4").arg(p->get_firstName(), p->get_lastName(), p->get_firstNameSecond(), p->get_lastNameSecond()));
         else
             it->setText(1, QStringLiteral("%1 %2 [%3]").arg(p->get_firstName(), p->get_lastName(), p->get_ranking()));
     }

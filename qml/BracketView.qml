@@ -22,6 +22,15 @@ RowLayout {
         return roundRepeater.itemAt(round)
     }
 
+    //Return x,y position of the match bloc in the BracketView
+    function findMatchBlocPosition(round, match) {
+        let item = itemFromRound(round)
+        let matchItem = item.children
+        let matchBloc = matchItem[match]
+        let pos = matchBloc.mapToItem(bracketView, 0, 0)
+        return Qt.rect(pos.x, pos.y, matchBloc.width, matchBloc.height)
+    }
+
     spacing: sc(30)
 
     Repeater {
@@ -92,6 +101,8 @@ RowLayout {
                             matchBloc.score2 = serie.scoreForMatch(matchRepeater.roundIndex, matchIndex, 1)
                             matchBloc.winner1 = serie.winnerForMatch(matchRepeater.roundIndex, matchIndex, 0)
                             matchBloc.winner2 = serie.winnerForMatch(matchRepeater.roundIndex, matchIndex, 1)
+                            matchBloc.roundIdx = matchRepeater.roundIndex
+                            matchBloc.matchIdx = matchIndex
 
                             let player1 = serie.getPlayer1(matchRepeater.roundIndex, matchIndex)
                             let player2 = serie.getPlayer2(matchRepeater.roundIndex, matchIndex)

@@ -32,7 +32,9 @@ SplitView {
         Filter {
             type: ActionTypes.showMatchSelector
             onDispatched: (filtertype, message) => {
-                              dialogMatchSelector.show((idx) => { }, message.tableNum)
+                              dialogMatchSelector.show((idx) => {
+                                  mainWindow.startMatchOnTable(idx, message.tableNum)
+                              }, message.tableNum)
                           }
         }
     }

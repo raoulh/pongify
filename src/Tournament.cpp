@@ -47,6 +47,28 @@ TSerie *Tournament::getSerie(int idx)
     return series->at(idx);
 }
 
+TSerie *Tournament::getSerieUid(QString uid)
+{
+    for (int i = 0;i < series->count();i++)
+    {
+        if (series->at(i)->get_serieUid() == uid)
+            return series->at(i);
+    }
+
+    return nullptr;
+}
+
+int Tournament::getSerieIndex(TSerie *s)
+{
+    for (int i = 0;i < series->count();i++)
+    {
+        if (series->at(i)->get_serieUid() == s->get_serieUid())
+            return i;
+    }
+
+    return -1;
+}
+
 void Tournament::addTable(TTable *t)
 {
     t->setParent(this);
@@ -73,6 +95,17 @@ TTable *Tournament::getTable(int idx)
     if (idx < 0 || idx >= tables->count())
         return nullptr;
     return tables->at(idx);
+}
+
+TTable *Tournament::getTableFromNumber(int num)
+{
+    for (int i = 0;i < tables->count();i++)
+    {
+        if (tables->at(i)->get_tableNumber() == num)
+            return tables->at(i);
+    }
+
+    return nullptr;
 }
 
 Tournament *Tournament::fromJson(const QJsonObject &obj)
@@ -110,7 +143,7 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
     for (int i = 0;i < arr.count();i++)
     {
         auto o = arr.at(i).toObject();
-        TTable *table = TTable::fromJson(o);
+        TTable *table = TTable::fromJson(t, o);
 
         if (table)
             t->addTable(table);

@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QuickFlux
+import "quickflux"
 
 Rectangle {
     color: "#FAFAFA"
@@ -85,14 +87,54 @@ Rectangle {
 
         boundsBehavior: Flickable.StopAtBounds
 
-        contentWidth: brackerView.width
-        contentHeight: brackerView.height
+        contentWidth: bracketView.width
+        contentHeight: bracketView.height
 
         BracketView {
-            id: brackerView
+            id: bracketView
 
             serie: selectedSerie
             isEditable: true
+        }
+
+        NumberAnimation {
+            id: animationX
+            target: flickable
+            property: "contentX"
+            duration: 500
+            easing.type: Easing.InOutQuad
+        }
+
+        NumberAnimation {
+            id: animationY
+            target: flickable
+            property: "contentY"
+            duration: 500
+            easing.type: Easing.InOutQuad
+        }
+
+        function moveToPosition(x, y, rectWidth, rectHeight) {
+            var targetX = x + rectWidth / 2 - flickable.width / 2;
+            var targetY = y + rectHeight / 2 - flickable.height / 2;
+
+            targetX = Math.max(0, Math.min(targetX, flickable.contentWidth - flickable.width));
+            targetY = Math.max(0, Math.min(targetY, flickable.contentHeight - flickable.height));
+
+            animationX.to = targetX
+            animationY.to = targetY
+            animationX.restart()
+            animationY.restart()
+        }
+    }
+
+    AppListener {
+        Filter {
+            type: ActionTypes.moveToMatchBlock
+            onDispatched: (filtertype, message) => {
+                              if (message.serieUuid !== selectedSerie.uuid) return
+                              let pos = bracketView.findMatchBlocPosition(message.round, message.match)
+                              flickable.moveToPosition(pos.x, pos.y, pos.width, pos.height)
+                          }
         }
     }
 }

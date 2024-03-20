@@ -29,6 +29,7 @@ SOURCES += \
     src/TSerie.cpp \
     src/TStorage.cpp \
     src/TTable.cpp \
+    src/TableMatchModel.cpp \
     src/Tournament.cpp \
     src/Utils.cpp \
     src/WidgetTextEdit.cpp \
@@ -59,6 +60,7 @@ HEADERS += \
     src/TSerie.h \
     src/TStorage.h \
     src/TTable.h \
+    src/TableMatchModel.h \
     src/Tournament.h \
     src/Utils.h \
     src/WidgetTextEdit.h \

@@ -59,6 +59,7 @@ TSerie::TSerie(QObject *parent):
     update_currentRound(0);
     update_podiumValidated(false);
     set_viewVisible(true);
+    set_serieUid(QUuid::createUuid().toString());
 
     winners = new QQmlObjectListModel<Player>(this, "name");
     update_winners(winners);
@@ -95,6 +96,9 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
         t->update_status("stopped");
     t->update_isDouble(obj["double"].toBool());
     t->update_isHandicap(obj["handicap"].toBool());
+    t->set_serieUid(obj["uid"].toString());
+    if (t->get_serieUid().isEmpty())
+        t->set_serieUid(QUuid::createUuid().toString());
 
     QJsonArray arr = obj["players"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -188,6 +192,7 @@ QJsonObject TSerie::toJson()
     obj.insert("status", get_status());
     obj.insert("double", get_isDouble());
     obj.insert("handicap", get_isHandicap());
+    obj.insert("uid", get_serieUid());
 
     QJsonArray arr;
     for (int i = 0;i < players->rowCount();i++)
@@ -1126,6 +1131,40 @@ void TSerie::clickedOnMatch(int round, int match)
     }
 
     menu.exec(QCursor::pos());
+}
+
+QList<TSerie::UnplayedMatch> TSerie::unplayedNextMatches()
+{
+    QList<TSerie::UnplayedMatch> lst;
+
+    for (int i = 0;i < allMatches.count();i++)
+    {
+        auto round = allMatches.at(i);
+        for (int j = 0;j < round->count();j++)
+        {
+            auto match = round->at(j);
+            if (match->get_playerWinner1() ||
+                match->get_playerWinner2())
+            {
+                //match finished
+                continue;
+            }
+
+            if (!match->get_player1() || !match->get_player2())
+            {
+                //bye or empty match
+                continue;
+            }
+
+            UnplayedMatch m;
+            m.round = i;
+            m.match = j;
+            m.p_match = match;
+            lst.append(m);
+        }
+    }
+
+    return lst;
 }
 
 void TSerie::playersModelChanged()

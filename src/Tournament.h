@@ -27,11 +27,14 @@ public:
     void removeSerie(int idx);
     TSerie *getSerie(int idx);
     int serieCount() { return series->count(); }
+    TSerie *getSerieUid(QString uid);
+    int getSerieIndex(TSerie *s);
 
     void addTable(TTable *t);
     void removeTable(int idx);
     TTable *getTable(int idx);
     int tableCount() { return tables->count(); }
+    TTable *getTableFromNumber(int num);
 
     static Tournament *fromJson(const QJsonObject &obj);
     QJsonObject toJson();
