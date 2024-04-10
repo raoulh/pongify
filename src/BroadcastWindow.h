@@ -55,6 +55,7 @@ private:
     QTimer *timerViewChange = nullptr;
 
     void loadQmlApp();
+    int getCurrentViewTime();
 };
 
 #endif // BROADCASTWINDOW_H

@@ -11,6 +11,7 @@ class BroadcastView: public QObject
     QML_READONLY_PROPERTY(QString, viewUrl)
     QML_READONLY_PROPERTY(QString, name)
     QML_WRITABLE_PROPERTY(bool, viewVisible)
+    QML_WRITABLE_PROPERTY(int, viewTime)
 
 public:
     explicit BroadcastView(QObject *parent = nullptr);

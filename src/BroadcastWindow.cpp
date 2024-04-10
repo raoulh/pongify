@@ -18,16 +18,20 @@ BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, Q
 
     timerViewChange = new QTimer(this);
     connect(timerViewChange, &QTimer::timeout, this, &BroadcastWindow::timerViewTick);
-    timerViewChange->start(currentTournament->get_timeBroadcastChange());
 
     connect(currentTournament, &Tournament::timeBroadcastChangeChanged, this, [this]()
     {
+        for (auto v: views->toList())
+            v->set_viewTime(currentTournament->get_timeBroadcastChange());
+
         timerViewChange->stop();
-        timerViewChange->start(currentTournament->get_timeBroadcastChange());
+        timerViewChange->start(getCurrentViewTime());
     });
 
     connect(currentTournament, &Tournament::seriesStatusChanged, this, &BroadcastWindow::reloadViews);
     reloadViews();
+
+    timerViewChange->start(getCurrentViewTime());
 
     update_fullscreen(fullscreen);
     update_screen(scr);
@@ -62,7 +66,7 @@ void BroadcastWindow::nextView()
     update_currentViewIndex(curr);
 
     timerViewChange->stop();
-    timerViewChange->start();
+    timerViewChange->start(getCurrentViewTime());
 }
 
 void BroadcastWindow::previousView()
@@ -87,7 +91,7 @@ void BroadcastWindow::previousView()
     update_currentViewIndex(curr);
 
     timerViewChange->stop();
-    timerViewChange->start();
+    timerViewChange->start(getCurrentViewTime());
 }
 
 void BroadcastWindow::quickViewStatusChanged(QQuickView::Status status)
@@ -109,6 +113,7 @@ void BroadcastWindow::reloadViews()
     auto v = new BroadcastView(this);
     v->update_viewUrl("qrc:/qml/broadcast/DefaultView.qml");
     v->update_name("Information tournoi");
+    v->set_viewTime(10000);
     views->append(v);
 
     for (int i = 0;i < currentTournament->serieCount();i++)
@@ -121,6 +126,7 @@ void BroadcastWindow::reloadViews()
             v->update_viewUrl("qrc:/qml/broadcast/SerieBracketView.qml");
             v->update_viewSerie(s);
             v->set_viewVisible(s->get_viewVisible());
+            v->set_viewTime(currentTournament->get_timeBroadcastChange());
             connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
             {
                 v->set_viewVisible(visible);
@@ -133,6 +139,7 @@ void BroadcastWindow::reloadViews()
             v->update_viewUrl("qrc:/qml/broadcast/RoundRobinView.qml");
             v->update_viewSerie(s);
             v->set_viewVisible(s->get_viewVisible());
+            v->set_viewTime(currentTournament->get_timeBroadcastChange());
             connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
             {
                 v->set_viewVisible(visible);
@@ -145,6 +152,7 @@ void BroadcastWindow::reloadViews()
             v->update_viewUrl("qrc:/qml/broadcast/HallOfFameView.qml");
             v->update_viewSerie(s);
             v->set_viewVisible(s->get_viewVisible());
+            v->set_viewTime(10000);
             connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
             {
                 v->set_viewVisible(visible);
@@ -185,4 +193,12 @@ void BroadcastWindow::loadQmlApp()
         view->showFullScreen();
     else
         view->showMaximized();
+}
+
+int BroadcastWindow::getCurrentViewTime()
+{
+    if (views->count() == 0 || get_currentViewIndex() >= views->count())
+        return 10000;
+    int t = views->at(get_currentViewIndex())->get_viewTime();
+    return t < 2000? 2000 : t;
 }

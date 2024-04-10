@@ -4,28 +4,70 @@ import QtQuick.Controls
 import QuickFlux
 import "quickflux"
 
-SplitView {
+Item {
 
-    SerieList {
-        id: left
+    SplitView {
+        anchors.fill: parent
 
-        SplitView.minimumWidth: 260
-        SplitView.preferredWidth: 260
-        SplitView.maximumWidth: 600
+        SerieList {
+            id: left
+
+            SplitView.minimumWidth: 260
+            SplitView.preferredWidth: 260
+            SplitView.maximumWidth: 600
+        }
+
+        SerieView {
+            id: center
+
+            SplitView.fillWidth: true
+        }
+
+        TableMgmt {
+            id: tableMgmt
+
+            property int minWidth: 260
+            property int prefWidth: 260
+            property int maxWidth: 600
+
+            SplitView.minimumWidth: minWidth
+            SplitView.preferredWidth: prefWidth
+            SplitView.maximumWidth: maxWidth
+
+            function toggle() {
+                if (tableMgmt.minWidth === 0) {
+                    tableMgmt.minWidth = 260
+                    tableMgmt.prefWidth = 260
+                } else {
+                    tableMgmt.minWidth = 0
+                    tableMgmt.prefWidth = 0
+                }
+            }
+        }
     }
 
-    SerieView {
-        id: center
+    Text {
+        color: "#dedade"
+        width: 35
+        height: 35
+        x: tableMgmt.x - width
+        y: tableMgmt.y
 
-        SplitView.fillWidth: true
-    }
+        font {
+            bold: true
+            pointSize: 20
+        }
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
 
-    TableMgmt {
-        id: right
+        text: tableMgmt.minWidth === 0? "<" : ">"
 
-        SplitView.minimumWidth: 260
-        SplitView.preferredWidth: 260
-        SplitView.maximumWidth: 600
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                tableMgmt.toggle()
+            }
+        }
     }
 
     AppListener {

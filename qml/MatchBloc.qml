@@ -65,55 +65,55 @@ Rectangle {
         ColorAnimation {
             target: flashRect.border
             property: "color"
-            from: "#ffffff"
+            from: "#ffffff00"
             to: "#ff0000"
             duration: 160
-            easing: Easing.OutInCubic
+            easing.type: Easing.Linear
         }
 
         ColorAnimation {
             target: flashRect.border
             property: "color"
             from: "#ff0000"
-            to: "#ffffff"
+            to: "#ffffff00"
             duration: 160
-            easing: Easing.OutInCubic
+            easing.type: Easing.Linear
         }
 
         ColorAnimation {
             target: flashRect.border
             property: "color"
-            from: "#ffffff"
+            from: "#ffffff00"
             to: "#ff0000"
             duration: 160
-            easing: Easing.OutInCubic
+            easing.type: Easing.Linear
         }
 
         ColorAnimation {
             target: flashRect.border
             property: "color"
             from: "#ff0000"
-            to: "#ffffff"
+            to: "#ffffff00"
             duration: 160
-            easing: Easing.OutInCubic
+            easing.type: Easing.Linear
         }
 
         ColorAnimation {
             target: flashRect.border
             property: "color"
-            from: "#ffffff"
+            from: "#ffffff00"
             to: "#ff0000"
             duration: 160
-            easing: Easing.OutInCubic
+            easing.type: Easing.Linear
         }
 
         ColorAnimation {
             target: flashRect.border
             property: "color"
             from: "#ff0000"
-            to: "#ffffff"
+            to: "#ffffff00"
             duration: 160
-            easing: Easing.OutInCubic
+            easing.type: Easing.Linear
         }
 
         ScriptAction {
