@@ -13,7 +13,15 @@ class TableMatchItem: public QObject
     QML_READONLY_PROPERTY(QString, player1_lastName)
     QML_READONLY_PROPERTY(QString, player2_firstName)
     QML_READONLY_PROPERTY(QString, player2_lastName)
+
+    QML_READONLY_PROPERTY(QString, player1Second_firstName)
+    QML_READONLY_PROPERTY(QString, player1Second_lastName)
+    QML_READONLY_PROPERTY(QString, player2Second_firstName)
+    QML_READONLY_PROPERTY(QString, player2Second_lastName)
+
     QML_READONLY_PROPERTY(QString, serieName)
+
+    QML_READONLY_PROPERTY(bool, isDouble)
 
 public:
     explicit TableMatchItem(QObject *parent = nullptr);

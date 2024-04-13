@@ -167,7 +167,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            text: free? "": player1_firstName
+                                            text: free? "": isDouble? "%1 %2".arg(player1_firstName).arg(player1_lastName): player1_firstName
                                             elide: Text.ElideRight
                                             font.pointSize: 12
                                             color: "white"
@@ -175,7 +175,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            text: free? "": player1_lastName
+                                            text: free? "": isDouble? "%1 %2".arg(player1Second_firstName).arg(player1Second_lastName): player1_lastName
                                             elide: Text.ElideRight
                                             font.pointSize: 12
                                             color: "white"
@@ -207,7 +207,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            text: free? "": player2_firstName
+                                            text: free? "": isDouble? "%1 %2".arg(player2_firstName).arg(player2_lastName): player2_firstName
                                             elide: Text.ElideRight
                                             font.pointSize: 12
                                             color: "white"
@@ -215,7 +215,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            text: free? "": player2_lastName
+                                            text: free? "": isDouble? "%1 %2".arg(player2Second_firstName).arg(player2Second_lastName): player2_lastName
                                             elide: Text.ElideRight
                                             font.pointSize: 12
                                             color: "white"

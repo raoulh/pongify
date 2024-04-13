@@ -93,7 +93,12 @@ Dialog {
                             }
 
                             Text {
-                                text: "%1 %2 vs %3 %4".arg(player1_firstName).arg(player1_lastName).arg(player2_firstName).arg(player2_lastName)
+                                text: isDouble?
+                                          "%1 %2 / %3 %4 vs %5 %6 / %7 %8".arg(player1_firstName).arg(player1_lastName)
+                                                                          .arg(player1Second_firstName).arg(player1Second_lastName)
+                                                                          .arg(player2_firstName).arg(player2_lastName)
+                                                                          .arg(player2Second_firstName).arg(player2Second_lastName) :
+                                          "%1 %2 vs %3 %4".arg(player1_firstName).arg(player1_lastName).arg(player2_firstName).arg(player2_lastName)
                                 font.pixelSize: 14
                             }
 

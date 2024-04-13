@@ -545,20 +545,43 @@ void MainWindow::buildMatchTableModel()
             {
                 auto t = currentTournament->getTable(k);
                 if (!t || t->get_free()) continue;
-                if (t->get_player1()->get_license() == m.p_match->get_player1()->get_license() ||
-                    t->get_player2()->get_license() == m.p_match->get_player1()->get_license() ||
-                    t->get_player1()->get_license() == m.p_match->get_player2()->get_license() ||
-                    t->get_player2()->get_license() == m.p_match->get_player2()->get_license())
+
+                QStringList licTable({t->get_player1()->get_license(),
+                                      t->get_player2()->get_license(),
+                                      t->get_player1()->get_licenseSecond(),
+                                      t->get_player2()->get_licenseSecond(),
+                                      m.p_match->get_player1()->get_license(),
+                                      m.p_match->get_player2()->get_license(),
+                                      m.p_match->get_player1()->get_licenseSecond(),
+                                      m.p_match->get_player2()->get_licenseSecond()});
+
+
+                auto containsDuplicate = [&licTable]() -> bool
+                {
+                    QSet<QString> seen;
+                    for (const QString &item: licTable)
+                    {
+                        if (item.isEmpty()) continue;
+
+                        if (seen.contains(item))
+                            return true;
+
+                        seen.insert(item);
+                    }
+                    return false;
+                };
+
+                if (containsDuplicate())
                 {
                     playerAlreadyPlaying = true;
-
                     qDebug() << "Match " << m.p_match->get_player1()->get_firstName() << " " << m.p_match->get_player1()->get_lastName() <<
                         " vs " << m.p_match->get_player2()->get_firstName() << " " << m.p_match->get_player2()->get_lastName() <<
-                        " already playing on table " << t->get_tableNumber() << " - skip it.";
+                        " already playing on table " << t->get_tableNumber();
 
                     break;
                 }
             }
+
             if (playerAlreadyPlaying) continue;
 
             //add to model
