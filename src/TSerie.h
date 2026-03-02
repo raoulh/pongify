@@ -23,6 +23,10 @@ public:
     explicit TMatch(QObject *parent = nullptr);
 
     void clearScore();
+
+private:
+    QMetaObject::Connection m_player1DestroyedConn;
+    QMetaObject::Connection m_player2DestroyedConn;
 };
 
 typedef QVector<TMatch *> TRound;

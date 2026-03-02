@@ -27,18 +27,32 @@ TMatch::TMatch(QObject *parent):
 
     connect(this, &TMatch::player1Changed, this, [this](auto *player)
     {
-        connect(player, &Player::destroyed, this, [this]()
+        // Disconnect previous player's destroyed signal
+        if (m_player1DestroyedConn)
+            disconnect(m_player1DestroyedConn);
+
+        if (player)
         {
-            update_player1(nullptr);
-        });
+            m_player1DestroyedConn = connect(player, &Player::destroyed, this, [this]()
+            {
+                update_player1(nullptr);
+            });
+        }
     });
 
     connect(this, &TMatch::player2Changed, this, [this](auto *player)
     {
-        connect(player, &Player::destroyed, this, [this]()
+        // Disconnect previous player's destroyed signal
+        if (m_player2DestroyedConn)
+            disconnect(m_player2DestroyedConn);
+
+        if (player)
         {
-            update_player2(nullptr);
-        });
+            m_player2DestroyedConn = connect(player, &Player::destroyed, this, [this]()
+            {
+                update_player2(nullptr);
+            });
+        }
     });
 }
 
@@ -442,7 +456,7 @@ void TSerie::autoSeedPlayers()
 
     //remove seeded players from list and randomize it
     allp.remove(0, seedMax);
-    std::random_shuffle(allp.begin(), allp.end());
+    std::shuffle(allp.begin(), allp.end(), std::mt19937{std::random_device{}()});
 
     for (int iround = 0, jplayer = 0;iround < firstRound->count() && jplayer < allp.count();iround++)
     {
@@ -452,6 +466,8 @@ void TSerie::autoSeedPlayers()
         {
             firstRound->at(iround)->update_player1(pl);
             jplayer++;
+            if (jplayer >= allp.count())
+                break;
             pl = allp.at(jplayer);
 
             //if there is still some bye to place, put them
@@ -520,12 +536,19 @@ void TSerie::showPodium()
 
 int TSerie::nearestPowerOf2(long long N)
 {
-    long long a = log2(N);
+    if (N <= 0)
+        return 1;
 
-    if (pow(2, a) == N)
-        return N;
+    // Check if N is already a power of 2
+    if ((N & (N - 1)) == 0)
+        return static_cast<int>(N);
 
-    return pow(2, a + 1);
+    // Find the next power of 2
+    long long result = 1;
+    while (result < N)
+        result <<= 1;
+
+    return static_cast<int>(result);
 }
 
 TMatch *TSerie::getMatchForRound(int round, int match)
@@ -815,36 +838,37 @@ void TSerie::calculateRRWinners()
         auto score1 = scores.value(a);
         auto score2 = scores.value(b);
 
-        if (score1.winCount == score2.winCount)
-        {
-            if (score1.score > score2.score)
-                return true;
-            if (score1.setWin > score2.setWin)
-                return true;
-            if (score1.setLoose < score2.setLoose)
-                return true;
+        if (score1.winCount != score2.winCount)
+            return score1.winCount > score2.winCount;
 
-            //Compare result from match between players only if Serie is finished (to account all matches)
-            if (get_currentRound() == allMatches.count() - 1)
+        if (score1.score != score2.score)
+            return score1.score > score2.score;
+
+        if (score1.setWin != score2.setWin)
+            return score1.setWin > score2.setWin;
+
+        if (score1.setLoose != score2.setLoose)
+            return score1.setLoose < score2.setLoose;
+
+        //Compare result from match between players only if Serie is finished (to account all matches)
+        if (get_currentRound() == allMatches.count() - 1)
+        {
+            //find match between both player
+            for (int i = 0;i < get_currentRound();i++)
             {
-                //find match between both player
-                for (int i = 0;i < get_currentRound();i++)
+                auto round = allMatches.at(i);
+                for (int j = 0;j < round->count();j++)
                 {
-                    auto round = allMatches.at(i);
-                    for (int j = 0;j < round->count();j++)
-                    {
-                        auto match = round->at(j);
-                        if ((match->get_player1() == a && match->get_player2() == b) ||
-                            (match->get_player1() == b && match->get_player2() == a))
-                            return match->get_playerWinner1();
-                    }
+                    auto match = round->at(j);
+                    if (match->get_player1() == a && match->get_player2() == b)
+                        return match->get_playerWinner1();
+                    if (match->get_player1() == b && match->get_player2() == a)
+                        return match->get_playerWinner2();
                 }
             }
-
-            return false;
         }
 
-        return score1.winCount > score2.winCount;
+        return false;
     });
 
     scoresWinners.clear();
@@ -955,6 +979,9 @@ void TSerie::calculateSingleWinners()
 
 bool TSerie::allMatchesPlayed()
 {
+    if (allMatches.isEmpty())
+        return false;
+
     bool lastRoundPlayed = true;
 
     //check if last round has been played entirely
@@ -1069,7 +1096,7 @@ void TSerie::clickedOnMatch(int round, int match)
     if (m)
     {
         //disable action if
-        if (m->get_isBye() || !m->get_player1() || !m->get_player1() ||
+        if (m->get_isBye() || !m->get_player1() || !m->get_player2() ||
             get_status() == "finished")
             actionDisabled = true;
     }
@@ -1195,6 +1222,12 @@ void TSerie::playersModelChanged()
     update_rounds(rounds);
 
     qDebug() << "Serie: " << get_name() << " players:" << players->rowCount() << " rounds: " << rounds;
+
+    // Do not reset matches if the serie is currently playing or finished,
+    // as prepareMatches() would wipe all scores and bracket progression.
+    // rounds must still be computed above so QML can render the bracket.
+    if (get_status() == "playing" || get_status() == "finished")
+        return;
 
     prepareMatches();
     updateCurrentRound();

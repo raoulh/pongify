@@ -29,8 +29,10 @@ PlayerModel *PlayerModel::createEmpty()
 
 QVariant PlayerModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() ||
-        (!players.isEmpty() && !players.at(0)->get_licenseSecond().isEmpty() && role < Qt::UserRole))
+    if (!index.isValid() || index.row() < 0 || index.row() >= players.count())
+        return QVariant();
+
+    if (!players.isEmpty() && !players.at(0)->get_licenseSecond().isEmpty() && role < Qt::UserRole)
         return QVariant();
 
     switch (role) {
@@ -110,6 +112,8 @@ QHash<int, QByteArray> PlayerModel::roleNames() const
 bool PlayerModel::removeRows(int row, int count, const QModelIndex &)
 {
     beginRemoveRows({}, row, row + count - 1);
+    for (int i = 0; i < count; ++i)
+        delete players.at(row + i);
     players.remove(row, count);
     endRemoveRows();
     emit playersChanged();
@@ -200,9 +204,11 @@ void PlayerModel::appendClone(Player *p)
 
 void PlayerModel::clear()
 {
+    beginResetModel();
     qDeleteAll(players);
     players.clear();
     clubs.clear();
+    endResetModel();
 }
 
 Player *PlayerModel::getFromLicense(QString lic)
@@ -270,7 +276,7 @@ void PlayerModel::saveCache()
     jdoc.setArray(arr);
 
     QFile cacheFile(QStringLiteral("%1/players.cache").arg(Utils::getCachePath()));
-    if (!cacheFile.open(QFile::ReadWrite))
+    if (!cacheFile.open(QFile::WriteOnly | QFile::Truncate))
     {
         QMessageBox::warning(nullptr, "Erreur", "Impossible d'ecrire dans le fichier de cache!");
         return;
@@ -363,6 +369,7 @@ void PlayerFilterModel::setClub(QString s)
 void PlayerFilterModel::setLicenseList(QStringList lics)
 {
     licenseList = lics;
+    invalidate();
 }
 
 void PlayerFilterModel::setSearchName(QString s)

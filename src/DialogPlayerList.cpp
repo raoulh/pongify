@@ -144,6 +144,7 @@ DialogPlayerList::DialogPlayerList(TSerie *s, QWidget *parent) :
     filterModel->setSourceModel(playerModel);
 
     ui->treeView->setItemDelegate(new TwoLineItemDelegate());
+    ui->treeView->itemDelegate()->setParent(ui->treeView);
     ui->treeView->setModel(filterModel);
     ui->treeView->setUniformRowHeights(true);
 
@@ -156,6 +157,7 @@ DialogPlayerList::DialogPlayerList(TSerie *s, QWidget *parent) :
 
 DialogPlayerList::~DialogPlayerList()
 {
+    delete playerModel;
     delete ui;
 }
 

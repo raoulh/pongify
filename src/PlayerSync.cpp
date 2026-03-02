@@ -52,8 +52,14 @@ void PlayerSync::start()
 void PlayerSync::cancel()
 {
     eventLoop->quit();
-    delete cdslsProc;
-    cdslsProc = nullptr;
+    if (cdslsProc)
+    {
+        cdslsProc->terminate();
+        if (!cdslsProc->waitForFinished(3000))
+            cdslsProc->kill();
+        delete cdslsProc;
+        cdslsProc = nullptr;
+    }
 }
 
 void PlayerSync::readStdOut()

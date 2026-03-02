@@ -396,7 +396,14 @@ void MainWindow::broadcastStart()
     {
         update_broadcastActive(true);
         if (broadcastWin)
-            broadcastWin->deleteLater();
+        {
+            // Delete immediately to avoid race condition with deferred deletion
+            // where the old window's windowClosed signal could trigger broadcastStop
+            // and destroy the new window
+            disconnect(broadcastWin, nullptr, this, nullptr);
+            delete broadcastWin;
+            broadcastWin = nullptr;
+        }
         broadcastWin = new BroadcastWindow(d.getScreen(), d.getFullscreen(), currentTournament, this);
         connect(broadcastWin, &BroadcastWindow::windowClosed, this, [=]()
         {
@@ -517,12 +524,18 @@ void MainWindow::loadQmlApp()
 
 void MainWindow::buildMatchTableModel()
 {
-    for (int i = 0; i < matchTableModel->count(); ++i)
+    // Remove items from model and delete. Set parent to nullptr first to
+    // avoid double-free via QObject parent-child ownership.
+    while (matchTableModel->count() > 0)
     {
-        auto m = matchTableModel->get(i);
-        if (m) delete m;
+        auto m = matchTableModel->get(0);
+        matchTableModel->remove(m);
+        if (m)
+        {
+            m->setParent(nullptr);
+            delete m;
+        }
     }
-    matchTableModel->clear();
 
     //search all series
     for (int i = 0; i < currentTournament->serieCount(); ++i)
@@ -545,6 +558,11 @@ void MainWindow::buildMatchTableModel()
             {
                 auto t = currentTournament->getTable(k);
                 if (!t || t->get_free()) continue;
+
+                // Guard against null players on table or match
+                if (!t->get_player1() || !t->get_player2() ||
+                    !m.p_match->get_player1() || !m.p_match->get_player2())
+                    continue;
 
                 QStringList licTable({t->get_player1()->get_license(),
                                       t->get_player2()->get_license(),

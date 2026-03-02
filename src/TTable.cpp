@@ -81,9 +81,9 @@ void TTable::setRoundMatch(TSerie *serie, int round, int match)
     currentMatchIndex = match;
 
     update_serieName(serie? serie->get_name(): "");
-    auto p1 = reinterpret_cast<Player *>(serie? serie->getPlayer1(round, match): nullptr);
-    auto p2 = reinterpret_cast<Player *>(serie? serie->getPlayer2(round, match): nullptr);
-    auto dbl = reinterpret_cast<Player *>(serie? serie->get_isDouble(): false);
+    auto p1 = serie? qobject_cast<Player *>(serie->getPlayer1(round, match)): nullptr;
+    auto p2 = serie? qobject_cast<Player *>(serie->getPlayer2(round, match)): nullptr;
+    bool dbl = serie? serie->get_isDouble(): false;
 
     update_player1(p1);
     update_player2(p2);
