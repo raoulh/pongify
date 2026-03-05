@@ -44,6 +44,8 @@ public slots:
     void nextView();
     void previousView();
     Q_INVOKABLE void setCurrentViewTimer(int ms);
+
+public:
     void grabPreview(int maxWidth, std::function<void(const QImage &)> callback);
 
 private slots:
