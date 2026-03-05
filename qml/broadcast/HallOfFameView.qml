@@ -160,6 +160,7 @@ Rectangle {
             id: hof
             scaleFactor: 3
             winnerModel: viewSerie? viewSerie.winners: null
+            isDouble: viewSerie? viewSerie.isDouble: false
         }
 
     }

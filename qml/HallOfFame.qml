@@ -6,6 +6,7 @@ ColumnLayout {
     id: hof
     property real scaleFactor: 1.0
     property bool temporary: false
+    property bool isDouble: false
 
     property QtObject winnerModel
 
@@ -84,7 +85,9 @@ ColumnLayout {
                     Text {
                         rightPadding: hof.sc(10)
                         Layout.fillWidth: true
-                        text: "%1 %2".arg(firstName).arg(lastName)
+                        text: hof.isDouble && firstNameSecond !== ""?
+                                  "%1 %2 / %3 %4".arg(firstName).arg(lastName).arg(firstNameSecond).arg(lastNameSecond):
+                                  "%1 %2".arg(firstName).arg(lastName)
                         font.bold: true
                         color: "black"
                         elide: Text.ElideMiddle

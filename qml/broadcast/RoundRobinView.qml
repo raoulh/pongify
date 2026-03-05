@@ -188,6 +188,7 @@ Rectangle {
                 temporary: true
                 scaleFactor: 2
                 winnerModel: viewSerie? viewSerie.winners: null
+                isDouble: viewSerie? viewSerie.isDouble: false
 
                 visible: viewSerie.winners.count > 2
             }
