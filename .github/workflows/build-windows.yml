@@ -64,12 +64,11 @@ jobs:
           echo "version_info=$VERSION_INFO" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION (VersionInfo: $VERSION_INFO)"
 
-      - name: Bump version in version.h
-        if: github.event_name == 'workflow_dispatch'
+      - name: Update version in version.h
         shell: pwsh
         run: |
           $content = Get-Content version.h -Raw
-          $content = $content -replace 'pongify_version\s*=\s*"[^"]*"', "pongify_version = `"${{ inputs.version }}`""
+          $content = $content -replace 'pongify_version\s*=\s*"[^"]*"', "pongify_version = `"${{ steps.version.outputs.version }}`""
           Set-Content version.h $content -NoNewline
           Get-Content version.h
 

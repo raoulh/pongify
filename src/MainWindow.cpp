@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent):
 
     setWindowTitle("Pongify - Gestion de tournoi");
 
-    QLabel *cpyLabel = new QLabel("(c) 2024 Raoul Hecky");
+    QLabel *cpyLabel = new QLabel("(c) 2026 Raoul Hecky");
     ui->statusbar->addPermanentWidget(cpyLabel, 1);
 
     QTimer::singleShot(100, this, []()
