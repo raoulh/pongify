@@ -68,82 +68,87 @@ Rectangle {
             }
         }
 
-        Item {
+        SplitView {
+            orientation: Qt.Vertical
             Layout.fillWidth: true
             Layout.fillHeight: true
-            clip: true
 
-            ListView {
-                id: listSerie
-                anchors.fill: parent
+            Item {
+                SplitView.fillHeight: true
+                SplitView.minimumHeight: 80
+                clip: true
 
-                model: currentTournament? currentTournament.series: undefined
+                ListView {
+                    id: listSerie
+                    anchors.fill: parent
 
-                delegate: ItemDelegate {
-                    id: control
+                    model: currentTournament? currentTournament.series: undefined
 
-                    width: parent? parent.width: 0
-                    height: bt.implicitHeight + 10
-                    text: name
+                    delegate: ItemDelegate {
+                        id: control
 
-                    onClicked: AppActions.selectSerie(index)
+                        width: parent? parent.width: 0
+                        height: bt.implicitHeight + 10
+                        text: name
 
-                    contentItem: RowLayout {
-                        width: 300
-                        spacing: 4
+                        onClicked: AppActions.selectSerie(index)
 
-                        Item { Layout.preferredWidth: 5; height: 1 }
+                        contentItem: RowLayout {
+                            width: 300
+                            spacing: 4
 
-                        Image {
-                            Layout.preferredHeight: 20
-                            Layout.preferredWidth: 20
-                            source: qtObject.status == "playing"?
-                                        "qrc:/icons/pongify/32x32@4/play-button.png" :
-                                        "qrc:/img/podium.png"
-                            fillMode: Image.PreserveAspectFit
+                            Item { Layout.preferredWidth: 5; height: 1 }
 
-                            visible: qtObject.status != "stopped"
+                            Image {
+                                Layout.preferredHeight: 20
+                                Layout.preferredWidth: 20
+                                source: qtObject.status == "playing"?
+                                            "qrc:/icons/pongify/32x32@4/play-button.png" :
+                                            "qrc:/img/podium.png"
+                                fillMode: Image.PreserveAspectFit
+
+                                visible: qtObject.status != "stopped"
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                rightPadding: control.spacing
+                                text: control.text
+                                font.bold: true
+                                color: control.enabled ? "#0f4932" : "#bdbebf"
+                                elide: Text.ElideMiddle
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            Button {
+                                id: bt
+                                Layout.preferredWidth: implicitWidth
+                                icon.name: "menu"
+                                icon.height: 16
+                                onClicked: mainWindow.showSerieMenu(index)
+                            }
+
+                            Item { Layout.preferredWidth: 5; height: 1 }
                         }
 
-                        Text {
-                            Layout.fillWidth: true
-                            rightPadding: control.spacing
-                            text: control.text
-                            font.bold: true
-                            color: control.enabled ? "#0f4932" : "#bdbebf"
-                            elide: Text.ElideMiddle
-                            verticalAlignment: Text.AlignVCenter
+                        background: Rectangle {
+                            border.color: listSerie.currentIndex == index?  "#489258": "#D7DED9"
+                            border.width: 1
+                            radius: 6
+                            color: control.down ? "#eeeeee" :
+                                   listSerie.currentIndex == index? "#dedade":
+                                                                    "#fefefe"
                         }
-
-                        Button {
-                            id: bt
-                            Layout.preferredWidth: implicitWidth
-                            icon.name: "menu"
-                            icon.height: 16
-                            onClicked: mainWindow.showSerieMenu(index)
-                        }
-
-                        Item { Layout.preferredWidth: 5; height: 1 }
                     }
 
-                    background: Rectangle {
-                        border.color: listSerie.currentIndex == index?  "#489258": "#D7DED9"
-                        border.width: 1
-                        radius: 6
-                        color: control.down ? "#eeeeee" :
-                               listSerie.currentIndex == index? "#dedade":
-                                                                "#fefefe"
-                    }
+                    ScrollBar.vertical: ScrollBar {}
                 }
-
-                ScrollBar.vertical: ScrollBar {}
             }
-        }
 
-
-        BroadcastControls {
-            Layout.preferredHeight: implicitHeight
-            Layout.fillWidth: true
+            BroadcastControls {
+                SplitView.minimumHeight: 80
+                SplitView.preferredHeight: 250
+            }
         }
     }
 

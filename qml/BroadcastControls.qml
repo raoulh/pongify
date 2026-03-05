@@ -52,11 +52,11 @@ Rectangle {
                 anchors.fill: parent
 
                 ToolButtonTip {
-                    icon.name: "play-button2"
-                    onClicked: mainWindow.broadcastStart()
-                    tooltipText: "Diffuser sur un ecran"
-                    enabled: !mainWindow.broadcastActive
-                    icon.color: enabled? "white" : "#a7d9eb"
+                    icon.name: mainWindow.broadcastActive ? "screen-preview" : "play-button2"
+                    onClicked: mainWindow.broadcastActive ? mainWindow.broadcastTogglePreview() : mainWindow.broadcastStart()
+                    tooltipText: mainWindow.broadcastActive ? "Aperçu de la diffusion" : "Diffuser sur un ecran"
+                    icon.color: mainWindow.broadcastPreviewActive ? "#7fff7f" :
+                                enabled? "white" : "#a7d9eb"
                 }
 
                 ToolButtonTip {
@@ -90,22 +90,13 @@ Rectangle {
                     icon.color: enabled? "white" : "#a7d9eb"
                 }
 
-                ToolButtonTip {
-                    icon.name: "play-button"
-                    onClicked: mainWindow.broadcastTogglePreview()
-                    tooltipText: "Aperçu de la diffusion"
-                    enabled: mainWindow.broadcastActive
-                    icon.color: mainWindow.broadcastPreviewActive ? "#7fff7f" :
-                                enabled? "white" : "#a7d9eb"
-                }
-
                 Item { Layout.fillWidth: true; height: 1 }
             }
         }
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 300
+            Layout.preferredHeight: 150
             clip: true
 
             ListView {
@@ -182,13 +173,14 @@ Rectangle {
             visible: mainWindow.broadcastPreviewActive && mainWindow.broadcastActive
             Layout.fillWidth: true
             Layout.preferredHeight: previewImage.sourceSize.width > 0 ?
-                width * previewImage.sourceSize.height / previewImage.sourceSize.width : 0
-            color: "#1a1a1a"
+                width * previewImage.sourceSize.height / previewImage.sourceSize.width + 8 : 0
+            color: "#2a2a2a"
             clip: true
 
             Image {
                 id: previewImage
                 anchors.fill: parent
+                anchors.margins: 4
                 source: mainWindow.broadcastPreviewActive && mainWindow.broadcastActive ?
                     "image://broadcastpreview/" + mainWindow.previewUpdateCounter : ""
                 fillMode: Image.PreserveAspectFit
