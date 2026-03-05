@@ -9,7 +9,7 @@ Rectangle {
     ColumnLayout {
         id: col
         spacing: 0
-        width: parent.width
+        anchors.fill: parent
 
         Rectangle {
             color: "#4fc1e9"
@@ -96,7 +96,7 @@ Rectangle {
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
+            Layout.fillHeight: true
             clip: true
 
             ListView {
