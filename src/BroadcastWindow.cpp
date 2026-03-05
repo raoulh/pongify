@@ -7,6 +7,7 @@
 #include "Tournament.h"
 #include <QMessageBox>
 #include <QTimer>
+#include <QQuickItem>
 #include <QQuickItemGrabResult>
 
 BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, QWidget *parent):
