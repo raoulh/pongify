@@ -84,7 +84,6 @@ Rectangle {
 
     property real scrollTarget: 0
     property int scrollDownDuration: 0
-    property int scrollUpDuration: 0
 
     Flickable {
         id: flickable
@@ -98,15 +97,11 @@ Rectangle {
             if (flickable.contentHeight > flickable.height) {
                 var distance = flickable.contentHeight - flickable.height
                 var downMs = Math.max(1000, distance / currentTournament.broadcastScrollSpeed * 1000)
-                var minTime = 1000 + downMs + 2000
-                var viewTime = Math.max(currentTournament.timeBroadcastChange, minTime)
-                var remaining = viewTime - minTime
-                var upMs = Math.min(remaining, downMs)
-                if (upMs < 500) upMs = 0
+                var cycleTime = downMs + 2000 + downMs + 2000
+                var viewTime = Math.max(currentTournament.timeBroadcastChange, 1000 + downMs + 2000)
 
                 scrollTarget = distance
                 scrollDownDuration = downMs
-                scrollUpDuration = upMs
 
                 broadcastWindow.setCurrentViewTimer(viewTime)
                 timerAnim.restart()
@@ -132,6 +127,7 @@ Rectangle {
 
         SequentialAnimation {
             id: scrollAnimation
+            loops: Animation.Infinite
 
             NumberAnimation {
                 target: flickable; property: "contentY"
@@ -140,9 +136,9 @@ Rectangle {
             PauseAnimation { duration: 2000 }
             NumberAnimation {
                 target: flickable; property: "contentY"
-                to: scrollUpDuration > 0 ? 0 : scrollTarget
-                duration: scrollUpDuration
+                to: 0; duration: scrollDownDuration
             }
+            PauseAnimation { duration: 2000 }
         }
 
         anchors {
