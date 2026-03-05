@@ -13,6 +13,7 @@
 #include "DialogEditInfo.h"
 #include "DialogPlayersHtml.h"
 #include "DialogAbout.h"
+#include "BroadcastPreviewProvider.h"
 
 #include <qfappdispatcher.h>
 
@@ -74,6 +75,22 @@ MainWindow::MainWindow(QWidget *parent):
     update_broadcastViews(nullptr);
     matchTableModel = new QQmlObjectListModel<TableMatchItem>(this, "name");
     update_matchTableModel(matchTableModel);
+
+    previewProvider = new BroadcastPreviewProvider();
+    update_broadcastPreviewActive(false);
+    update_previewUpdateCounter(0);
+
+    previewTimer = new QTimer(this);
+    previewTimer->setInterval(100); // ~10 FPS
+    connect(previewTimer, &QTimer::timeout, this, [this]() {
+        if (broadcastWin) {
+            broadcastWin->grabPreview(640, [this](const QImage &img) {
+                previewProvider->updateImage(img);
+                update_previewUpdateCounter(get_previewUpdateCounter() + 1);
+            });
+        }
+    });
+
     loadQmlApp();
 }
 
@@ -421,6 +438,8 @@ void MainWindow::broadcastStop()
     update_broadcastActive(false);
     update_currentBrodcastViewIndex(0);
     update_broadcastViews(nullptr);
+    update_broadcastPreviewActive(false);
+    previewTimer->stop();
     if (broadcastWin)
         broadcastWin->deleteLater();
     broadcastWin = nullptr;
@@ -447,6 +466,18 @@ void MainWindow::broadcastEditInfo()
         currentTournament->update_infoText(d.getText());
         TStorage::Instance()->saveToDisk(currentTournament);
     }
+}
+
+void MainWindow::broadcastTogglePreview()
+{
+    if (!get_broadcastActive())
+        return;
+
+    update_broadcastPreviewActive(!get_broadcastPreviewActive());
+    if (get_broadcastPreviewActive())
+        previewTimer->start();
+    else
+        previewTimer->stop();
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()
@@ -519,6 +550,8 @@ void MainWindow::loadQmlApp()
     view->engine()->rootContext()->setContextProperty("selectedSerie", nullptr);
     view->engine()->rootContext()->setContextProperty("currentTournament", nullptr);
     view->engine()->rootContext()->setContextProperty("matchTableModel", matchTableModel);
+
+    view->engine()->addImageProvider("broadcastpreview", previewProvider);
 
     view->setSource(QUrl("qrc:/qml/main.qml"));
     ui->verticalLayout->addWidget(container);

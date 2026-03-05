@@ -38,6 +38,7 @@ SOURCES += \
 
 HEADERS += \
     src/BroadcastModel.h \
+    src/BroadcastPreviewProvider.h \
     src/BroadcastWindow.h \
     src/DialogAbout.h \
     src/DialogAddDoublePlayers.h \

@@ -90,6 +90,15 @@ Rectangle {
                     icon.color: enabled? "white" : "#a7d9eb"
                 }
 
+                ToolButtonTip {
+                    icon.name: "play-button"
+                    onClicked: mainWindow.broadcastTogglePreview()
+                    tooltipText: "Aperçu de la diffusion"
+                    enabled: mainWindow.broadcastActive
+                    icon.color: mainWindow.broadcastPreviewActive ? "#7fff7f" :
+                                enabled? "white" : "#a7d9eb"
+                }
+
                 Item { Layout.fillWidth: true; height: 1 }
             }
         }
@@ -166,6 +175,24 @@ Rectangle {
                 }
 
                 ScrollBar.vertical: ScrollBar {}
+            }
+        }
+
+        Rectangle {
+            visible: mainWindow.broadcastPreviewActive && mainWindow.broadcastActive
+            Layout.fillWidth: true
+            Layout.preferredHeight: previewImage.sourceSize.width > 0 ?
+                width * previewImage.sourceSize.height / previewImage.sourceSize.width : 0
+            color: "#1a1a1a"
+            clip: true
+
+            Image {
+                id: previewImage
+                anchors.fill: parent
+                source: mainWindow.broadcastPreviewActive && mainWindow.broadcastActive ?
+                    "image://broadcastpreview/" + mainWindow.previewUpdateCounter : ""
+                fillMode: Image.PreserveAspectFit
+                cache: false
             }
         }
     }

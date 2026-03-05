@@ -6,6 +6,7 @@
 #include "qqmlhelpers.h"
 #include <QQmlObjectListModel.h>
 #include "BroadcastModel.h"
+#include <functional>
 
 class Tournament;
 
@@ -43,6 +44,7 @@ public slots:
     void nextView();
     void previousView();
     Q_INVOKABLE void setCurrentViewTimer(int ms);
+    void grabPreview(int maxWidth, std::function<void(const QImage &)> callback);
 
 private slots:
     void quickViewStatusChanged(QQuickView::Status status);

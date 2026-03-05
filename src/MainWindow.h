@@ -5,6 +5,8 @@
 #include "qqmlhelpers.h"
 #include "TableMatchModel.h"
 
+class BroadcastPreviewProvider;
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -24,6 +26,10 @@ class MainWindow : public QMainWindow
     QML_READONLY_PROPERTY(int, currentBrodcastViewIndex)
 
     QML_READONLY_PROPERTY(QObject *, matchTableModel)
+
+    //broadcast preview
+    QML_READONLY_PROPERTY(bool, broadcastPreviewActive)
+    QML_READONLY_PROPERTY(int, previewUpdateCounter)
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -51,6 +57,8 @@ public:
     Q_INVOKABLE void broadcastPrevious();
     Q_INVOKABLE void broadcastEditInfo();
 
+    Q_INVOKABLE void broadcastTogglePreview();
+
 private slots:
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
     void on_actionListe_des_joueurs_triggered();
@@ -66,6 +74,9 @@ private:
     Tournament *currentTournament = nullptr;
     BroadcastWindow *broadcastWin = nullptr;
     QQmlObjectListModel<TableMatchItem> *matchTableModel = nullptr;
+
+    QTimer *previewTimer = nullptr;
+    BroadcastPreviewProvider *previewProvider = nullptr;
 
     virtual void closeEvent(QCloseEvent *event) override;
 

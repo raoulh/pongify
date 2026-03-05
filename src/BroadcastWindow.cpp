@@ -7,6 +7,7 @@
 #include "Tournament.h"
 #include <QMessageBox>
 #include <QTimer>
+#include <QQuickItemGrabResult>
 
 BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, QWidget *parent):
     QWidget{parent},
@@ -209,4 +210,26 @@ int BroadcastWindow::getCurrentViewTime()
         return 10000;
     int t = views->at(get_currentViewIndex())->get_viewTime();
     return t < 2000? 2000 : t;
+}
+
+void BroadcastWindow::grabPreview(int maxWidth, std::function<void(const QImage &)> callback)
+{
+    if (!view || !view->rootObject())
+        return;
+
+    int w = view->width();
+    int h = view->height();
+    if (w <= 0 || h <= 0)
+        return;
+
+    int targetH = maxWidth * h / w;
+    QSize targetSize(maxWidth, targetH);
+
+    auto result = view->rootObject()->grabToImage(targetSize);
+    if (!result)
+        return;
+
+    connect(result.get(), &QQuickItemGrabResult::ready, this, [result, callback]() {
+        callback(result->image());
+    });
 }
