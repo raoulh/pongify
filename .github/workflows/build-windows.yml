@@ -1,0 +1,124 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 2.1.0)"
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.10.*"
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          tools: tools_mingw1310
+          cache: true
+
+      - name: Add MinGW to PATH
+        shell: bash
+        run: |
+          # Find the MinGW bin directory installed by the Qt action
+          MINGW_PATH=$(find "$IQTA_TOOLS" -path "*/mingw*/bin" -type d | head -1)
+          echo "Found MinGW at: $MINGW_PATH"
+          echo "$MINGW_PATH" >> "$GITHUB_PATH"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: cdsls_scrapper/go.sum
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+            # Parse numeric version for VersionInfoVersion (X.X.X.0)
+            IFS='.' read -r major minor patch <<< "$VERSION"
+            VERSION_INFO="${major:-0}.${minor:-0}.${patch:-0}.0"
+          else
+            # Extract base version from version.h
+            BASE_VERSION=$(grep -oP 'pongify_version\s*=\s*"\K[^"]+' version.h)
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${BASE_VERSION}-dev+${SHORT_SHA}"
+            VERSION_INFO="0.0.0.0"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_info=$VERSION_INFO" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION (VersionInfo: $VERSION_INFO)"
+
+      - name: Bump version in version.h
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          $content = Get-Content version.h -Raw
+          $content = $content -replace 'pongify_version\s*=\s*"[^"]*"', "pongify_version = `"${{ inputs.version }}`""
+          Set-Content version.h $content -NoNewline
+          Get-Content version.h
+
+      - name: Commit version bump
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.h
+          git commit -m "chore: bump version to ${{ inputs.version }} [skip ci]"
+          git push origin master
+
+      - name: Build cdsls_scrapper
+        shell: bash
+        run: |
+          cd cdsls_scrapper
+          GOOS=windows GOARCH=amd64 go build -o cdsls_scrapper.exe .
+
+      - name: Build pongify
+        shell: bash
+        run: |
+          qmake pongify.pro CONFIG+=release
+          mingw32-make -j$(nproc)
+
+      - name: Package with windeployqt
+        shell: bash
+        run: |
+          mkdir -p deploy
+          cp release/pongify.exe deploy/
+          cp cdsls_scrapper/cdsls_scrapper.exe deploy/
+          windeployqt --qmldir qml deploy/pongify.exe
+
+      - name: Build installer
+        shell: bash
+        run: |
+          iscc //DMyAppVersion="${{ steps.version.outputs.version }}" installer/pongify.iss
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PongifySetup-${{ steps.version.outputs.version }}
+          path: installer/Output/PongifySetup-${{ steps.version.outputs.version }}.exe
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: Pongify v${{ inputs.version }}
+          generate_release_notes: true
+          files: installer/Output/PongifySetup-${{ inputs.version }}.exe
