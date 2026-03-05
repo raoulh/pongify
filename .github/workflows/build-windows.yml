@@ -55,7 +55,7 @@ jobs:
             VERSION_INFO="${major:-0}.${minor:-0}.${patch:-0}.0"
           else
             # Extract base version from version.h
-            BASE_VERSION=$(grep -oP 'pongify_version\s*=\s*"\K[^"]+' version.h)
+            BASE_VERSION=$(sed -n 's/.*pongify_version *= *"\([^"]*\)".*/\1/p' version.h)
             SHORT_SHA=$(git rev-parse --short HEAD)
             VERSION="${BASE_VERSION}-dev+${SHORT_SHA}"
             VERSION_INFO="0.0.0.0"
