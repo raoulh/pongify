@@ -58,7 +58,7 @@ ColumnLayout {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: sc(36)
+                Layout.preferredHeight: hof.isDouble && firstNameSecond !== ""? sc(60): sc(36)
                 Layout.margins: hof.sc(5)
 
                 radius: hof.sc(4)
@@ -82,35 +82,69 @@ ColumnLayout {
                         }
                     }
 
-                    Text {
-                        rightPadding: hof.sc(10)
+                    Column {
                         Layout.fillWidth: true
-                        text: hof.isDouble && firstNameSecond !== ""?
-                                  "%1 %2 / %3 %4".arg(firstName).arg(lastName).arg(firstNameSecond).arg(lastNameSecond):
-                                  "%1 %2".arg(firstName).arg(lastName)
-                        font.bold: true
-                        color: "black"
-                        elide: Text.ElideMiddle
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        font {
-                            pointSize: sc(12)
-                            bold: true
+
+                        Text {
+                            width: parent.width
+                            rightPadding: hof.sc(10)
+                            text: "%1 %2".arg(firstName).arg(lastName)
+                            font.bold: true
+                            color: "black"
+                            elide: Text.ElideMiddle
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            font {
+                                pointSize: sc(12)
+                                bold: true
+                            }
+                        }
+
+                        Text {
+                            width: parent.width
+                            rightPadding: hof.sc(10)
+                            visible: hof.isDouble && firstNameSecond !== ""
+                            text: "%1 %2".arg(firstNameSecond).arg(lastNameSecond)
+                            font.bold: true
+                            color: "black"
+                            elide: Text.ElideMiddle
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            font {
+                                pointSize: sc(12)
+                                bold: true
+                            }
                         }
                     }
                 }
             }
 
-            Text {
+            Column {
                 Layout.margins: hof.sc(10)
-                text: ranking
-                font.bold: true
-                color: "#b79217"
-                elide: Text.ElideMiddle
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                font {
-                    pointSize: sc(12)
+
+                Text {
+                    text: ranking
+                    font.bold: true
+                    color: "#b79217"
+                    elide: Text.ElideMiddle
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    font {
+                        pointSize: sc(12)
+                    }
+                }
+
+                Text {
+                    visible: hof.isDouble && firstNameSecond !== ""
+                    text: rankingSecond
+                    font.bold: true
+                    color: "#b79217"
+                    elide: Text.ElideMiddle
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    font {
+                        pointSize: sc(12)
+                    }
                 }
             }
         }
