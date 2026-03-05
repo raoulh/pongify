@@ -109,7 +109,12 @@ void BroadcastWindow::reloadViews()
     auto v = new BroadcastView(this);
     v->update_viewUrl("qrc:/qml/broadcast/DefaultView.qml");
     v->update_name("Information tournoi");
+    v->set_viewVisible(currentTournament->get_defaultViewVisible());
     v->set_viewTime(10000);
+    connect(currentTournament, &Tournament::defaultViewVisibleChanged, v, [this, v]()
+    {
+        v->set_viewVisible(currentTournament->get_defaultViewVisible());
+    });
     views->append(v);
 
     for (int i = 0;i < currentTournament->serieCount();i++)

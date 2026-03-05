@@ -10,6 +10,12 @@ Tournament::Tournament(QObject *parent):
     update_series(series);
     tables = new QQmlObjectListModel<TTable>(this, "tableNumber");
     update_tables(tables);
+    set_defaultViewVisible(true);
+
+    connect(this, &Tournament::defaultViewVisibleChanged, this, [this]()
+    {
+        TStorage::Instance()->saveToDisk(this);
+    });
 }
 
 void Tournament::addSerie(TSerie *s)
@@ -18,6 +24,11 @@ void Tournament::addSerie(TSerie *s)
     series->append(s);
 
     connect(s, &TSerie::matchesUpdated, this, [this]()
+    {
+        TStorage::Instance()->saveToDisk(this);
+    });
+
+    connect(s, &TSerie::viewVisibleChanged, this, [this]()
     {
         TStorage::Instance()->saveToDisk(this);
     });
@@ -131,6 +142,7 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
     t->update_broadcastScrollSpeed(obj["broadcast_scroll_speed"].toInt());
     if (t->get_broadcastScrollSpeed() < 10)
         t->update_broadcastScrollSpeed(80);
+    t->set_defaultViewVisible(obj.contains("default_view_visible") ? obj["default_view_visible"].toBool() : true);
 
     QJsonArray arr = obj["series"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -175,5 +187,6 @@ QJsonObject Tournament::toJson()
         { "info_text", get_infoText() },
         { "time_broadcast_change", get_timeBroadcastChange() },
         { "broadcast_scroll_speed", get_broadcastScrollSpeed() },
+        { "default_view_visible", get_defaultViewVisible() },
     };
 }

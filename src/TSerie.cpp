@@ -111,6 +111,7 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
     t->update_isDouble(obj["double"].toBool());
     t->update_isHandicap(obj["handicap"].toBool());
     t->set_serieUid(obj["uid"].toString());
+    t->set_viewVisible(obj.contains("view_visible") ? obj["view_visible"].toBool() : true);
     if (t->get_serieUid().isEmpty())
         t->set_serieUid(QUuid::createUuid().toString());
 
@@ -207,6 +208,7 @@ QJsonObject TSerie::toJson()
     obj.insert("double", get_isDouble());
     obj.insert("handicap", get_isHandicap());
     obj.insert("uid", get_serieUid());
+    obj.insert("view_visible", get_viewVisible());
 
     QJsonArray arr;
     for (int i = 0;i < players->rowCount();i++)

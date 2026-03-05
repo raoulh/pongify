@@ -146,6 +146,8 @@ Rectangle {
                                     viewSerie.viewVisible = checked
                                 } else {
                                     viewVisible = checked
+                                    if (currentTournament)
+                                        currentTournament.defaultViewVisible = checked
                                 }
                             }
                         }
