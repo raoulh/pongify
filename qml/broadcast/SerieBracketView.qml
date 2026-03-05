@@ -82,26 +82,41 @@ Rectangle {
     }
 
 
-    // Adaptive scroll: duration based on content size and constant speed
-    property int scrollDistance: Math.max(0, flickable.contentHeight - flickable.height)
-    property int scrollDuration: scrollDistance > 0 ? Math.max(1000, scrollDistance / currentTournament.broadcastScrollSpeed * 1000) : 0
-    property int neededViewTime: scrollDuration > 0 ? 1000 + scrollDuration + 2000 : currentTournament.timeBroadcastChange
+    property real scrollTarget: 0
+    property int scrollDownDuration: 0
+    property int scrollUpDuration: 0
 
     Flickable {
         id: flickable
         interactive: false
 
         function initPosition() {
-            state = "top"
+            scrollAnimation.stop()
+            contentY = 0
             contentX = 0
-            if (flickable.contentItem.height > flickable.height) {
+
+            if (flickable.contentHeight > flickable.height) {
+                var distance = flickable.contentHeight - flickable.height
+                var downMs = Math.max(1000, distance / currentTournament.broadcastScrollSpeed * 1000)
+                var minTime = 1000 + downMs + 2000
+                var viewTime = Math.max(currentTournament.timeBroadcastChange, minTime)
+                var remaining = viewTime - minTime
+                var upMs = Math.min(remaining, downMs)
+                if (upMs < 500) upMs = 0
+
+                scrollTarget = distance
+                scrollDownDuration = downMs
+                scrollUpDuration = upMs
+
+                broadcastWindow.setCurrentViewTimer(viewTime)
                 timerAnim.restart()
             } else {
                 //center Y
                 contentY = Qt.binding(() => { return -(flickable.height - flickable.contentItem.height) / 2 })
+                broadcastWindow.setCurrentViewTimer(currentTournament.timeBroadcastChange)
             }
 
-            if (flickable.contentItem.width < flickable.width) {
+            if (flickable.contentWidth < flickable.width) {
                 //center X
                 contentX = Qt.binding(() => { return -(flickable.width - flickable.contentItem.width) / 2 })
             }
@@ -112,33 +127,23 @@ Rectangle {
             running: false
             repeat: false
             interval: 1000
-            onTriggered: flickable.state = "bottom"
+            onTriggered: scrollAnimation.start()
         }
 
-        states: [
-            State {
-                name: "top"
-                PropertyChanges {
-                    target: flickable
-                    contentY: 0
-                }
-            },
-            State {
-                name: "bottom"
-                PropertyChanges {
-                    target: flickable
-                    contentY: contentHeight - flickable.height
-                }
-            }
-        ]
+        SequentialAnimation {
+            id: scrollAnimation
 
-        transitions: [
-            Transition {
-                from: "top"
-                to: "bottom"
-                NumberAnimation { target: flickable; properties: "contentY"; duration: scrollDuration }
+            NumberAnimation {
+                target: flickable; property: "contentY"
+                to: scrollTarget; duration: scrollDownDuration
             }
-        ]
+            PauseAnimation { duration: 2000 }
+            NumberAnimation {
+                target: flickable; property: "contentY"
+                to: scrollUpDuration > 0 ? 0 : scrollTarget
+                duration: scrollUpDuration
+            }
+        }
 
         anchors {
             left: parent.left; leftMargin: 25

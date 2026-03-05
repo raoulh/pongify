@@ -64,9 +64,7 @@ void BroadcastWindow::nextView()
     }
 
     update_currentViewIndex(curr);
-
-    timerViewChange->stop();
-    timerViewChange->start(getCurrentViewTime());
+    //timer will be restarted by the QML view via setCurrentViewTimer()
 }
 
 void BroadcastWindow::previousView()
@@ -89,9 +87,7 @@ void BroadcastWindow::previousView()
     }
 
     update_currentViewIndex(curr);
-
-    timerViewChange->stop();
-    timerViewChange->start(getCurrentViewTime());
+    //timer will be restarted by the QML view via setCurrentViewTimer()
 }
 
 void BroadcastWindow::quickViewStatusChanged(QQuickView::Status status)

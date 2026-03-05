@@ -13,8 +13,8 @@ SwipeView {
         if (currentItem && currentItem.item) {
             if (currentItem.item.hasOwnProperty('startViewShow'))
                 currentItem.item.startViewShow()
-            if (currentItem.item.hasOwnProperty('neededViewTime'))
-                broadcastWindow.setCurrentViewTimer(currentItem.item.neededViewTime)
+            else
+                broadcastWindow.setCurrentViewTimer(currentTournament.timeBroadcastChange)
         }
     }
 
