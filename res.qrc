@@ -86,6 +86,10 @@
         <file>icons/pongify/32x32@2/previous.png</file>
         <file>icons/pongify/32x32@3/previous.png</file>
         <file>icons/pongify/32x32@4/previous.png</file>
+        <file>icons/pongify/32x32/screen-preview.png</file>
+        <file>icons/pongify/32x32@2/screen-preview.png</file>
+        <file>icons/pongify/32x32@3/screen-preview.png</file>
+        <file>icons/pongify/32x32@4/screen-preview.png</file>
         <file>img/radio-button.png</file>
         <file>img/radio-button-selected.png</file>
         <file>img/text-editor/format_align_center_black_24dp.svg</file>
