@@ -10,9 +10,12 @@ SwipeView {
     currentIndex: broadcastWindow.currentViewIndex
 
     onCurrentIndexChanged: {
-        if (currentItem && currentItem.item &&
-            currentItem.item.hasOwnProperty('startViewShow'))
-            currentItem.item.startViewShow()
+        if (currentItem && currentItem.item) {
+            if (currentItem.item.hasOwnProperty('startViewShow'))
+                currentItem.item.startViewShow()
+            if (currentItem.item.hasOwnProperty('neededViewTime'))
+                broadcastWindow.setCurrentViewTimer(currentItem.item.neededViewTime)
+        }
     }
 
     Repeater {

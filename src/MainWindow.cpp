@@ -477,11 +477,13 @@ void MainWindow::on_actionPropri_t_s_triggered()
     d.setName(currentTournament->get_name());
     d.setDate(currentTournament->get_date().date());
     d.setTime(currentTournament->get_timeBroadcastChange());
+    d.setScrollSpeed(currentTournament->get_broadcastScrollSpeed());
     if (d.exec() == QDialog::Accepted)
     {
         currentTournament->update_name(d.getName());
         currentTournament->update_date(QDateTime(d.getDate(), QTime::currentTime()));
         currentTournament->update_timeBroadcastChange(d.getTime());
+        currentTournament->update_broadcastScrollSpeed(d.getScrollSpeed());
         TStorage::Instance()->saveToDisk(currentTournament);
     }
 }

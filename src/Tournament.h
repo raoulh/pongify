@@ -18,6 +18,7 @@ class Tournament: public QObject
     QML_READONLY_PROPERTY(QObject *, series)
     QML_READONLY_PROPERTY(QString, infoText)
     QML_READONLY_PROPERTY(int, timeBroadcastChange)
+    QML_READONLY_PROPERTY(int, broadcastScrollSpeed)
     QML_READONLY_PROPERTY(QObject *, tables)
 
 public:

@@ -42,6 +42,7 @@ signals:
 public slots:
     void nextView();
     void previousView();
+    Q_INVOKABLE void setCurrentViewTimer(int ms);
 
 private slots:
     void quickViewStatusChanged(QQuickView::Status status);

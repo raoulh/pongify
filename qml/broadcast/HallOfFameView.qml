@@ -64,6 +64,11 @@ Rectangle {
         }
     }
 
+    // Adaptive scroll: duration based on content size and constant speed
+    property int scrollDistance: Math.max(0, flickable.contentHeight - flickable.height)
+    property int scrollDuration: scrollDistance > 0 ? Math.max(1000, scrollDistance / currentTournament.broadcastScrollSpeed * 1000) : 0
+    property int neededViewTime: scrollDuration > 0 ? 1000 + scrollDuration + 2000 : currentTournament.timeBroadcastChange
+
     Flickable {
         id: flickable
         interactive: false
@@ -113,7 +118,7 @@ Rectangle {
             Transition {
                 from: "top"
                 to: "bottom"
-                NumberAnimation { target: flickable; properties: "contentY"; duration: currentTournament.timeBroadcastChange - 2000 }
+                NumberAnimation { target: flickable; properties: "contentY"; duration: scrollDuration }
             }
         ]
 

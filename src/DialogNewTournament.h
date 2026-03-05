@@ -21,6 +21,8 @@ public:
     QDate getDate();
     void setTime(int time);
     int getTime();
+    void setScrollSpeed(int speed);
+    int getScrollSpeed();
 
 private:
     Ui::DialogNewTournament *ui;

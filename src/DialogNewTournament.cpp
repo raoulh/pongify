@@ -15,6 +15,11 @@ DialogNewTournament::DialogNewTournament(bool newTournament, QWidget *parent) :
     ui->spinBoxTime->setValue(15000);
     ui->spinBoxTime->setMinimum(2000);
     ui->spinBoxTime->setMaximum(99999999);
+
+    ui->spinBoxScrollSpeed->setValue(80);
+    ui->spinBoxScrollSpeed->setMinimum(20);
+    ui->spinBoxScrollSpeed->setMaximum(500);
+    ui->spinBoxScrollSpeed->setSuffix(" px/s");
 }
 
 DialogNewTournament::~DialogNewTournament()
@@ -50,4 +55,14 @@ void DialogNewTournament::setTime(int time)
 int DialogNewTournament::getTime()
 {
     return ui->spinBoxTime->value();
+}
+
+void DialogNewTournament::setScrollSpeed(int speed)
+{
+    ui->spinBoxScrollSpeed->setValue(speed);
+}
+
+int DialogNewTournament::getScrollSpeed()
+{
+    return ui->spinBoxScrollSpeed->value();
 }

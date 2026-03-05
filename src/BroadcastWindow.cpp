@@ -167,6 +167,13 @@ void BroadcastWindow::timerViewTick()
     nextView();
 }
 
+void BroadcastWindow::setCurrentViewTimer(int ms)
+{
+    int t = ms < 3000 ? 3000 : ms;
+    timerViewChange->stop();
+    timerViewChange->start(t);
+}
+
 void BroadcastWindow::loadQmlApp()
 {
     view = new BWQQuickView();

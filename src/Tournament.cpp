@@ -128,6 +128,9 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
     t->update_timeBroadcastChange(obj["time_broadcast_change"].toInt());
     if (t->get_timeBroadcastChange() < 2000)
         t->update_timeBroadcastChange(10000);
+    t->update_broadcastScrollSpeed(obj["broadcast_scroll_speed"].toInt());
+    if (t->get_broadcastScrollSpeed() < 10)
+        t->update_broadcastScrollSpeed(80);
 
     QJsonArray arr = obj["series"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -171,5 +174,6 @@ QJsonObject Tournament::toJson()
         { "tables", arr2 },
         { "info_text", get_infoText() },
         { "time_broadcast_change", get_timeBroadcastChange() },
+        { "broadcast_scroll_speed", get_broadcastScrollSpeed() },
     };
 }
