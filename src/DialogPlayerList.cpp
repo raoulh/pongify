@@ -168,15 +168,20 @@ void DialogPlayerList::on_pushButtonAdd_clicked()
         DialogAddDoublePlayers d;
         if (d.exec() == QDialog::Accepted)
         {
-            playerModel->appendClone(d.getPlayer1());
-            auto p1 = playerModel->item(playerModel->rowCount() - 1);
+            auto p1 = d.getPlayer1();
             auto p2 = d.getPlayer2();
-            p1->update_firstNameSecond(p2->get_firstName());
-            p1->update_lastNameSecond(p2->get_lastName());
-            p1->update_clubSecond(p2->get_club());
-            p1->update_licenseSecond(p2->get_license());
-            p1->update_rankingSecond(p2->get_ranking());
-            p1->update_licenseValidSecond(p2->get_licenseValid());
+
+            // Build a merged JSON with both players' data so the model
+            // receives complete double info at insert time (fixes column count)
+            QJsonObject merged = p1->toJson();
+            merged.insert("firstnameSecond", p2->get_firstName());
+            merged.insert("lastnameSecond", p2->get_lastName());
+            merged.insert("clubSecond", p2->get_club());
+            merged.insert("licenseSecond", p2->get_license());
+            merged.insert("rankingSecond", p2->get_ranking());
+            merged.insert("license_validSecond", p2->get_licenseValid());
+
+            playerModel->loadPlayer(merged);
         }
 
         return;

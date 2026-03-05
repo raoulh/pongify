@@ -111,11 +111,25 @@ QHash<int, QByteArray> PlayerModel::roleNames() const
 
 bool PlayerModel::removeRows(int row, int count, const QModelIndex &)
 {
-    beginRemoveRows({}, row, row + count - 1);
+    // When removing all remaining double players, column count changes from 1 to 5.
+    // Use beginResetModel to notify the view of the structural change.
+    bool columnChange = (players.count() - count == 0) &&
+                        !players.isEmpty() && !players.at(0)->get_licenseSecond().isEmpty();
+
+    if (columnChange)
+        beginResetModel();
+    else
+        beginRemoveRows({}, row, row + count - 1);
+
     for (int i = 0; i < count; ++i)
         delete players.at(row + i);
     players.remove(row, count);
-    endRemoveRows();
+
+    if (columnChange)
+        endResetModel();
+    else
+        endRemoveRows();
+
     emit playersChanged();
     return true;
 }
@@ -171,9 +185,21 @@ void PlayerModel::loadPlayer(const QJsonObject &obj)
 
     if (idx < 0)
     {
-        beginInsertRows({}, players.count(), players.count());
+        // When inserting a double player into an empty model, the column count
+        // changes from 5 to 1. Use beginResetModel to notify the view.
+        bool columnChange = players.isEmpty() && !obj["licenseSecond"].toString().isEmpty();
+        if (columnChange)
+            beginResetModel();
+        else
+            beginInsertRows({}, players.count(), players.count());
+
         players.append(player);
-        endInsertRows();
+
+        if (columnChange)
+            endResetModel();
+        else
+            endInsertRows();
+
         emit playersChanged();
     }
 }
