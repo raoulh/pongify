@@ -1,10 +1,11 @@
 /**
  * Reads the AES key from sessionStorage (set by main.js at startup).
  * Falls back to parsing the current URL hash.
+ * @param {string} uuid - Tournament UUID for scoped storage lookup
  * @returns {Uint8Array|null}
  */
-export function getKeyFromFragment() {
-  const stored = sessionStorage.getItem('pongify_key')
+export function getKeyFromFragment(uuid) {
+  const stored = sessionStorage.getItem('pongify_key_' + uuid)
   if (stored) return base64urlDecode(stored)
 
   const hash = window.location.hash

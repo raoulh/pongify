@@ -211,6 +211,7 @@ void WebPublisher::doEncryptAndSend(const QByteArray &plaintext)
     QNetworkRequest request{QUrl(url)};
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
     request.setRawHeader("X-Write-Secret", m_tournament->get_writeSecret().toUtf8());
+    request.setRawHeader("X-Admin-Secret", m_adminSecret.toUtf8());
     request.setRawHeader("X-Pongify-Version", pongify_version);
 
     QNetworkReply *reply = m_nam->put(request, payload);

@@ -18,7 +18,7 @@ export function useTournament(uuid) {
   let pollTimer = null
   let lastKnownVersion = 0
   let isVisible = true
-  const keyBytes = getKeyFromFragment()
+  const keyBytes = getKeyFromFragment(uuid)
   const apiBase = window.location.origin
 
   const lastUpdateTime = computed(() => {

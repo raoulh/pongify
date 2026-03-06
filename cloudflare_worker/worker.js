@@ -83,9 +83,12 @@ async function handleTournamentPut(request, env, uuid) {
   const existing = await env.KV.get(`meta:${uuid}`, 'json');
 
   if (existing) {
-    // UUID exists → verify same owner
+    // UUID exists → verify same owner, or allow admin override
     if (secretHash !== existing.secretHash) {
-      return textResponse('Forbidden', 403);
+      const adminSecret = request.headers.get('X-Admin-Secret');
+      if (!adminSecret || adminSecret !== env.ADMIN_SECRET) {
+        return textResponse('Forbidden', 403);
+      }
     }
   }
 
@@ -118,6 +121,7 @@ async function handleTournamentGet(env, uuid) {
   return new Response(data, {
     headers: {
       'Content-Type': 'application/octet-stream',
+      'Cache-Control': 'no-store',
       ...corsHeaders({
         'X-Updated-At': meta ? meta.updatedAt.toString() : '0',
       }),
@@ -148,7 +152,10 @@ async function handleTournamentDelete(request, env, uuid) {
 
   const secretHash = await sha256(writeSecret);
   if (secretHash !== meta.secretHash) {
-    return textResponse('Forbidden', 403);
+    const adminSecret = request.headers.get('X-Admin-Secret');
+    if (!adminSecret || adminSecret !== env.ADMIN_SECRET) {
+      return textResponse('Forbidden', 403);
+    }
   }
 
   await env.KV.delete(`data:${uuid}`);
