@@ -200,8 +200,24 @@ QJsonObject Tournament::toJsonForPublish()
     QJsonArray seriesArray;
     for (int i = 0; i < series->count(); i++) {
         auto s = series->at(i);
-        if (s->get_status() == "playing" || s->get_status() == "finished")
+        if (s->get_status() == "stopped")
+        {
+            // Only publish metadata for stopped series (no players/rounds/podium)
+            QJsonObject stub;
+            stub.insert("name", s->get_name());
+            stub.insert("type", s->get_tournamentType());
+            stub.insert("ranking", s->get_ranking());
+            stub.insert("status", s->get_status());
+            stub.insert("double", s->get_isDouble());
+            stub.insert("handicap", s->get_isHandicap());
+            stub.insert("uid", s->get_serieUid());
+            stub.insert("start_time", s->get_startTime());
+            seriesArray.append(stub);
+        }
+        else
+        {
             seriesArray.append(s->toJson());
+        }
     }
 
     QJsonArray tablesArray;

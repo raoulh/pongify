@@ -19,7 +19,6 @@ BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, b
     update_webPublishEnabled(webPublish);
     views = new QQmlObjectListModel<BroadcastView>(this, "view");
     update_views(views);
-    update_currentViewIndex(0);
 
     timerViewChange = new QTimer(this);
     connect(timerViewChange, &QTimer::timeout, this, &BroadcastWindow::timerViewTick);
@@ -35,6 +34,16 @@ BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, b
 
     connect(currentTournament, &Tournament::seriesStatusChanged, this, &BroadcastWindow::reloadViews);
     reloadViews();
+
+    // Start on the first visible view
+    int startIdx = 0;
+    for (int i = 0; i < views->count(); i++) {
+        if (views->at(i)->get_viewVisible()) {
+            startIdx = i;
+            break;
+        }
+    }
+    update_currentViewIndex(startIdx);
 
     timerViewChange->start(getCurrentViewTime());
 

@@ -20,7 +20,7 @@
       <div v-if="isLoading" class="flex items-center justify-center h-64">
         <span class="text-gray-400">Chargement...</span>
       </div>
-      <router-view v-else :tournament="tournament" />ok
+      <router-view v-else :tournament="tournament" />
     </main>
 
     <BottomNav v-if="tournament" />

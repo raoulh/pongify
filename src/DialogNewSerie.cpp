@@ -1,5 +1,6 @@
 #include "DialogNewSerie.h"
 #include "ui_DialogNewSerie.h"
+#include <QTime>
 
 DialogNewSerie::DialogNewSerie(bool isnew, QWidget *parent) :
     QDialog(parent),
@@ -22,6 +23,11 @@ DialogNewSerie::DialogNewSerie(bool isnew, QWidget *parent) :
 
     if (!isnew)
         ui->checkBoxDouble->setDisabled(true);
+
+    ui->timeEditStart->setDisplayFormat("HH:mm");
+    ui->timeEditStart->setEnabled(false);
+    ui->timeEditStart->setTime(QTime(9, 0));
+    connect(ui->checkStartTime, &QCheckBox::toggled, ui->timeEditStart, &QTimeEdit::setEnabled);
 }
 
 DialogNewSerie::~DialogNewSerie()
@@ -96,4 +102,24 @@ void DialogNewSerie::setHandicap(bool en)
     if (getDouble())
         return;
     ui->checkBoxHandicap->setChecked(en);
+}
+
+QString DialogNewSerie::getStartTime() const
+{
+    if (!ui->checkStartTime->isChecked())
+        return {};
+    return ui->timeEditStart->time().toString("HH:mm");
+}
+
+void DialogNewSerie::setStartTime(const QString &time)
+{
+    if (time.isEmpty())
+    {
+        ui->checkStartTime->setChecked(false);
+    }
+    else
+    {
+        ui->checkStartTime->setChecked(true);
+        ui->timeEditStart->setTime(QTime::fromString(time, "HH:mm"));
+    }
 }

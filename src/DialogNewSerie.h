@@ -26,6 +26,8 @@ public:
     void setDouble(bool en);
     bool getHandicap();
     void setHandicap(bool en);
+    QString getStartTime() const;
+    void setStartTime(const QString &time);
 
 private:
     Ui::DialogNewSerie *ui;

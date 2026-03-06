@@ -120,6 +120,14 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                             }
 
+                            Text {
+                                text: qtObject.startTime
+                                visible: qtObject.startTime !== ""
+                                color: "#666666"
+                                font.pointSize: 10
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
                             Button {
                                 id: bt
                                 Layout.preferredWidth: implicitWidth

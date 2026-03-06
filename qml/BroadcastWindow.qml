@@ -25,6 +25,14 @@ SwipeView {
             clip: true
             property QtObject serieModel: viewSerie
             source: viewUrl
+            onLoaded: {
+                if (SwipeView.isCurrentItem) {
+                    if (item.hasOwnProperty('startViewShow'))
+                        item.startViewShow()
+                    else
+                        broadcastWindow.setCurrentViewTimer(currentTournament.timeBroadcastChange)
+                }
+            }
         }
     }
 }

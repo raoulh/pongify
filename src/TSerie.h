@@ -59,6 +59,9 @@ class TSerie : public QObject
 
     QML_WRITABLE_PROPERTY(QString, serieUid)
 
+    //Optional planned start time for this serie (format "HH:mm" or empty)
+    QML_READONLY_PROPERTY(QString, startTime)
+
 public:
     explicit TSerie(QObject *parent = nullptr);
     virtual ~TSerie();

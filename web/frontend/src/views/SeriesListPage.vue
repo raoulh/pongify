@@ -2,12 +2,12 @@
   <div class="space-y-3">
     <h1 class="text-xl font-bold text-gray-800">Séries</h1>
 
-    <div v-if="!tournament.series || !tournament.series.length" class="text-gray-400 text-center py-8">
+    <div v-if="!activeSeries.length" class="text-gray-400 text-center py-8">
       Aucune série en cours
     </div>
 
-    <router-link v-for="(serie, i) in tournament.series" :key="serie.uid"
-                 :to="{ name: 'serie', params: { index: i } }"
+    <router-link v-for="(serie, i) in activeSeries" :key="serie.uid"
+                 :to="{ name: 'serie', params: { index: serie._originalIndex } }"
                  class="block bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:ring-1 hover:ring-pongify-teal">
       <div class="flex items-center gap-3">
         <StatusBadge :status="serie.status" />
@@ -18,6 +18,7 @@
             <span v-if="serie.double"> · Double</span>
             <span v-if="serie.handicap"> · Handicap</span>
             · {{ serie.players?.length || 0 }} joueurs
+            <span v-if="serie.start_time"> · 🕐 {{ serie.start_time }}</span>
           </div>
         </div>
         <span class="text-gray-400 text-lg">›</span>
@@ -31,12 +32,19 @@
 </template>
 
 <script setup>
-import { onMounted, inject } from 'vue'
+import { computed, onMounted, inject } from 'vue'
 import StatusBadge from '../components/StatusBadge.vue'
 
-defineProps({ tournament: Object })
+const props = defineProps({ tournament: Object })
 const { setPollContext } = inject('tournamentCtx')
 onMounted(() => setPollContext('home'))
+
+const activeSeries = computed(() => {
+  if (!props.tournament.series) return []
+  return props.tournament.series
+    .map((s, i) => ({ ...s, _originalIndex: i }))
+    .filter(s => s.status !== 'stopped')
+})
 
 function playedCount(serie) {
   let count = 0

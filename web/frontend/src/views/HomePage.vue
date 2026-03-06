@@ -12,20 +12,37 @@
 
     <div v-if="tournament.series && tournament.series.length" class="space-y-2">
       <h2 class="text-lg font-semibold text-gray-700">Séries</h2>
-      <router-link v-for="(serie, i) in tournament.series" :key="serie.uid"
-                   :to="{ name: 'serie', params: { index: i } }"
-                   class="block bg-white rounded-lg p-3 flex items-center gap-3 shadow-sm border border-gray-100 hover:ring-1 hover:ring-pongify-teal">
-        <StatusBadge :status="serie.status" />
-        <div class="min-w-0 flex-1">
-          <div class="font-medium truncate text-gray-800">{{ serie.name }}</div>
-          <div class="text-xs text-gray-500">
-            {{ serie.type === 'single' ? 'Élimination directe' : 'Poules' }}
-            <span v-if="serie.double"> · Double</span>
-            <span v-if="serie.handicap"> · Handicap</span>
+      <template v-for="(serie, i) in tournament.series" :key="serie.uid">
+        <router-link v-if="serie.status !== 'stopped'"
+                     :to="{ name: 'serie', params: { index: i } }"
+                     class="block bg-white rounded-lg p-3 flex items-center gap-3 shadow-sm border border-gray-100 hover:ring-1 hover:ring-pongify-teal">
+          <StatusBadge :status="serie.status" />
+          <div class="min-w-0 flex-1">
+            <div class="font-medium truncate text-gray-800">{{ serie.name }}</div>
+            <div class="text-xs text-gray-500">
+              {{ serie.type === 'single' ? 'Élimination directe' : 'Poules' }}
+              <span v-if="serie.double"> · Double</span>
+              <span v-if="serie.handicap"> · Handicap</span>
+            </div>
           </div>
+          <span v-if="serie.start_time" class="text-xs text-gray-400">🕐 {{ serie.start_time }}</span>
+          <span v-else class="text-xs text-gray-400">{{ serie.players?.length || 0 }} joueurs</span>
+        </router-link>
+        <div v-else
+             class="block bg-white rounded-lg p-3 flex items-center gap-3 shadow-sm border border-gray-100 opacity-75">
+          <StatusBadge :status="serie.status" />
+          <div class="min-w-0 flex-1">
+            <div class="font-medium truncate text-gray-800">{{ serie.name }}</div>
+            <div class="text-xs text-gray-500">
+              {{ serie.type === 'single' ? 'Élimination directe' : 'Poules' }}
+              <span v-if="serie.double"> · Double</span>
+              <span v-if="serie.handicap"> · Handicap</span>
+            </div>
+          </div>
+          <span v-if="serie.start_time" class="text-xs text-gray-400">🕐 {{ serie.start_time }}</span>
+          <span v-else class="text-xs text-gray-400">En attente</span>
         </div>
-        <span class="text-xs text-gray-400">{{ serie.players?.length || 0 }} joueurs</span>
-      </router-link>
+      </template>
     </div>
   </div>
 </template>

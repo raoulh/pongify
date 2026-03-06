@@ -112,6 +112,7 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
     t->update_isHandicap(obj["handicap"].toBool());
     t->set_serieUid(obj["uid"].toString());
     t->set_viewVisible(obj.contains("view_visible") ? obj["view_visible"].toBool() : true);
+    t->update_startTime(obj["start_time"].toString());
     if (t->get_serieUid().isEmpty())
         t->set_serieUid(QUuid::createUuid().toString());
 
@@ -209,6 +210,7 @@ QJsonObject TSerie::toJson()
     obj.insert("handicap", get_isHandicap());
     obj.insert("uid", get_serieUid());
     obj.insert("view_visible", get_viewVisible());
+    obj.insert("start_time", get_startTime());
 
     QJsonArray arr;
     for (int i = 0;i < players->rowCount();i++)
@@ -753,7 +755,7 @@ void TSerie::calculateRRWinners()
         return;
     }
 
-    if (get_currentRound() < 3)
+    if (get_currentRound() < allMatches.count() - 1)
     {
         scoresWinners.clear();
         winners->clear();

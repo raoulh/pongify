@@ -74,9 +74,7 @@ public:
 
         if (!(opt.state & QStyle::State_Selected))
         {
-            QColor penColor = painter->pen().color();
-            penColor.setNamedColor("#A0A0A0");
-            painter->setPen(penColor);
+            painter->setPen(QColor::fromString(u"#A0A0A0"));
         }
 
         painter->drawText(QRect(rect.left() + iconsize.width() + 8,

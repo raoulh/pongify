@@ -1,5 +1,9 @@
 <template>
-  <div v-if="serie" class="space-y-4">
+  <div v-if="serie && serie.status === 'stopped'" class="text-gray-400 text-center py-8">
+    Cette série n'a pas encore démarré.
+  </div>
+
+  <div v-else-if="serie" class="space-y-4">
     <div class="flex items-center gap-3">
       <StatusBadge :status="serie.status" />
       <h1 class="text-xl font-bold text-gray-800 truncate">{{ serie.name }}</h1>

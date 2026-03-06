@@ -17,7 +17,9 @@ const routes = [
   { path: '/search', name: 'search', component: SearchPage },
 ]
 
-export const router = createRouter({
-  history: createWebHashHistory(),
-  routes
-})
+export function createAppRouter() {
+  return createRouter({
+    history: createWebHashHistory(),
+    routes
+  })
+}
