@@ -1,4 +1,4 @@
-QT       += core gui widgets quick quickcontrols2 network
+QT       += core gui widgets quick quickcontrols2 network printsupport
 
 CONFIG += c++17
 
@@ -39,6 +39,7 @@ SOURCES += \
     src/MainWindow.cpp \
     src/WebPublisher.cpp \
     src/DialogWebPublish.cpp \
+    src/DialogTournamentQr.cpp \
     3rd_party/qrcodegen/qrcodegen.cpp
 
 HEADERS += \
@@ -75,6 +76,7 @@ HEADERS += \
     src/qqmlhelpers.h \
     src/WebPublisher.h \
     src/DialogWebPublish.h \
+    src/DialogTournamentQr.h \
     src/QrCodeProvider.h \
     3rd_party/qrcodegen/qrcodegen.hpp \
     version.h

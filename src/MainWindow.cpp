@@ -16,6 +16,8 @@
 #include "BroadcastPreviewProvider.h"
 #include "WebPublisher.h"
 #include "DialogWebPublish.h"
+#include "DialogTournamentQr.h"
+#include "QrCodeProvider.h"
 #include "version.h"
 
 #include <qfappdispatcher.h>
@@ -46,6 +48,11 @@ MainWindow::MainWindow(QWidget *parent):
     actionWebToggle->setCheckable(true);
     connect(actionWebToggle, &QAction::triggered, this, &MainWindow::webPublishToggle);
     connect(this, &MainWindow::webPublishEnabledChanged, actionWebToggle, &QAction::setChecked);
+
+    QAction *actionShowQr = toolsMenu->addAction(tr("QR Code du tournoi..."));
+    actionShowQr->setEnabled(false);
+    connect(actionShowQr, &QAction::triggered, this, &MainWindow::showTournamentQrCode);
+    connect(this, &MainWindow::webPublishEnabledChanged, actionShowQr, &QAction::setEnabled);
 
     setWindowTitle("Pongify - Gestion de tournoi");
 
@@ -581,6 +588,29 @@ void MainWindow::webPublishToggle()
 
     wp->uploadWebapp(pongify_version);
     wp->setTournament(currentTournament);
+}
+
+void MainWindow::showTournamentQrCode()
+{
+    if (!currentTournament || !get_webPublishEnabled())
+        return;
+
+    auto wp = WebPublisher::Instance();
+    QString baseUrl = wp->workerUrl() + "/t/" + currentTournament->get_uuid();
+
+    QrCodeProvider provider;
+    provider.setBaseInfo(baseUrl, currentTournament->get_encryptionKey());
+    QSize sz;
+    QImage qrImage = provider.requestImage("home", &sz, QSize());
+
+    QString dateStr = currentTournament->get_date().toString("dd/MM/yyyy");
+
+    DialogTournamentQr dlg(currentTournament->get_name(),
+                           dateStr,
+                           get_webPublishUrl(),
+                           qrImage,
+                           this);
+    dlg.exec();
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()
