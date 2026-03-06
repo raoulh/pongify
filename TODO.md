@@ -4,8 +4,8 @@
 
 ## Phase A — Infrastructure Cloud (Cloudflare Worker + Go setup)
 
-- [ ] **A1** — Créer le code du Cloudflare Worker (`pongify_setup/worker.js`)
-- [ ] **A2** — Créer l'outil de setup Go (`pongify_setup/main.go`, `go.mod`)
+- [x] **A1** — Créer le code du Cloudflare Worker (`pongify_setup/worker.js`)
+- [x] **A2** — Créer l'outil de setup Go (`pongify_setup/main.go`, `go.mod`)
 
 ## Phase B — Intégration Pongify (C++)
 
@@ -38,6 +38,6 @@
 
 ## Phase D — Tests et validation
 
-- [ ] **D1** — Tests du Worker (manuels via curl)
+- [x] **D1** — Tests du Worker (manuels via curl)
 - [ ] **D2** — Tests end-to-end (publication, QR scan, mise à jour live, multi-onglets)
 - [ ] **D3** — Tests de sécurité (mauvais secret, body trop gros, rate limit, clé manquante)
