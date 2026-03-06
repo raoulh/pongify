@@ -3,7 +3,8 @@
     <div class="flex justify-around">
       <router-link v-for="tab in tabs" :key="tab.to" :to="tab.to"
                    class="flex flex-col items-center py-2 px-3 text-xs rounded-lg"
-                   :class="isActive(tab.to) ? 'text-white bg-white/20' : 'text-white/75'">
+                   :class="isActive(tab.to) ? 'text-white bg-white/20' : 'text-white/75'"
+                   @click.native="onTabClick(tab, $event)">
         <span class="text-lg">{{ tab.icon }}</span>
         <span>{{ tab.label }}</span>
       </router-link>
@@ -12,9 +13,17 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
+const router = useRouter()
+
+function onTabClick(tab, event) {
+  if (tab.to === '/search' && route.path === '/search') {
+    event.preventDefault()
+    router.replace({ path: '/search' })
+  }
+}
 
 const tabs = [
   { to: '/', icon: '🏠', label: 'Accueil' },

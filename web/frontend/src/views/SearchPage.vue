@@ -5,6 +5,26 @@
     <input v-model="query" type="text" placeholder="Nom du joueur..."
            class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-pongify-teal">
 
+    <!-- Top 5 players when search is empty -->
+    <div v-if="query.length < 2 && topPlayers.length" class="space-y-3">
+      <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide">🏅 Top 5 joueurs</div>
+      <div v-for="(entry, idx) in topPlayers" :key="entry.license"
+           class="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-100 cursor-pointer hover:border-pongify-teal/40 transition-colors"
+           @click="searchPlayer(entry.player)">
+        <div class="flex items-center gap-3">
+          <span class="text-lg font-bold w-6 text-center" :class="idx === 0 ? 'text-yellow-500' : idx === 1 ? 'text-gray-400' : idx === 2 ? 'text-amber-600' : 'text-gray-300'">{{ idx + 1 }}</span>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-pongify-teal text-sm truncate">{{ entry.player.firstname }} {{ entry.player.lastname }}</div>
+            <div class="text-xs text-gray-400">{{ entry.player.club }}</div>
+          </div>
+          <div class="text-right text-xs">
+            <span class="font-bold" :class="winRate(entry.stats) >= 50 ? 'text-pongify-green' : 'text-red-400'">{{ winRate(entry.stats) }}%</span>
+            <div class="text-gray-400">{{ entry.stats.wins }}V {{ entry.stats.losses }}D</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-if="query.length >= 2 && !filteredPlayers.length" class="text-gray-400 text-center py-4">
       Aucun joueur trouvé
     </div>
@@ -102,19 +122,20 @@
 
 <script setup>
 import { ref, computed, onMounted, inject, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import PlayerBadge from '../components/PlayerBadge.vue'
 
 const props = defineProps({ tournament: Object })
 const { setPollContext } = inject('tournamentCtx')
 const route = useRoute()
+const router = useRouter()
 
 onMounted(() => setPollContext('home'))
 
 const query = ref(route.query.q || '')
 
 watch(() => route.query.q, (newQ) => {
-  if (newQ !== undefined) query.value = newQ
+  query.value = newQ || ''
 })
 const medals = ['🥇', '🥈', '🥉']
 
@@ -308,4 +329,20 @@ const filteredPlayers = computed(() => {
     return searchStr.includes(q)
   })
 })
+
+const topPlayers = computed(() => {
+  return allPlayersData.value
+    .filter(e => (e.stats.wins + e.stats.losses) > 0)
+    .sort((a, b) => {
+      if (b.stats.wins !== a.stats.wins) return b.stats.wins - a.stats.wins
+      return winRate(b.stats) - winRate(a.stats)
+    })
+    .slice(0, 5)
+})
+
+function searchPlayer(player) {
+  const name = `${player.lastname}`
+  query.value = name
+  router.replace({ path: '/search', query: { q: name } })
+}
 </script>
