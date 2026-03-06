@@ -83,6 +83,7 @@ TSerie::TSerie(QObject *parent):
 
     update_isDouble(false);
     update_isHandicap(false);
+    update_handicapTable({0, 1, 2, 3, 4, 4, 5});
     connect(this, &TSerie::tournamentTypeChanged, this, &TSerie::playersModelChanged);
 }
 
@@ -110,6 +111,20 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
         t->update_status("stopped");
     t->update_isDouble(obj["double"].toBool());
     t->update_isHandicap(obj["handicap"].toBool());
+
+    //Load handicap table, fallback to basic [0,1,2,3,4] for backward compat
+    if (obj.contains("handicapTable"))
+    {
+        QVariantList table;
+        for (const auto &v : obj["handicapTable"].toArray())
+            table.append(v.toInt());
+        t->update_handicapTable(table);
+    }
+    else
+    {
+        t->update_handicapTable({0, 1, 2, 3, 4});
+    }
+
     t->set_serieUid(obj["uid"].toString());
     t->set_viewVisible(obj.contains("view_visible") ? obj["view_visible"].toBool() : true);
     t->update_startTime(obj["start_time"].toString());
@@ -208,6 +223,12 @@ QJsonObject TSerie::toJson()
     obj.insert("status", get_status());
     obj.insert("double", get_isDouble());
     obj.insert("handicap", get_isHandicap());
+
+    QJsonArray handicapArr;
+    for (const auto &v : get_handicapTable())
+        handicapArr.append(v.toInt());
+    obj.insert("handicapTable", handicapArr);
+
     obj.insert("uid", get_serieUid());
     obj.insert("view_visible", get_viewVisible());
     obj.insert("start_time", get_startTime());
@@ -272,6 +293,16 @@ QJsonObject TSerie::toJson()
     }
 
     return obj;
+}
+
+int TSerie::computeHandicap(int ecart) const
+{
+    const auto &table = get_handicapTable();
+    if (table.isEmpty() || ecart <= 0)
+        return 0;
+    if (ecart >= table.size())
+        return table.last().toInt();
+    return table.at(ecart).toInt();
 }
 
 QStringList TSerie::getPlayerLicences()

@@ -2,6 +2,7 @@
 #define DIALOGNEWSERIE_H
 
 #include <QDialog>
+#include <QVariantList>
 
 namespace Ui {
 class DialogNewSerie;
@@ -26,11 +27,15 @@ public:
     void setDouble(bool en);
     bool getHandicap();
     void setHandicap(bool en);
+    QVariantList getHandicapTable() const;
+    void setHandicapTable(const QVariantList &table);
     QString getStartTime() const;
     void setStartTime(const QString &time);
 
 private:
     Ui::DialogNewSerie *ui;
+    void populateHandicapTable(const QVariantList &table);
+    void updateHandicapVisibility();
 };
 
 #endif // DIALOGNEWSERIE_H

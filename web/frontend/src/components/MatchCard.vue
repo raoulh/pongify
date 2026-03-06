@@ -130,6 +130,7 @@ const props = defineProps({
   players: Object,
   isDouble: Boolean,
   isHandicap: Boolean,
+  handicapTable: { type: Array, default: undefined },
   hideScore: { type: Boolean, default: false }
 })
 
@@ -138,7 +139,7 @@ const player2 = computed(() => props.players?.[props.match?.player2] || null)
 
 const h = computed(() => {
   if (!props.isHandicap || !player1.value || !player2.value) return { handicap1: 0, handicap2: 0 }
-  return computeHandicap(player1.value.ranking, player2.value.ranking)
+  return computeHandicap(player1.value.ranking, player2.value.ranking, props.handicapTable)
 })
 
 const p1Bg = computed(() => (!player1.value || props.match.playerWinner2) ? 'bg-[#b2b2b2]' : 'bg-[#484848]')

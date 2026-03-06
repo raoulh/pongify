@@ -113,19 +113,11 @@ RowLayout {
                                 let rankP1 = player1.ranking === "NC"? 95 : player1.ranking
                                 let rankP2 = player2.ranking === "NC"? 95 : player2.ranking
 
-                                if (rankP1 > rankP2)
-                                {
-                                    //handicap for P1
-                                    handicapP1 = (rankP1 - rankP2) / 5
-                                    if (handicapP1 > 4) {
-                                        handicapP1 = 4
-                                    }
+                                let ecart = Math.floor(Math.abs(rankP1 - rankP2) / 5)
+                                if (rankP1 > rankP2) {
+                                    handicapP1 = serie.computeHandicap(ecart)
                                 } else if (rankP2 > rankP1) {
-                                    //handicap for P2
-                                    handicapP2 = (rankP2 - rankP1) / 5
-                                    if (handicapP2 > 4) {
-                                        handicapP2 = 4
-                                    }
+                                    handicapP2 = serie.computeHandicap(ecart)
                                 }
                             }
 

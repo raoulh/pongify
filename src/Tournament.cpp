@@ -210,6 +210,10 @@ QJsonObject Tournament::toJsonForPublish()
             stub.insert("status", s->get_status());
             stub.insert("double", s->get_isDouble());
             stub.insert("handicap", s->get_isHandicap());
+            QJsonArray handicapArr;
+            for (const auto &v : s->get_handicapTable())
+                handicapArr.append(v.toInt());
+            stub.insert("handicapTable", handicapArr);
             stub.insert("uid", s->get_serieUid());
             stub.insert("start_time", s->get_startTime());
             seriesArray.append(stub);

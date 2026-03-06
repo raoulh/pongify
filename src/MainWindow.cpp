@@ -302,6 +302,7 @@ void MainWindow::newSerie()
         s->update_status("stopped");
         s->update_isDouble(d.getDouble());
         s->update_isHandicap(d.getHandicap());
+        s->update_handicapTable(d.getHandicapTable());
         s->update_startTime(d.getStartTime());
 
         currentTournament->addSerie(s);
@@ -335,6 +336,7 @@ void MainWindow::editSerie(int idx)
     d.setType(s->get_tournamentType());
     d.setDouble(s->get_isDouble());
     d.setHandicap(s->get_isHandicap());
+    d.setHandicapTable(s->get_handicapTable());
     d.setStartTime(s->get_startTime());
     if (d.exec() == QDialog::Accepted)
     {
@@ -343,6 +345,7 @@ void MainWindow::editSerie(int idx)
         s->update_tournamentType(d.getType());
         s->update_isDouble(d.getDouble());
         s->update_isHandicap(d.getHandicap());
+        s->update_handicapTable(d.getHandicapTable());
         s->update_startTime(d.getStartTime());
         TStorage::Instance()->saveToDisk(currentTournament);
     }

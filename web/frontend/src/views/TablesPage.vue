@@ -20,7 +20,7 @@
       </div>
 
       <div v-if="t.match" class="mt-2">
-        <MatchCard :match="t.match" :players="tablePlayersMap(t)" :is-double="!!t.serie?.double" :is-handicap="!!t.serie?.handicap" :hide-score="true" />
+        <MatchCard :match="t.match" :players="tablePlayersMap(t)" :is-double="!!t.serie?.double" :is-handicap="!!t.serie?.handicap" :handicap-table="t.serie?.handicapTable" :hide-score="true" />
       </div>
     </div>
   </div>
@@ -77,7 +77,7 @@ const sortedTables = computed(() => {
     entry.player2 = playersMap[match.player2] || null
 
     if (serie.handicap && entry.player1 && entry.player2) {
-      const h = computeHandicap(entry.player1.ranking, entry.player2.ranking)
+      const h = computeHandicap(entry.player1.ranking, entry.player2.ranking, serie.handicapTable)
       entry.handicap1 = h.handicap1
       entry.handicap2 = h.handicap2
     }

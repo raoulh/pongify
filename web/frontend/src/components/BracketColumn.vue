@@ -3,7 +3,7 @@
     <div class="text-xs font-semibold text-gray-400 text-center mb-1">{{ label }}</div>
     <div class="bracket-column">
       <MatchCard v-for="(match, j) in round" :key="j"
-                 :match="match" :players="players" :is-double="isDouble" :is-handicap="isHandicap" />
+                 :match="match" :players="players" :is-double="isDouble" :is-handicap="isHandicap" :handicap-table="handicapTable" />
     </div>
   </div>
 </template>
@@ -18,7 +18,8 @@ const props = defineProps({
   totalRounds: Number,
   players: Object,
   isDouble: Boolean,
-  isHandicap: Boolean
+  isHandicap: Boolean,
+  handicapTable: { type: Array, default: undefined }
 })
 
 const label = computed(() => {

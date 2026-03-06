@@ -51,6 +51,10 @@ class TSerie : public QObject
     QML_READONLY_PROPERTY(bool, isDouble)
     QML_READONLY_PROPERTY(bool, isHandicap)
 
+    //Handicap table: index = écart de classement, value = points d'avance
+    //For écart >= table length, use last value
+    QML_READONLY_PROPERTY(QVariantList, handicapTable)
+
     //This holds the current round. This is used to display the correct round in BroadcastingViews
     QML_READONLY_PROPERTY(int, currentRound)
 
@@ -86,6 +90,7 @@ public:
     Q_INVOKABLE int scoreForMatch(int round, int match, int playerIdx);
     Q_INVOKABLE bool winnerForMatch(int round, int match, int playerIdx);
     Q_INVOKABLE void clickedOnMatch(int round, int match);
+    Q_INVOKABLE int computeHandicap(int ecart) const;
 
     typedef struct UnplayedMatch
     {

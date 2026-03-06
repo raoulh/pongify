@@ -22,7 +22,7 @@
         </div>
         <div class="flex flex-col gap-2 mt-2">
           <MatchCard v-for="(match, j) in serie.rounds[activeRound]" :key="j"
-                     :match="match" :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" />
+                     :match="match" :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable" />
         </div>
       </div>
 
@@ -31,7 +31,7 @@
         <div class="bracket-grid">
           <BracketColumn v-for="(round, i) in serie.rounds" :key="i"
                          :round="round" :round-index="i" :total-rounds="serie.rounds.length"
-                         :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" />
+                         :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable" />
         </div>
       </div>
     </template>
@@ -43,7 +43,7 @@
       <div v-for="(round, ri) in serie.rounds" :key="ri" class="space-y-2">
         <h3 class="text-sm font-semibold text-gray-500">Tour {{ ri + 1 }}</h3>
         <MatchCard v-for="(match, j) in round" :key="j"
-                   :match="match" :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" />
+                   :match="match" :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable" />
       </div>
     </template>
   </div>
