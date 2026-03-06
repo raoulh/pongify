@@ -21,6 +21,8 @@ class Tournament: public QObject
     QML_READONLY_PROPERTY(int, broadcastScrollSpeed)
     QML_WRITABLE_PROPERTY(bool, defaultViewVisible)
     QML_READONLY_PROPERTY(QObject *, tables)
+    QML_READONLY_PROPERTY(QString, writeSecret)
+    QML_READONLY_PROPERTY(QString, encryptionKey)
 
 public:
     explicit Tournament(QObject *parent = nullptr);
@@ -40,6 +42,7 @@ public:
 
     static Tournament *fromJson(const QJsonObject &obj);
     QJsonObject toJson();
+    QJsonObject toJsonForPublish();
 
 signals:
     void seriesStatusChanged(); //emited if any serie has changed its status

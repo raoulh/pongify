@@ -85,3 +85,5 @@ compile_commands.json
 
 *_qmlcache.qrc
 
+node_modules/
+build/

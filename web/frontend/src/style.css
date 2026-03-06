@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .round-tabs {
+    @apply flex gap-1 overflow-x-auto py-2;
+    -webkit-overflow-scrolling: touch;
+  }
+  .round-tab {
+    @apply px-4 py-1.5 rounded-full text-sm whitespace-nowrap
+           border border-gray-200 bg-white text-gray-500 cursor-pointer;
+  }
+  .round-tab.active {
+    @apply bg-pongify-teal border-pongify-teal text-white font-semibold;
+  }
+  .match-card {
+    @apply rounded-lg overflow-hidden shadow-sm;
+  }
+  .match-rank {
+    color: #eed67d;
+    font-size: 0.8125rem;
+  }
+  .match-card .score {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (min-width: 768px) {
+  .bracket-grid {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 16px 0;
+  }
+  .bracket-col-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-width: 240px;
+    flex-shrink: 0;
+  }
+  .bracket-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex: 1;
+  }
+  .bracket-column .match-card {
+    position: relative;
+    margin: 4px 0;
+  }
+  .bracket-column .match-card::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 50%;
+    width: 16px;
+    height: 0;
+    border-top: 2px solid #4fc1e9;
+  }
+  .bracket-col-wrapper:last-child .bracket-column .match-card::after {
+    display: none;
+  }
+}

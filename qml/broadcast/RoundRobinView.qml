@@ -190,4 +190,8 @@ Rectangle {
             }
         }
     }
+
+    BroadcastQrOverlay {
+        deepLink: "serie/" + viewSerieIndex
+    }
 }

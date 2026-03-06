@@ -8,6 +8,7 @@ class BroadcastView: public QObject
 {
     Q_OBJECT
     QML_READONLY_PROPERTY(QObject *, viewSerie)
+    QML_READONLY_PROPERTY(int, viewSerieIndex)
     QML_READONLY_PROPERTY(QString, viewUrl)
     QML_READONLY_PROPERTY(QString, name)
     QML_WRITABLE_PROPERTY(bool, viewVisible)

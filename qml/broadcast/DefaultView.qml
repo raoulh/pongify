@@ -45,4 +45,8 @@ Rectangle {
         textFormat: Text.RichText
         text: currentTournament.infoText
     }
+
+    BroadcastQrOverlay {
+        deepLink: "home"
+    }
 }

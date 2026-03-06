@@ -9,11 +9,14 @@
 #include <QTimer>
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
+#include "QrCodeProvider.h"
+#include "WebPublisher.h"
 
-BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, QWidget *parent):
+BroadcastWindow::BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, bool webPublish, QWidget *parent):
     QWidget{parent},
     currentTournament(t)
 {
+    update_webPublishEnabled(webPublish);
     views = new QQmlObjectListModel<BroadcastView>(this, "view");
     update_views(views);
     update_currentViewIndex(0);
@@ -111,6 +114,7 @@ void BroadcastWindow::reloadViews()
     auto v = new BroadcastView(this);
     v->update_viewUrl("qrc:/qml/broadcast/DefaultView.qml");
     v->update_name("Information tournoi");
+    v->update_viewSerieIndex(-1);
     v->set_viewVisible(currentTournament->get_defaultViewVisible());
     v->set_viewTime(10000);
     connect(currentTournament, &Tournament::defaultViewVisibleChanged, v, [this, v]()
@@ -128,6 +132,7 @@ void BroadcastWindow::reloadViews()
             auto v = new BroadcastView(this);
             v->update_viewUrl("qrc:/qml/broadcast/SerieBracketView.qml");
             v->update_viewSerie(s);
+            v->update_viewSerieIndex(i);
             v->set_viewVisible(s->get_viewVisible());
             v->set_viewTime(currentTournament->get_timeBroadcastChange());
             connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
@@ -141,6 +146,7 @@ void BroadcastWindow::reloadViews()
             auto v = new BroadcastView(this);
             v->update_viewUrl("qrc:/qml/broadcast/RoundRobinView.qml");
             v->update_viewSerie(s);
+            v->update_viewSerieIndex(i);
             v->set_viewVisible(s->get_viewVisible());
             v->set_viewTime(currentTournament->get_timeBroadcastChange());
             connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
@@ -154,6 +160,7 @@ void BroadcastWindow::reloadViews()
             auto v = new BroadcastView(this);
             v->update_viewUrl("qrc:/qml/broadcast/HallOfFameView.qml");
             v->update_viewSerie(s);
+            v->update_viewSerieIndex(i);
             v->set_viewVisible(s->get_viewVisible());
             v->set_viewTime(10000);
             connect(s, &TSerie::viewVisibleChanged, this, [v](bool visible)
@@ -189,6 +196,14 @@ void BroadcastWindow::loadQmlApp()
     view->rootContext()->setContextProperty("storage", TStorage::Instance());
     view->rootContext()->setContextProperty("playerModel", PlayerModel::Instance());
     view->rootContext()->setContextProperty("currentTournament", currentTournament);
+
+    if (get_webPublishEnabled())
+    {
+        auto *qrProvider = new QrCodeProvider();
+        QString baseUrl = WebPublisher::Instance()->workerUrl() + "/t/" + currentTournament->get_uuid();
+        qrProvider->setBaseInfo(baseUrl, currentTournament->get_encryptionKey());
+        view->engine()->addImageProvider("qrcode", qrProvider);
+    }
 
     view->setTitle("Pongify - Vue spectateur");
     view->setSource(QUrl("qrc:///qml/BroadcastWindow.qml"));

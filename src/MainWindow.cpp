@@ -14,6 +14,9 @@
 #include "DialogPlayersHtml.h"
 #include "DialogAbout.h"
 #include "BroadcastPreviewProvider.h"
+#include "WebPublisher.h"
+#include "DialogWebPublish.h"
+#include "version.h"
 
 #include <qfappdispatcher.h>
 
@@ -35,10 +38,36 @@ MainWindow::MainWindow(QWidget *parent):
 
     QIcon::setThemeName("pongify");
 
+    // Menu Outils
+    QMenu *toolsMenu = ui->menubar->addMenu(tr("&Outils"));
+    QAction *actionWebConfig = toolsMenu->addAction(tr("Configuration publication web..."));
+    connect(actionWebConfig, &QAction::triggered, this, &MainWindow::webPublishConfig);
+    QAction *actionWebToggle = toolsMenu->addAction(tr("Publier en ligne"));
+    actionWebToggle->setCheckable(true);
+    connect(actionWebToggle, &QAction::triggered, this, &MainWindow::webPublishToggle);
+    connect(this, &MainWindow::webPublishEnabledChanged, actionWebToggle, &QAction::setChecked);
+
     setWindowTitle("Pongify - Gestion de tournoi");
 
     QLabel *cpyLabel = new QLabel("(c) 2026 Raoul Hecky");
     ui->statusbar->addPermanentWidget(cpyLabel, 1);
+
+    liveStatusLabel = new QLabel(this);
+    liveStatusLabel->hide();
+    ui->statusbar->addPermanentWidget(liveStatusLabel);
+    connect(this, &MainWindow::webPublishEnabledChanged, this, [this](bool en)
+    {
+        if (en)
+        {
+            liveStatusLabel->setText(QString::fromUtf8(" \xF0\x9F\x9F\xA2 Pongify Live"));
+            liveStatusLabel->setStyleSheet("QLabel { color: #2e7d32; font-weight: bold; padding: 0 8px; }");
+            liveStatusLabel->show();
+        }
+        else
+        {
+            liveStatusLabel->hide();
+        }
+    });
 
     QTimer::singleShot(100, this, []()
     {
@@ -59,6 +88,13 @@ MainWindow::MainWindow(QWidget *parent):
         view->engine()->rootContext()->setContextProperty("currentTournament", currentTournament);
         auto s = currentTournament? currentTournament->getSerie(0): nullptr;
         view->engine()->rootContext()->setContextProperty("selectedSerie", s);
+
+        if (!en)
+        {
+            WebPublisher::Instance()->clearTournament();
+            update_webPublishEnabled(false);
+            update_webPublishUrl("");
+        }
     });
 
     //Restore window position
@@ -79,6 +115,8 @@ MainWindow::MainWindow(QWidget *parent):
     previewProvider = new BroadcastPreviewProvider();
     update_broadcastPreviewActive(false);
     update_previewUpdateCounter(0);
+    update_webPublishEnabled(false);
+    update_webPublishUrl("");
 
     previewTimer = new QTimer(this);
     previewTimer->setInterval(100); // ~10 FPS
@@ -115,6 +153,23 @@ void MainWindow::openTournament(int idx)
 {
     currentTournament = TStorage::Instance()->item(idx);
     update_tournamentOpened(currentTournament != nullptr);
+
+    // If tournament was previously published, suggest re-enabling
+    if (currentTournament &&
+        !currentTournament->get_writeSecret().isEmpty() &&
+        !currentTournament->get_encryptionKey().isEmpty() &&
+        WebPublisher::Instance()->enabled())
+    {
+        auto ret = QMessageBox::question(
+            this,
+            tr("Publication en ligne"),
+            tr("Ce tournoi était publié en ligne.\n"
+               "Voulez-vous réactiver la publication live ?"),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::Yes);
+        if (ret == QMessageBox::Yes)
+            webPublishToggle();
+    }
 }
 
 void MainWindow::deleteTournament(int idx)
@@ -421,7 +476,7 @@ void MainWindow::broadcastStart()
             delete broadcastWin;
             broadcastWin = nullptr;
         }
-        broadcastWin = new BroadcastWindow(d.getScreen(), d.getFullscreen(), currentTournament, this);
+        broadcastWin = new BroadcastWindow(d.getScreen(), d.getFullscreen(), currentTournament, get_webPublishEnabled(), this);
         connect(broadcastWin, &BroadcastWindow::windowClosed, this, [=]()
         {
             broadcastStop();
@@ -478,6 +533,54 @@ void MainWindow::broadcastTogglePreview()
         previewTimer->start();
     else
         previewTimer->stop();
+}
+
+void MainWindow::webPublishConfig()
+{
+    DialogWebPublish d(this);
+    d.exec();
+}
+
+void MainWindow::webPublishToggle()
+{
+    if (!currentTournament) return;
+
+    auto wp = WebPublisher::Instance();
+    if (!wp->enabled() || wp->workerUrl().isEmpty())
+    {
+        webPublishConfig();
+        return;
+    }
+
+    if (get_webPublishEnabled())
+    {
+        wp->unpublish();
+        update_webPublishEnabled(false);
+        update_webPublishUrl("");
+        return;
+    }
+
+    // Generate writeSecret if absent
+    if (currentTournament->get_writeSecret().isEmpty())
+        currentTournament->update_writeSecret(WebPublisher::generateSecret());
+
+    // Generate encryptionKey if absent
+    if (currentTournament->get_encryptionKey().isEmpty())
+    {
+        QByteArray key = WebPublisher::generateKey();
+        QString keyB64 = key.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        currentTournament->update_encryptionKey(keyB64);
+    }
+
+    TStorage::Instance()->saveToDisk(currentTournament);
+
+    QString baseUrl = wp->workerUrl() + "/t/" + currentTournament->get_uuid();
+    QString publicUrl = baseUrl + "#K=" + currentTournament->get_encryptionKey();
+    update_webPublishUrl(publicUrl);
+    update_webPublishEnabled(true);
+
+    wp->uploadWebapp(pongify_version);
+    wp->setTournament(currentTournament);
 }
 
 void MainWindow::on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered()

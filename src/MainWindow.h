@@ -14,6 +14,7 @@ QT_END_NAMESPACE
 class Tournament;
 class QQuickView;
 class BroadcastWindow;
+class QLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -30,6 +31,10 @@ class MainWindow : public QMainWindow
     //broadcast preview
     QML_READONLY_PROPERTY(bool, broadcastPreviewActive)
     QML_READONLY_PROPERTY(int, previewUpdateCounter)
+
+    //web publish
+    QML_READONLY_PROPERTY(bool, webPublishEnabled)
+    QML_READONLY_PROPERTY(QString, webPublishUrl)
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -59,6 +64,9 @@ public:
 
     Q_INVOKABLE void broadcastTogglePreview();
 
+    Q_INVOKABLE void webPublishConfig();
+    Q_INVOKABLE void webPublishToggle();
+
 private slots:
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
     void on_actionListe_des_joueurs_triggered();
@@ -77,6 +85,7 @@ private:
 
     QTimer *previewTimer = nullptr;
     BroadcastPreviewProvider *previewProvider = nullptr;
+    QLabel *liveStatusLabel = nullptr;
 
     virtual void closeEvent(QCloseEvent *event) override;
 

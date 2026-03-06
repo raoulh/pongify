@@ -28,13 +28,14 @@
 
 ## Phase C — Webapp Mobile (Vue.js SPA)
 
-- [ ] **C1** — Initialiser le projet `web/frontend/` (package.json, Vite, Tailwind)
-- [ ] **C2** — Implémenter le module de déchiffrement (`crypto.js`)
-- [ ] **C3** — Implémenter le composable `useTournament` (polling adaptatif + visibility API)
-- [ ] **C4** — Implémenter le router et le layout principal (`main.js`, `router.js`, `App.vue`)
-- [ ] **C5** — Implémenter les vues principales (HomePage, SeriePage, PodiumPage, SearchPage)
-- [ ] **C6** — Implémenter les composants réutilisables (MatchCard, BracketColumn, RankingTable, etc.)
-- [ ] **C7** — Build et intégration dans les ressources Qt
+- [x] **C1** — Initialiser le projet `web/frontend/` (package.json, Vite, Tailwind, CDN importmap)
+- [x] **C2** — Implémenter le module de déchiffrement (`crypto.js`)
+- [x] **C3** — Implémenter le composable `useTournament` (polling adaptatif + visibility API)
+- [x] **C4** — Implémenter le router et le layout principal (`main.js`, `router.js`, `App.vue`)
+- [x] **C5** — Implémenter les vues principales (HomePage, SeriesListPage, SeriePage, PodiumListPage, PodiumPage, TablesPage, SearchPage)
+- [x] **C6** — Implémenter les composants réutilisables (MatchCard, BracketColumn, RankingTable, PlayerBadge, BottomNav, StatusBadge)
+- [x] **C7** — Implémenter l'utilitaire handicap (`utils/handicap.js`)
+- [ ] **C8** — Build et intégration dans les ressources Qt
 
 ## Phase D — Tests et validation
 

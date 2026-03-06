@@ -78,6 +78,7 @@
         <file>qml/broadcast/SerieBracketView.qml</file>
         <file>qml/broadcast/RoundRobinView.qml</file>
         <file>qml/broadcast/HallOfFameView.qml</file>
+        <file>qml/broadcast/BroadcastQrOverlay.qml</file>
         <file>icons/pongify/32x32/next.png</file>
         <file>icons/pongify/32x32@2/next.png</file>
         <file>icons/pongify/32x32@3/next.png</file>
@@ -113,5 +114,13 @@
         <file>qml/quickflux/AppActions.qml</file>
         <file>qml/quickflux/qmldir</file>
         <file>qml/DialogMatchSelector.qml</file>
+    </qresource>
+    <qresource prefix="/webapp">
+        <file alias="index.html">web/frontend/dist/index.html</file>
+        <file alias="app.js">web/frontend/dist/app.js</file>
+        <file alias="app.css">web/frontend/dist/app.css</file>
+    </qresource>
+    <qresource prefix="/cloudflare">
+        <file alias="worker.js">cloudflare_worker/worker.js</file>
     </qresource>
 </RCC>

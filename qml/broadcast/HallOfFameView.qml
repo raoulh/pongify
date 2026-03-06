@@ -160,4 +160,8 @@ Rectangle {
         }
 
     }
+
+    BroadcastQrOverlay {
+        deepLink: "podium/" + viewSerieIndex
+    }
 }

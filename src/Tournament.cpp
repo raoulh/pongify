@@ -143,6 +143,8 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
     if (t->get_broadcastScrollSpeed() < 10)
         t->update_broadcastScrollSpeed(80);
     t->set_defaultViewVisible(obj.contains("default_view_visible") ? obj["default_view_visible"].toBool() : true);
+    t->update_writeSecret(obj["write_secret"].toString());
+    t->update_encryptionKey(obj["encryption_key"].toString());
 
     QJsonArray arr = obj["series"].toArray();
     for (int i = 0;i < arr.count();i++)
@@ -188,5 +190,31 @@ QJsonObject Tournament::toJson()
         { "time_broadcast_change", get_timeBroadcastChange() },
         { "broadcast_scroll_speed", get_broadcastScrollSpeed() },
         { "default_view_visible", get_defaultViewVisible() },
+        { "write_secret", get_writeSecret() },
+        { "encryption_key", get_encryptionKey() },
+    };
+}
+
+QJsonObject Tournament::toJsonForPublish()
+{
+    QJsonArray seriesArray;
+    for (int i = 0; i < series->count(); i++) {
+        auto s = series->at(i);
+        if (s->get_status() == "playing" || s->get_status() == "finished")
+            seriesArray.append(s->toJson());
+    }
+
+    QJsonArray tablesArray;
+    for (int i = 0; i < tables->count(); i++)
+        tablesArray.append(tables->at(i)->toJson());
+
+    return {
+        { "uuid", get_uuid() },
+        { "name", get_name() },
+        { "date", get_date().toString(Qt::ISODate) },
+        { "status", get_status() },
+        { "info_text", get_infoText() },
+        { "series", seriesArray },
+        { "tables", tablesArray },
     };
 }

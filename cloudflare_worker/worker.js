@@ -203,10 +203,14 @@ async function handleWebappServe(env, uuid, path) {
     'ttf': 'font/ttf',
   };
 
+  const cacheControl = (file === 'index.html')
+    ? 'no-cache'
+    : 'public, max-age=86400';
+
   return new Response(content, {
     headers: {
       'Content-Type': contentTypes[ext] || 'application/octet-stream',
-      'Cache-Control': 'public, max-age=86400',
+      'Cache-Control': cacheControl,
       ...corsHeaders(),
     },
   });
@@ -266,8 +270,12 @@ export default {
       return handleWebappCheck(env, webappCheckMatch[1]);
     }
 
-    // --- Webapp serve: GET /t/:uuid[/*path] ---
-    const serveMatch = path.match(/^\/t\/([a-f0-9-]{36})(?:\/(.+))?$/);
+    // --- Webapp serve: GET /t/:uuid/ and /t/:uuid/*path ---
+    // Redirect /t/:uuid to /t/:uuid/ so relative paths (./app.js) resolve correctly
+    if (method === 'GET' && /^\/t\/[a-f0-9-]{36}$/.test(path)) {
+      return Response.redirect(url.origin + path + '/' + url.hash, 301);
+    }
+    const serveMatch = path.match(/^\/t\/([a-f0-9-]{36})\/(.+)?$/);
     if (method === 'GET' && serveMatch) {
       const uuid = serveMatch[1];
       const filePath = serveMatch[2] || null;

@@ -1,20 +1,22 @@
-QT       += core gui widgets quick quickcontrols2
+QT       += core gui widgets quick quickcontrols2 network
 
 CONFIG += c++17
 
 include(3rd_party/quickflux/quickflux.pri)
 include(3rd_party/qt-qml-models/QtQmlModels.pri)
 
-INCLUDEPATH += src
+INCLUDEPATH += src 3rd_party/qrcodegen
 
 SOURCES += \
     src/BroadcastModel.cpp \
     src/BroadcastWindow.cpp \
+    src/CloudflareSetup.cpp \
     src/DialogAbout.cpp \
     src/DialogAddDoublePlayers.cpp \
     src/DialogAddPlayer.cpp \
     src/DialogBroadcastOpts.cpp \
     src/DialogChangePlayer.cpp \
+    src/DialogCloudflareSetup.cpp \
     src/DialogEditInfo.cpp \
     src/DialogEditScore.cpp \
     src/DialogNewSerie.cpp \
@@ -34,17 +36,22 @@ SOURCES += \
     src/Utils.cpp \
     src/WidgetTextEdit.cpp \
     src/main.cpp \
-    src/MainWindow.cpp
+    src/MainWindow.cpp \
+    src/WebPublisher.cpp \
+    src/DialogWebPublish.cpp \
+    3rd_party/qrcodegen/qrcodegen.cpp
 
 HEADERS += \
     src/BroadcastModel.h \
     src/BroadcastPreviewProvider.h \
     src/BroadcastWindow.h \
+    src/CloudflareSetup.h \
     src/DialogAbout.h \
     src/DialogAddDoublePlayers.h \
     src/DialogAddPlayer.h \
     src/DialogBroadcastOpts.h \
     src/DialogChangePlayer.h \
+    src/DialogCloudflareSetup.h \
     src/DialogEditInfo.h \
     src/DialogEditScore.h \
     src/DialogNewSerie.h \
@@ -66,6 +73,10 @@ HEADERS += \
     src/Utils.h \
     src/WidgetTextEdit.h \
     src/qqmlhelpers.h \
+    src/WebPublisher.h \
+    src/DialogWebPublish.h \
+    src/QrCodeProvider.h \
+    3rd_party/qrcodegen/qrcodegen.hpp \
     version.h
 
 FORMS += \
@@ -74,6 +85,7 @@ FORMS += \
     src/DialogAddPlayer.ui \
     src/DialogBroadcastOpts.ui \
     src/DialogChangePlayer.ui \
+    src/DialogCloudflareSetup.ui \
     src/DialogEditInfo.ui \
     src/DialogEditScore.ui \
     src/DialogNewSerie.ui \
@@ -84,10 +96,12 @@ FORMS += \
     src/DialogPodiumRR.ui \
     src/DialogPodiumSingle.ui \
     src/MainWindow.ui \
-    src/WidgetTextEdit.ui
+    src/WidgetTextEdit.ui \
+    src/DialogWebPublish.ui
 
 win32 {
     RC_FILE = windows_res.rc
+    LIBS += -lbcrypt
 }
 
 RESOURCES += \

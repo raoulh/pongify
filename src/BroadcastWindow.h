@@ -32,9 +32,10 @@ class BroadcastWindow : public QWidget
     QML_READONLY_PROPERTY(QScreen *, screen)
     QML_READONLY_PROPERTY(QObject *, views)
     QML_READONLY_PROPERTY(int, currentViewIndex)
+    QML_READONLY_PROPERTY(bool, webPublishEnabled)
 
 public:
-    explicit BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, QWidget *parent = nullptr);
+    explicit BroadcastWindow(QScreen *scr, bool fullscreen, Tournament *t, bool webPublish = false, QWidget *parent = nullptr);
     ~BroadcastWindow();
 
 signals:

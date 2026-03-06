@@ -179,4 +179,8 @@ Rectangle {
             startRoundIdx: viewSerie? viewSerie.currentRound === viewSerie.rounds - 1? viewSerie.currentRound - 1: viewSerie.currentRound: 0
         }
     }
+
+    BroadcastQrOverlay {
+        deepLink: "serie/" + viewSerieIndex + "/round/" + (viewSerie ? viewSerie.currentRound : 0)
+    }
 }
