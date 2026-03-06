@@ -51,7 +51,8 @@ function topThree(serie) {
     if (typeof entry === 'string') {
       return { player: playersMap[entry] || { firstname: entry, lastname: '' } }
     }
-    return { player: playersMap[entry.player] || { firstname: entry.player, lastname: '' }, ...entry }
+    const { player: license, ...rest } = entry
+    return { ...rest, player: playersMap[license] || { firstname: license, lastname: '' } }
   })
 }
 </script>

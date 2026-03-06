@@ -14,11 +14,9 @@
           <span v-if="rank < 3">{{ medals[rank] }}</span>
           <span v-else>{{ rank + 1 }}</span>
         </span>
-        <component :is="playersMap[license] ? 'router-link' : 'span'"
-          :to="playersMap[license] ? { name: 'search', query: { q: playerName(playersMap[license]) } } : undefined"
-          class="flex-1 font-semibold text-[#484848] truncate min-w-0">
-          {{ playerDisplayName(playersMap[license], serie.double) }}
-        </component>
+        <div class="flex-1 min-w-0">
+          <PlayerBadge :player="playersMap[license]" :is-double="serie.double" :clickable="true" />
+        </div>
         <span class="text-[#484848] font-bold shrink-0">{{ playerRanking(playersMap[license]) }}</span>
       </div>
     </div>
