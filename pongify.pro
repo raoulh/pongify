@@ -26,6 +26,7 @@ SOURCES += \
     src/DialogPlayersHtml.cpp \
     src/DialogPodiumRR.cpp \
     src/DialogPodiumSingle.cpp \
+    src/DialogRestoreBackup.cpp \
     src/PlayerModel.cpp \
     src/PlayerSync.cpp \
     src/TSerie.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
     src/DialogPlayersHtml.h \
     src/DialogPodiumRR.h \
     src/DialogPodiumSingle.h \
+    src/DialogRestoreBackup.h \
     src/MainWindow.h \
     src/PlayerModel.h \
     src/PlayerSync.h \
@@ -97,6 +99,7 @@ FORMS += \
     src/DialogPlayersHtml.ui \
     src/DialogPodiumRR.ui \
     src/DialogPodiumSingle.ui \
+    src/DialogRestoreBackup.ui \
     src/MainWindow.ui \
     src/WidgetTextEdit.ui \
     src/DialogWebPublish.ui

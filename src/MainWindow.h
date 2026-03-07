@@ -68,6 +68,10 @@ public:
     Q_INVOKABLE void webPublishToggle();
     Q_INVOKABLE void showTournamentQrCode();
 
+    void exportTournament();
+    void importTournament();
+    void restoreBackup();
+
 private slots:
     void on_actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS_triggered();
     void on_actionListe_des_joueurs_triggered();

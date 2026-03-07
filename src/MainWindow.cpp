@@ -18,6 +18,7 @@
 #include "DialogWebPublish.h"
 #include "DialogTournamentQr.h"
 #include "QrCodeProvider.h"
+#include "DialogRestoreBackup.h"
 #include "version.h"
 
 #include <qfappdispatcher.h>
@@ -31,6 +32,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QWidgetAction>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
@@ -84,11 +86,16 @@ MainWindow::MainWindow(QWidget *parent):
 
     connect(ui->actionQuitter, &QAction::triggered, this, &MainWindow::close);
     connect(ui->actionNouveau_tournoi, &QAction::triggered, this, &MainWindow::newTournament);
+    connect(ui->actionExporter, &QAction::triggered, this, &MainWindow::exportTournament);
+    connect(ui->actionImporter, &QAction::triggered, this, &MainWindow::importTournament);
+    connect(ui->actionRestaurer_backup, &QAction::triggered, this, &MainWindow::restoreBackup);
     connect(this, &MainWindow::tournamentOpenedChanged, this, [this](bool en)
     {
         ui->actionFermer->setEnabled(en);
         ui->actionPropri_t_s->setEnabled(en);
         ui->actionListe_des_joueurs_du_tournoi->setEnabled(en);
+        ui->actionExporter->setEnabled(en);
+        ui->actionRestaurer_backup->setEnabled(en);
 
         //update QML model
         if (!view) return;
@@ -656,6 +663,150 @@ void MainWindow::on_actionPropri_t_s_triggered()
         currentTournament->update_broadcastScrollSpeed(d.getScrollSpeed());
         TStorage::Instance()->saveToDisk(currentTournament);
     }
+}
+
+void MainWindow::exportTournament()
+{
+    if (!currentTournament) return;
+
+    QString defaultName = currentTournament->get_name() + ".tnm";
+    QString filePath = QFileDialog::getSaveFileName(
+        this,
+        tr("Exporter le tournoi"),
+        defaultName,
+        tr("Tournoi Pongify (*.tnm)"));
+
+    if (filePath.isEmpty())
+        return;
+
+    QFile f(filePath);
+    if (!f.open(QFile::WriteOnly | QFile::Truncate))
+    {
+        QMessageBox::critical(this, tr("Erreur"),
+                              tr("Impossible d'ouvrir le fichier pour l'écriture :\n%1").arg(filePath));
+        return;
+    }
+
+    QJsonDocument jdoc;
+    jdoc.setObject(currentTournament->toJson());
+    f.write(jdoc.toJson());
+    f.close();
+
+    QMessageBox::information(this, tr("Export réussi"),
+                             tr("Le tournoi \"%1\" a été exporté avec succès.").arg(currentTournament->get_name()));
+}
+
+void MainWindow::importTournament()
+{
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("Importer un tournoi"),
+        QString(),
+        tr("Tournoi Pongify (*.tnm)"));
+
+    if (filePath.isEmpty())
+        return;
+
+    QFile f(filePath);
+    if (!f.open(QFile::ReadOnly))
+    {
+        QMessageBox::critical(this, tr("Erreur"),
+                              tr("Impossible d'ouvrir le fichier :\n%1").arg(filePath));
+        return;
+    }
+
+    QJsonParseError jerr;
+    QJsonDocument jdoc = QJsonDocument::fromJson(f.readAll(), &jerr);
+    f.close();
+
+    if (jerr.error != QJsonParseError::NoError)
+    {
+        QMessageBox::critical(this, tr("Erreur"),
+                              tr("Le fichier n'est pas un JSON valide :\n%1").arg(jerr.errorString()));
+        return;
+    }
+
+    if (!jdoc.isObject())
+    {
+        QMessageBox::critical(this, tr("Erreur"),
+                              tr("Le fichier ne contient pas un tournoi valide."));
+        return;
+    }
+
+    QJsonObject obj = jdoc.object();
+
+    // Check if a tournament with the same UUID already exists
+    QString uuid = obj["uuid"].toString();
+    auto *existing = TStorage::Instance()->itemByUuid(uuid);
+    if (existing)
+    {
+        auto ret = QMessageBox::question(
+            this,
+            tr("Tournoi existant"),
+            tr("Un tournoi \"%1\" avec le même identifiant existe déjà.\n"
+               "Voulez-vous le remplacer ?").arg(existing->get_name()),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No);
+
+        if (ret != QMessageBox::Yes)
+            return;
+
+        // If the existing tournament is currently open, close it first
+        if (currentTournament && currentTournament->get_uuid() == uuid)
+        {
+            currentTournament = nullptr;
+            broadcastStop();
+            update_tournamentOpened(false);
+        }
+    }
+
+    auto *imported = TStorage::Instance()->importTournament(obj);
+    if (!imported)
+    {
+        QMessageBox::critical(this, tr("Erreur"),
+                              tr("Le fichier ne contient pas un tournoi valide.\n"
+                                 "Vérifiez que les champs obligatoires (nom, date, statut, uuid) sont présents."));
+        return;
+    }
+
+    QMessageBox::information(this, tr("Import réussi"),
+                             tr("Le tournoi \"%1\" a été importé avec succès.").arg(imported->get_name()));
+}
+
+void MainWindow::restoreBackup()
+{
+    if (!currentTournament) return;
+
+    DialogRestoreBackup d(currentTournament->get_uuid(), currentTournament->get_name(), this);
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    int backupIdx = d.selectedBackupIndex();
+    if (backupIdx < 0)
+        return;
+
+    QString uuid = currentTournament->get_uuid();
+
+    // Close the current tournament before restoring
+    currentTournament = nullptr;
+    broadcastStop();
+    update_tournamentOpened(false);
+
+    bool ok = TStorage::Instance()->restoreBackup(uuid, backupIdx);
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Erreur"),
+                              tr("La restauration du backup a échoué."));
+        return;
+    }
+
+    // Re-open the restored tournament
+    currentTournament = TStorage::Instance()->itemByUuid(uuid);
+    if (currentTournament)
+        update_tournamentOpened(true);
+
+    QMessageBox::information(this, tr("Restauration réussie"),
+                             tr("Le backup a été restauré avec succès."));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

@@ -5,6 +5,7 @@
 #include <QSortFilterProxyModel>
 #include <QAbstractListModel>
 #include <QJsonObject>
+#include <QFileInfo>
 
 class Tournament;
 
@@ -36,6 +37,8 @@ public:
 
     void loadTournament(const QJsonObject &obj);
     Tournament *item(int row);
+    Tournament *itemByUuid(const QString &uuid);
+    int indexOfUuid(const QString &uuid) const;
 
     void loadFromDisk();
     void saveToDisk(int idx);
@@ -43,6 +46,15 @@ public:
 
     Tournament *createNewTournament(QString name);
     void deleteTournament(Tournament *t);
+
+    // Backup
+    static const int MAX_BACKUPS = 50;
+    void createBackup(Tournament *t);
+    QList<QFileInfo> listBackups(const QString &uuid) const;
+    bool restoreBackup(const QString &uuid, int backupIndex);
+
+    // Import
+    Tournament *importTournament(const QJsonObject &obj);
 
 private:
     TStorage();

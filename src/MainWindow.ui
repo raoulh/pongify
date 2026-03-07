@@ -47,6 +47,11 @@
     <addaction name="actionPropri_t_s"/>
     <addaction name="actionFermer"/>
     <addaction name="separator"/>
+    <addaction name="actionExporter"/>
+    <addaction name="actionImporter"/>
+    <addaction name="separator"/>
+    <addaction name="actionRestaurer_backup"/>
+    <addaction name="separator"/>
     <addaction name="actionQuitter"/>
    </widget>
    <widget class="QMenu" name="menuJoueurs">
@@ -106,6 +111,21 @@
   <action name="actionA_propos">
    <property name="text">
     <string>A propos</string>
+   </property>
+  </action>
+  <action name="actionExporter">
+   <property name="text">
+    <string>Exporter le tournoi...</string>
+   </property>
+  </action>
+  <action name="actionImporter">
+   <property name="text">
+    <string>Importer un tournoi...</string>
+   </property>
+  </action>
+  <action name="actionRestaurer_backup">
+   <property name="text">
+    <string>Restaurer un backup...</string>
    </property>
   </action>
  </widget>
