@@ -5,7 +5,7 @@
         <span class="text-white font-bold text-lg whitespace-nowrap">🏓 Pongify Live</span>
         <div class="flex items-center gap-2 text-xs text-white/80 whitespace-nowrap">
           <template v-if="!error">
-            <span class="inline-block w-2 h-2 rounded-full animate-pulse" :class="secondsAgo !== null && secondsAgo > 300 ? 'bg-red-400' : secondsAgo !== null && secondsAgo > 60 ? 'bg-yellow-400' : 'bg-pongify-green'"></span>
+            <span class="inline-block w-2 h-2 rounded-full animate-pulse" :class="secondsAgo !== null && secondsAgo > 3600 ? 'bg-red-400' : secondsAgo !== null && secondsAgo > 900 ? 'bg-yellow-400' : 'bg-pongify-green'"></span>
             <span v-if="lastUpdateDisplay">{{ lastUpdateDisplay }}</span>
           </template>
           <span v-else class="text-red-200 truncate max-w-[200px]">{{ error }}</span>
