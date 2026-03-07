@@ -67,6 +67,7 @@ export function useTournament(uuid) {
       if (!res.ok) {
         if (res.status === 404) {
           error.value = 'Tournoi non trouvé ou expiré'
+          isLoading.value = false
           tournament.value = null
         }
         return
@@ -76,7 +77,10 @@ export function useTournament(uuid) {
         lastKnownVersion = data.updatedAt
         await fetchFullData()
       }
-      error.value = null
+      // Don't clear error here if it was a decryption error — only fetchFullData can clear it
+      if (error.value && !error.value.includes('déchiffrer')) {
+        error.value = null
+      }
     } catch (e) {
       error.value = 'Connexion perdue'
     }
@@ -84,13 +88,16 @@ export function useTournament(uuid) {
 
   async function fetchFullData() {
     try {
+      console.log('[Pongify] fetchFullData: uuid =', uuid, 'keyBytes =', keyBytes ? keyBytes.length + ' bytes' : 'null')
       const res = await fetch(`${apiBase}/api/tournament/${uuid}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
       const encrypted = await res.arrayBuffer()
+      console.log('[Pongify] fetchFullData: received', encrypted.byteLength, 'bytes')
 
       if (!keyBytes) {
         error.value = 'Clé de déchiffrement manquante dans l\'URL'
+        isLoading.value = false
         return
       }
 
@@ -100,13 +107,21 @@ export function useTournament(uuid) {
       isLoading.value = false
       error.value = null
     } catch (e) {
+      isLoading.value = false
       if (e.name === 'OperationError') {
-        error.value = 'Impossible de déchiffrer (clé invalide ?)'
+        error.value = 'Impossible de déchiffrer les données. La clé dans l\'URL ne correspond pas à celle utilisée par le tournoi. Essayez de rescanner le QR code ou de rouvrir le lien original.'
       } else {
-        error.value = 'Erreur de chargement'
+        error.value = 'Erreur de chargement: ' + (e.message || e.name)
       }
-      console.error('[Pongify] fetchFullData error:', e.name, e.message)
+      console.error('[Pongify] fetchFullData error:', e.name, e.message, e)
     }
+  }
+
+  function retryLoad() {
+    error.value = null
+    isLoading.value = true
+    lastKnownVersion = 0
+    fetchVersion()
   }
 
   onMounted(() => {
@@ -125,6 +140,7 @@ export function useTournament(uuid) {
     isLoading: readonly(isLoading),
     error: readonly(error),
     lastUpdateTime,
-    setPollContext
+    setPollContext,
+    retryLoad
   }
 }

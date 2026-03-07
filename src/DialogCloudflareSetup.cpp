@@ -1,6 +1,8 @@
 #include "DialogCloudflareSetup.h"
 #include "ui_DialogCloudflareSetup.h"
 #include "CloudflareSetup.h"
+#include "WebPublisher.h"
+#include <QMessageBox>
 
 DialogCloudflareSetup::DialogCloudflareSetup(QWidget *parent)
     : QDialog(parent),
@@ -69,6 +71,22 @@ void DialogCloudflareSetup::onDeploy()
     if (token.isEmpty()) {
         appendLog(tr("Veuillez saisir un token API Cloudflare."));
         return;
+    }
+
+    // Warn if a config already exists — re-deploying will change the admin secret
+    auto wp = WebPublisher::Instance();
+    if (!wp->workerUrl().isEmpty() && !wp->adminSecret().isEmpty()) {
+        auto answer = QMessageBox::warning(this,
+            tr("Configuration existante"),
+            tr("Un Worker Cloudflare est déjà configuré sur ce poste.\n\n"
+               "Relancer le déploiement va générer un nouveau secret admin "
+               "et l'envoyer à Cloudflare. L'ancien secret sera invalidé.\n\n"
+               "Si d'autres postes utilisent ce même Worker, ils ne pourront "
+               "plus publier tant que leur secret n'est pas mis à jour.\n\n"
+               "Continuer ?"),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if (answer != QMessageBox::Yes)
+            return;
     }
 
     ui->textLog->clear();

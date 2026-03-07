@@ -8,7 +8,7 @@
             <span class="inline-block w-2 h-2 rounded-full bg-pongify-green animate-pulse"></span>
             <span v-if="lastUpdateTime">{{ lastUpdateTime }}</span>
           </template>
-          <span v-else class="text-red-200">{{ error }}</span>
+          <span v-else class="text-red-200 truncate max-w-[200px]">{{ error }}</span>
         </div>
       </div>
       <div v-if="tournament" class="text-center text-sm text-white/70 truncate mt-0.5">
@@ -17,7 +17,15 @@
     </header>
 
     <main class="flex-1 overflow-auto p-4 pb-20">
-      <div v-if="isLoading" class="flex items-center justify-center h-64">
+      <div v-if="error && !tournament" class="flex flex-col items-center justify-center h-64 text-center px-4">
+        <div class="text-red-500 text-4xl mb-4">⚠️</div>
+        <h2 class="text-lg font-semibold text-gray-700 mb-2">Erreur</h2>
+        <p class="text-gray-600 text-sm max-w-sm">{{ error }}</p>
+        <button @click="retryLoad" class="mt-6 px-4 py-2 bg-pongify-teal text-white rounded-lg text-sm font-medium hover:opacity-90">
+          Réessayer
+        </button>
+      </div>
+      <div v-else-if="isLoading" class="flex items-center justify-center h-64">
         <span class="text-gray-400">Chargement...</span>
       </div>
       <router-view v-else :tournament="tournament" />
@@ -35,7 +43,7 @@ import BottomNav from './components/BottomNav.vue'
 const pathParts = window.location.pathname.split('/')
 const uuid = pathParts[2] || ''
 
-const { tournament, isLoading, error, lastUpdateTime, setPollContext } = useTournament(uuid)
+const { tournament, isLoading, error, lastUpdateTime, setPollContext, retryLoad } = useTournament(uuid)
 
 provide('tournamentCtx', { setPollContext })
 </script>

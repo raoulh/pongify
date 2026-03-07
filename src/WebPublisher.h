@@ -39,6 +39,7 @@ public:
     static QByteArray generateKey();   // 32 bytes raw, for AES-256
 
     bool testConnection();
+    QString testAuth();
 
 signals:
     void publishError(const QString &message);

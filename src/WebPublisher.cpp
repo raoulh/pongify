@@ -207,7 +207,10 @@ void WebPublisher::doEncryptAndSend(const QByteArray &plaintext)
 
     // Send via HTTP PUT
     QString url = m_workerUrl + "/api/tournament/" + m_tournament->get_uuid();
-    qInfo() << "WebPublisher: publishing tournament" << m_tournament->get_uuid() << "(" << payload.size() << "bytes)";
+    qInfo() << "WebPublisher: publishing tournament" << m_tournament->get_uuid()
+            << "(" << payload.size() << "bytes)"
+            << "adminSecret:" << m_adminSecret.left(8) + "..."
+            << "writeSecret:" << m_tournament->get_writeSecret().left(8) + "...";
     QNetworkRequest request{QUrl(url)};
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
     request.setRawHeader("X-Write-Secret", m_tournament->get_writeSecret().toUtf8());
@@ -259,7 +262,8 @@ void WebPublisher::uploadWebapp(const QString &version)
         return;
     }
 
-    qInfo() << "WebPublisher: uploading webapp version" << version;
+    qInfo() << "WebPublisher: uploading webapp version" << version
+            << "adminSecret:" << m_adminSecret.left(8) + "...";
     QStringList files = {"index.html", "app.js", "app.css"};
     for (const auto &filename : files) {
         QFile res(":/webapp/" + filename);
@@ -316,4 +320,35 @@ bool WebPublisher::testConnection()
     bool ok = reply->error() == QNetworkReply::NoError;
     reply->deleteLater();
     return ok;
+}
+
+QString WebPublisher::testAuth()
+{
+    if (m_workerUrl.isEmpty()) return "URL du Worker vide";
+    if (m_adminSecret.isEmpty()) return "Secret admin vide";
+
+    QNetworkRequest req(QUrl(m_workerUrl + "/api/auth-check"));
+    req.setRawHeader("X-Admin-Secret", m_adminSecret.toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkReply *reply = m_nam->post(req, QByteArray());
+
+    QEventLoop loop;
+    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    QTimer::singleShot(5000, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        QString err = reply->errorString();
+        reply->deleteLater();
+        return "Erreur réseau: " + err;
+    }
+
+    QByteArray data = reply->readAll();
+    reply->deleteLater();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonObject obj = doc.object();
+    if (obj["ok"].toBool())
+        return QString();
+    return obj["hint"].toString("Secret admin invalide");
 }

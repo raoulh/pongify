@@ -243,6 +243,20 @@ export default {
       return jsonResponse({ ok: true });
     }
 
+    // Auth diagnostic: verify admin secret without exposing it
+    if (method === 'POST' && path === '/api/auth-check') {
+      const adminSecret = request.headers.get('X-Admin-Secret');
+      if (!adminSecret) {
+        return jsonResponse({ ok: false, reason: 'no X-Admin-Secret header' }, 401);
+      }
+      if (!env.ADMIN_SECRET) {
+        return jsonResponse({ ok: false, reason: 'ADMIN_SECRET not configured on worker' }, 500);
+      }
+      const match = adminSecret === env.ADMIN_SECRET;
+      const hint = match ? 'match' : `mismatch (sent ${adminSecret.length} chars starting with "${adminSecret.substring(0, 8)}...", expected ${env.ADMIN_SECRET.length} chars starting with "${env.ADMIN_SECRET.substring(0, 8)}...")`;
+      return jsonResponse({ ok: match, hint }, match ? 200 : 403);
+    }
+
     // --- Tournament routes: /api/tournament/:uuid[/version] ---
     const tournamentMatch = path.match(/^\/api\/tournament\/([a-f0-9-]{36})(\/version)?$/);
     if (tournamentMatch) {
