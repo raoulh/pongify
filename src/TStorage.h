@@ -25,6 +25,8 @@ public:
         RoleUuid = Qt::UserRole + 1,
         RoleName,
         RoleDate,
+        RoleDateMs,
+        RoleAgeCategory,
         RoleSerieCount,
         RoleStatus,
     };

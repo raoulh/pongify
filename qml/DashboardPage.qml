@@ -12,9 +12,7 @@ RowLayout {
     ColumnLayout {
         GroupBox {
             Layout.preferredWidth: logo.implicitWidth + 100
-            Layout.preferredHeight: 300
-
-            title: "Tournois récents"
+            Layout.preferredHeight: 400
 
             Rectangle {
                 width: parent.width
@@ -25,6 +23,24 @@ RowLayout {
                     anchors.fill: parent
 
                     model: storage
+
+                    section.property: "ageCategory"
+                    section.delegate: Rectangle {
+                        width: parent ? parent.width : 0
+                        height: sectionText.implicitHeight + 12
+                        color: "#f0f0f0"
+
+                        Text {
+                            id: sectionText
+                            anchors.left: parent.left
+                            anchors.leftMargin: 4
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: section
+                            font.bold: true
+                            font.pixelSize: 14
+                            color: "#0f4932"
+                        }
+                    }
 
                     delegate: ItemDelegate {
                         id: control

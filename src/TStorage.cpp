@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QUuid>
+#include <algorithm>
 #include "Utils.h"
 
 TStorage::TStorage():
@@ -38,6 +39,12 @@ QVariant TStorage::data(const QModelIndex &index, int role) const
     case RoleUuid: return tournaments.at(index.row())->get_uuid();
     case RoleName: return tournaments.at(index.row())->get_name();
     case RoleDate: return tournaments.at(index.row())->get_date().toString("dd/MM/yyyy");
+    case RoleDateMs: return tournaments.at(index.row())->get_date().toMSecsSinceEpoch();
+    case RoleAgeCategory: {
+        auto date = tournaments.at(index.row())->get_date();
+        auto sixMonthsAgo = QDateTime::currentDateTime().addMonths(-6);
+        return date >= sixMonthsAgo ? QStringLiteral("Tournois récents") : QStringLiteral("Anciens tournois");
+    }
     case RoleStatus: return tournaments.at(index.row())->get_status();
     default: break;
     }
@@ -73,6 +80,8 @@ QHash<int, QByteArray> TStorage::roleNames() const
     roles[RoleDate] = "date";
     roles[RoleStatus] = "status";
     roles[RoleUuid] = "uuid";
+    roles[RoleDateMs] = "dateMs";
+    roles[RoleAgeCategory] = "ageCategory";
     return roles;
 }
 
@@ -150,6 +159,10 @@ void TStorage::loadFromDisk()
         loadTournament(jdoc.object());
     }
 
+    std::sort(tournaments.begin(), tournaments.end(), [](Tournament *a, Tournament *b) {
+        return a->get_date() > b->get_date();
+    });
+
     endResetModel();
 }
 
@@ -185,8 +198,8 @@ Tournament *TStorage::createNewTournament(QString name)
     t->update_status("open");
     t->update_uuid(QUuid::createUuid().toString(QUuid::WithoutBraces));
 
-    beginInsertRows({}, tournaments.count(), tournaments.count());
-    tournaments.append(t);
+    beginInsertRows({}, 0, 0);
+    tournaments.prepend(t);
     endInsertRows();
     saveToDisk(t);
 
