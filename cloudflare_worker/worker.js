@@ -121,7 +121,7 @@ async function handleTournamentGet(env, uuid) {
   return new Response(data, {
     headers: {
       'Content-Type': 'application/octet-stream',
-      'Cache-Control': 'no-store',
+      'Cache-Control': 'public, max-age=3',
       ...corsHeaders({
         'X-Updated-At': meta ? meta.updatedAt.toString() : '0',
       }),
@@ -137,7 +137,7 @@ async function handleVersionGet(env, uuid) {
     headers: {
       'Content-Type': 'application/json',
       ...corsHeaders({
-        'Cache-Control': 'public, max-age=3', // CDN coalesces polls from all clients
+        'Cache-Control': 'public, max-age=5', // CDN coalesces polls from all clients
       }),
     },
   });

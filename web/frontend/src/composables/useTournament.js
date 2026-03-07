@@ -2,9 +2,9 @@ import { ref, readonly, computed, onMounted, onUnmounted } from 'vue'
 import { getKeyFromFragment, decryptTournament } from '../crypto.js'
 
 const POLL_INTERVALS = {
-  playing: 5000,
-  home: 15000,
-  stopped: 30000,
+  playing: 10000,
+  home: 30000,
+  stopped: 60000,
   finished: 0
 }
 
@@ -14,17 +14,36 @@ export function useTournament(uuid) {
   const error = ref(null)
   const lastUpdated = ref(null)
   const pollContext = ref('home')
+  const secondsAgo = ref(null)
 
   let pollTimer = null
+  let tickTimer = null
   let lastKnownVersion = 0
   let isVisible = true
   const keyBytes = getKeyFromFragment(uuid)
   const apiBase = window.location.origin
 
-  const lastUpdateTime = computed(() => {
-    if (!lastUpdated.value) return ''
-    return lastUpdated.value.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  function formatAgo(seconds) {
+    if (seconds < 60) return `il y a ${seconds}s`
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `il y a ${minutes}min`
+    const hours = Math.floor(minutes / 60)
+    return `il y a ${hours}h${minutes % 60 > 0 ? String(minutes % 60).padStart(2, '0') : ''}`
+  }
+
+  const lastUpdateDisplay = computed(() => {
+    if (secondsAgo.value === null) return ''
+    return formatAgo(secondsAgo.value)
   })
+
+  function startTick() {
+    if (tickTimer) return
+    tickTimer = setInterval(() => {
+      if (lastUpdated.value) {
+        secondsAgo.value = Math.floor((Date.now() - lastUpdated.value.getTime()) / 1000)
+      }
+    }, 1000)
+  }
 
   function setPollContext(context) {
     if (pollContext.value === context) return
@@ -58,6 +77,25 @@ export function useTournament(uuid) {
     } else {
       clearTimeout(pollTimer)
       pollTimer = null
+    }
+  }
+
+  function handlePageShow(e) {
+    if (e.persisted) {
+      fetchVersion()
+      restartPoll()
+    }
+  }
+
+  function handleOnline() {
+    fetchVersion()
+    restartPoll()
+  }
+
+  function handleFocus() {
+    if (document.visibilityState === 'visible') {
+      fetchVersion()
+      restartPoll()
     }
   }
 
@@ -103,7 +141,8 @@ export function useTournament(uuid) {
 
       const data = await decryptTournament(encrypted, keyBytes)
       tournament.value = data
-      lastUpdated.value = new Date()
+      lastUpdated.value = new Date(lastKnownVersion)
+      secondsAgo.value = Math.floor((Date.now() - lastKnownVersion) / 1000)
       isLoading.value = false
       error.value = null
     } catch (e) {
@@ -126,20 +165,29 @@ export function useTournament(uuid) {
 
   onMounted(() => {
     document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pageshow', handlePageShow)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('focus', handleFocus)
     fetchVersion()
     restartPoll()
+    startTick()
   })
 
   onUnmounted(() => {
     document.removeEventListener('visibilitychange', handleVisibilityChange)
+    window.removeEventListener('pageshow', handlePageShow)
+    window.removeEventListener('online', handleOnline)
+    window.removeEventListener('focus', handleFocus)
     clearTimeout(pollTimer)
+    clearInterval(tickTimer)
   })
 
   return {
     tournament: readonly(tournament),
     isLoading: readonly(isLoading),
     error: readonly(error),
-    lastUpdateTime,
+    lastUpdateDisplay,
+    secondsAgo: readonly(secondsAgo),
     setPollContext,
     retryLoad
   }

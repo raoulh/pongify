@@ -5,8 +5,8 @@
         <span class="text-white font-bold text-lg whitespace-nowrap">🏓 Pongify Live</span>
         <div class="flex items-center gap-2 text-xs text-white/80 whitespace-nowrap">
           <template v-if="!error">
-            <span class="inline-block w-2 h-2 rounded-full bg-pongify-green animate-pulse"></span>
-            <span v-if="lastUpdateTime">{{ lastUpdateTime }}</span>
+            <span class="inline-block w-2 h-2 rounded-full animate-pulse" :class="secondsAgo !== null && secondsAgo > 300 ? 'bg-red-400' : secondsAgo !== null && secondsAgo > 60 ? 'bg-yellow-400' : 'bg-pongify-green'"></span>
+            <span v-if="lastUpdateDisplay">{{ lastUpdateDisplay }}</span>
           </template>
           <span v-else class="text-red-200 truncate max-w-[200px]">{{ error }}</span>
         </div>
@@ -43,7 +43,7 @@ import BottomNav from './components/BottomNav.vue'
 const pathParts = window.location.pathname.split('/')
 const uuid = pathParts[2] || ''
 
-const { tournament, isLoading, error, lastUpdateTime, setPollContext, retryLoad } = useTournament(uuid)
+const { tournament, isLoading, error, lastUpdateDisplay, secondsAgo, setPollContext, retryLoad } = useTournament(uuid)
 
 provide('tournamentCtx', { setPollContext })
 </script>
