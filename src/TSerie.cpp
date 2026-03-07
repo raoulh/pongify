@@ -775,6 +775,9 @@ void TSerie::calculateRRWinners()
 {
     QHash<Player *, ScoreRR> scores;
 
+    if (allMatches.isEmpty())
+        return;
+
     //Podium already validated, fill the QML model and leave
     if (get_podiumValidated())
     {
