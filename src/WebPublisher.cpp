@@ -11,6 +11,7 @@
 #include <QSettings>
 #include <QUuid>
 #include <QFile>
+#include <QDir>
 #include <QEventLoop>
 
 #include <windows.h>
@@ -264,7 +265,8 @@ void WebPublisher::uploadWebapp(const QString &version)
 
     qInfo() << "WebPublisher: uploading webapp version" << version
             << "adminSecret:" << m_adminSecret.left(8) + "...";
-    QStringList files = {"index.html", "app.js", "app.css"};
+    QDir webappDir(":/webapp/");
+    QStringList files = webappDir.entryList(QDir::Files);
     for (const auto &filename : files) {
         QFile res(":/webapp/" + filename);
         if (!res.open(QIODevice::ReadOnly)) {

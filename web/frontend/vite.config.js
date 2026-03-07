@@ -8,9 +8,9 @@ export default defineConfig({
     rollupOptions: {
       external: ['vue', 'vue-router'],
       output: {
-        entryFileNames: 'app.js',
-        chunkFileNames: 'app-[name].js',
-        assetFileNames: 'app.[ext]'
+        entryFileNames: 'app-[hash].js',
+        chunkFileNames: '[name]-[hash].js',
+        assetFileNames: '[name]-[hash].[ext]'
       }
     }
   }
