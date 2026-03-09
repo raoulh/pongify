@@ -1,15 +1,20 @@
 /**
- * Reads the AES key from sessionStorage (set by main.js at startup).
- * Falls back to parsing the current URL hash.
+ * Reads the AES key from localStorage (set by main.js at startup).
+ * Falls back to sessionStorage (migration) then to parsing the current URL hash.
  * @param {string} uuid - Tournament UUID for scoped storage lookup
  * @returns {Uint8Array|null}
  */
 export function getKeyFromFragment(uuid) {
   const storageKey = 'pongify_key_' + uuid
-  const stored = sessionStorage.getItem(storageKey)
+  // Try localStorage first (persists across browser restarts), fallback to sessionStorage for migration
+  const stored = localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey)
   if (stored) {
+    // Migrate from sessionStorage to localStorage if needed
+    if (!localStorage.getItem(storageKey)) {
+      localStorage.setItem(storageKey, stored)
+    }
     const bytes = base64urlDecode(stored)
-    console.log('[Pongify] Key from sessionStorage: base64url length:', stored.length, '→', bytes.length, 'bytes')
+    console.log('[Pongify] Key from storage: base64url length:', stored.length, '→', bytes.length, 'bytes')
     if (bytes.length !== 32) {
       console.warn('[Pongify] Key size mismatch! Expected 32 bytes, got', bytes.length)
     }

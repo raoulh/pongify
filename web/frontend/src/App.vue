@@ -20,7 +20,7 @@
       <div v-if="error && !tournament" class="flex flex-col items-center justify-center h-64 text-center px-4">
         <div class="text-red-500 text-4xl mb-4">⚠️</div>
         <h2 class="text-lg font-semibold text-gray-700 mb-2">Erreur</h2>
-        <p class="text-gray-600 text-sm max-w-sm">{{ error }}</p>
+        <p class="text-gray-600 text-sm max-w-sm whitespace-pre-line">{{ error }}</p>
         <button @click="retryLoad" class="mt-6 px-4 py-2 bg-pongify-teal text-white rounded-lg text-sm font-medium hover:opacity-90">
           Réessayer
         </button>
@@ -28,7 +28,10 @@
       <div v-else-if="isLoading" class="flex items-center justify-center h-64">
         <span class="text-gray-400">Chargement...</span>
       </div>
-      <router-view v-else :tournament="tournament" />
+      <router-view v-else-if="tournament" :tournament="tournament" />
+      <div v-else class="flex items-center justify-center h-64">
+        <span class="text-gray-400">Chargement...</span>
+      </div>
     </main>
 
     <BottomNav v-if="tournament" />

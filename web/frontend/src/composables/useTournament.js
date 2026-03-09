@@ -21,6 +21,7 @@ export function useTournament(uuid) {
   let lastKnownVersion = 0
   let isVisible = true
   const keyBytes = getKeyFromFragment(uuid)
+  const keyMissing = !keyBytes
   const apiBase = window.location.origin
 
   function formatAgo(seconds) {
@@ -115,8 +116,8 @@ export function useTournament(uuid) {
         lastKnownVersion = data.updatedAt
         await fetchFullData()
       }
-      // Don't clear error here if it was a decryption error — only fetchFullData can clear it
-      if (error.value && !error.value.includes('déchiffrer')) {
+      // Don't clear error here if it was a key/decryption error — only fetchFullData can clear it
+      if (error.value && !error.value.includes('déchiffr') && !error.value.includes('clé') && !error.value.includes('QR Code')) {
         error.value = null
       }
     } catch (e) {
@@ -164,6 +165,12 @@ export function useTournament(uuid) {
   }
 
   onMounted(() => {
+    if (keyMissing) {
+      console.warn('[Pongify] No encryption key available — skipping all network activity')
+      error.value = 'L\'URL du tournoi n\'est plus valable. La clé de déchiffrement est manquante.\nVeuillez rescanner le QR Code ou rouvrir le lien original.'
+      isLoading.value = false
+      return
+    }
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('pageshow', handlePageShow)
     window.addEventListener('online', handleOnline)

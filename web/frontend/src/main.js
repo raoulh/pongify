@@ -17,16 +17,16 @@ if (hash && hash.includes('K=')) {
     const key = afterK.substring(0, slashIndex)
     const route = afterK.substring(slashIndex)
     console.log('[Pongify] Key extracted from URL, length:', key.length, 'route:', route)
-    sessionStorage.setItem('pongify_key_' + tournamentUuid, key)
+    localStorage.setItem('pongify_key_' + tournamentUuid, key)
     history.replaceState(null, '', window.location.pathname + '#' + route)
   } else {
     console.log('[Pongify] Key extracted from URL (no route), length:', afterK.length)
-    sessionStorage.setItem('pongify_key_' + tournamentUuid, afterK)
+    localStorage.setItem('pongify_key_' + tournamentUuid, afterK)
     history.replaceState(null, '', window.location.pathname + '#/')
   }
 } else {
-  const existingKey = sessionStorage.getItem('pongify_key_' + tournamentUuid)
-  console.log('[Pongify] No key in URL hash.', existingKey ? 'Using cached key, length: ' + existingKey.length : 'No cached key in sessionStorage!')
+  const existingKey = localStorage.getItem('pongify_key_' + tournamentUuid)
+  console.log('[Pongify] No key in URL hash.', existingKey ? 'Using cached key, length: ' + existingKey.length : 'No cached key in localStorage!')
 }
 
 // Create router AFTER hash cleanup so createWebHashHistory() sees the clean hash
