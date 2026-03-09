@@ -16,7 +16,7 @@
         <div class="round-tabs">
           <button v-for="(round, i) in serie.rounds" :key="i"
                   :class="['round-tab', { active: activeRound === i }]"
-                  @click="activeRound = i">
+                  @click="setActiveRound(i)">
             {{ roundLabel(i, serie.rounds.length) }}
           </button>
         </div>
@@ -80,6 +80,12 @@ const playersMap = computed(() => {
 
 // Determine initial round: from query param or most advanced played round
 const activeRound = ref(0)
+const userSelectedRound = ref(false)
+
+function setActiveRound(i) {
+  userSelectedRound.value = true
+  activeRound.value = i
+}
 
 function findBestRound() {
   const qr = parseInt(route.query.round, 10)
@@ -94,7 +100,9 @@ function findBestRound() {
   return best
 }
 
-watch(serie, () => { activeRound.value = findBestRound() }, { immediate: true })
+watch(serie, () => {
+  if (!userSelectedRound.value) activeRound.value = findBestRound()
+}, { immediate: true })
 onMounted(() => {
   if (serie.value) setPollContext(serie.value.status)
 })
