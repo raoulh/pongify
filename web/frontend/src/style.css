@@ -9,10 +9,35 @@
   }
   .round-tab {
     @apply px-4 py-1.5 rounded-full text-sm whitespace-nowrap
-           border border-gray-200 bg-white text-gray-500 cursor-pointer;
+           border border-gray-200 bg-white text-gray-500 cursor-pointer
+           flex items-center gap-1.5 transition-colors;
   }
   .round-tab.active {
     @apply bg-pongify-teal border-pongify-teal text-white font-semibold;
+  }
+  .round-tab.live {
+    @apply border-pongify-teal/50 text-pongify-teal font-medium;
+  }
+  .live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #22c55e;
+    flex-shrink: 0;
+    animation: live-pulse 1.5s ease-in-out infinite;
+  }
+  .round-tab.active .live-dot {
+    background-color: #fff;
+    animation: live-pulse-white 1.5s ease-in-out infinite;
+  }
+  @keyframes live-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+    50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+  }
+  @keyframes live-pulse-white {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); }
+    50% { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0); }
   }
   .match-card {
     @apply rounded-lg overflow-hidden shadow-sm;

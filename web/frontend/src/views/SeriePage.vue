@@ -15,8 +15,9 @@
       <div class="md:hidden">
         <div class="round-tabs">
           <button v-for="(round, i) in serie.rounds" :key="i"
-                  :class="['round-tab', { active: activeRound === i }]"
+                  :class="['round-tab', { active: activeRound === i, live: liveRound === i && activeRound !== i }]"
                   @click="setActiveRound(i)">
+            <span class="live-dot" v-if="liveRound === i"></span>
             {{ roundLabel(i, serie.rounds.length) }}
           </button>
         </div>
@@ -31,7 +32,8 @@
         <div class="bracket-grid">
           <BracketColumn v-for="(round, i) in serie.rounds" :key="i"
                          :round="round" :round-index="i" :total-rounds="serie.rounds.length"
-                         :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable" />
+                         :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable"
+                         :is-live="liveRound === i" />
         </div>
       </div>
     </template>
@@ -41,7 +43,10 @@
       <RankingTable :serie="serie" />
 
       <div v-for="(round, ri) in serie.rounds" :key="ri" class="space-y-2">
-        <h3 class="text-sm font-semibold text-gray-500">Tour {{ ri + 1 }}</h3>
+        <h3 :class="['text-sm font-semibold', liveRound === ri ? 'text-pongify-teal flex items-center gap-1.5' : 'text-gray-500']">
+          <span class="live-dot" v-if="liveRound === ri"></span>
+          Tour {{ ri + 1 }}
+        </h3>
         <MatchCard v-for="(match, j) in round" :key="j"
                    :match="match" :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable" />
       </div>
@@ -99,6 +104,18 @@ function findBestRound() {
   }
   return best
 }
+
+// Identify the round currently being played (has assigned matches with no winner yet)
+const liveRound = computed(() => {
+  if (!serie.value?.rounds || serie.value.status !== 'playing') return -1
+  for (let i = 0; i < serie.value.rounds.length; i++) {
+    const hasUnfinished = serie.value.rounds[i].some(m =>
+      m.player1 && m.player2 && !m.playerWinner1 && !m.playerWinner2 && !m.isBye
+    )
+    if (hasUnfinished) return i
+  }
+  return -1
+})
 
 watch(serie, () => {
   if (!userSelectedRound.value) activeRound.value = findBestRound()
