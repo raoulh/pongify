@@ -5,8 +5,10 @@
       {{ label }}
     </div>
     <div class="bracket-column">
-      <MatchCard v-for="(match, j) in round" :key="j"
-                 :match="match" :players="players" :is-double="isDouble" :is-handicap="isHandicap" :handicap-table="handicapTable" />
+      <div v-for="(match, j) in round" :key="j" class="bracket-slot">
+        <MatchCard :match="match" :players="players" :is-double="isDouble" :is-handicap="isHandicap" :handicap-table="handicapTable"
+                   :compact="compact" />
+      </div>
     </div>
   </div>
 </template>
@@ -23,7 +25,8 @@ const props = defineProps({
   isDouble: Boolean,
   isHandicap: Boolean,
   handicapTable: { type: Array, default: undefined },
-  isLive: { type: Boolean, default: false }
+  isLive: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false }
 })
 
 const label = computed(() => {

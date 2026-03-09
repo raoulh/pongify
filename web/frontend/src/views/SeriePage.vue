@@ -11,8 +11,34 @@
 
     <!-- Single elimination bracket -->
     <template v-if="serie.type === 'single'">
-      <!-- Mobile: round tabs -->
-      <div class="md:hidden">
+
+      <!-- Mobile view mode toggle -->
+      <div class="md:hidden flex items-center justify-between">
+        <div class="view-toggle">
+          <button :class="['view-toggle-btn', { active: mobileViewMode === 'rounds' }]"
+                  @click="mobileViewMode = 'rounds'" title="Vue par tour">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+              <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 012 10z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <button :class="['view-toggle-btn', { active: mobileViewMode === 'bracket' }]"
+                  @click="mobileViewMode = 'bracket'" title="Vue bracket">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+              <path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 002 4.25v2.5A2.25 2.25 0 004.25 9h2.5A2.25 2.25 0 009 6.75v-2.5A2.25 2.25 0 006.75 2h-2.5zm0 9A2.25 2.25 0 002 13.25v2.5A2.25 2.25 0 004.25 18h2.5A2.25 2.25 0 009 15.75v-2.5A2.25 2.25 0 006.75 11h-2.5zm9-9A2.25 2.25 0 0011 4.25v2.5A2.25 2.25 0 0013.25 9h2.5A2.25 2.25 0 0018 6.75v-2.5A2.25 2.25 0 0015.75 2h-2.5zm0 9A2.25 2.25 0 0011 13.25v2.5A2.25 2.25 0 0013.25 18h2.5A2.25 2.25 0 0018 15.75v-2.5A2.25 2.25 0 0015.75 11h-2.5z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        <!-- Compact toggle (only visible in bracket mode) -->
+        <div v-if="mobileViewMode === 'bracket'" class="view-toggle">
+          <button :class="['view-toggle-btn text-xs px-2', { active: bracketCardSize === 'compact' }]"
+                  @click="bracketCardSize = 'compact'">Compact</button>
+          <button :class="['view-toggle-btn text-xs px-2', { active: bracketCardSize === 'normal' }]"
+                  @click="bracketCardSize = 'normal'">Normal</button>
+        </div>
+      </div>
+
+      <!-- Mobile: rounds mode (tab navigation) -->
+      <div v-if="mobileViewMode === 'rounds'" class="md:hidden">
         <div class="round-tabs">
           <button v-for="(round, i) in serie.rounds" :key="i"
                   :class="['round-tab', { active: activeRound === i, live: liveRound === i && activeRound !== i }]"
@@ -23,7 +49,22 @@
         </div>
         <div class="flex flex-col gap-2 mt-2">
           <MatchCard v-for="(match, j) in serie.rounds[activeRound]" :key="j"
-                     :match="match" :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable" />
+                     :match="match" :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable"
+                     :round-index="activeRound" :match-index="j" :total-rounds="serie.rounds.length"
+                     :show-path-annotation="true"
+                     @select="openPathSheet"
+                     @navigate="navigateToMatch" />
+        </div>
+      </div>
+
+      <!-- Mobile: bracket mode (full bracket grid on mobile) -->
+      <div v-if="mobileViewMode === 'bracket'" class="md:hidden bracket-scroll">
+        <div :class="['bracket-grid bracket-grid-mobile', { 'bracket-grid-compact': bracketCardSize === 'compact' }]">
+          <BracketColumn v-for="(round, i) in serie.rounds" :key="i"
+                         :round="round" :round-index="i" :total-rounds="serie.rounds.length"
+                         :players="playersMap" :is-double="serie.double" :is-handicap="serie.handicap" :handicap-table="serie.handicapTable"
+                         :is-live="liveRound === i"
+                         :compact="bracketCardSize === 'compact'" />
         </div>
       </div>
 
@@ -54,6 +95,14 @@
   </div>
 
   <div v-else class="text-gray-400 text-center py-8">Série introuvable</div>
+
+  <!-- Bottom sheet: match path -->
+  <MatchPathSheet v-if="serie?.type === 'single'"
+                  :visible="selectedMatch !== null"
+                  :serie="serie" :players="playersMap"
+                  :round-index="selectedMatch?.ri ?? 0" :match-index="selectedMatch?.mi ?? 0"
+                  :is-double="serie?.double" :is-handicap="serie?.handicap" :handicap-table="serie?.handicapTable"
+                  @close="selectedMatch = null" />
 </template>
 
 <script setup>
@@ -63,6 +112,7 @@ import StatusBadge from '../components/StatusBadge.vue'
 import MatchCard from '../components/MatchCard.vue'
 import BracketColumn from '../components/BracketColumn.vue'
 import RankingTable from '../components/RankingTable.vue'
+import MatchPathSheet from '../components/MatchPathSheet.vue'
 
 const props = defineProps({ tournament: Object, index: [String, Number] })
 const route = useRoute()
@@ -82,6 +132,22 @@ const playersMap = computed(() => {
   }
   return map
 })
+
+// Mobile view mode: 'rounds' (tab navigation) or 'bracket' (full bracket grid)
+const mobileViewMode = ref('rounds')
+const bracketCardSize = ref('compact')
+
+// Bottom sheet state
+const selectedMatch = ref(null)
+
+function openPathSheet(ri, mi) {
+  selectedMatch.value = { ri, mi }
+}
+
+// Navigate to a specific match (from annotation tap)
+function navigateToMatch(ri, mi) {
+  setActiveRound(ri)
+}
 
 // Determine initial round: from query param or most advanced played round
 const activeRound = ref(0)
