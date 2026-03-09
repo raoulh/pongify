@@ -148,7 +148,7 @@ func scrapPageAlpha(letter string) {
 }
 
 func execApp() {
-	letters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+	letters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 	fmt.Printf(`{"progress":0,"total":%d}`, len(letters))
 	fmt.Printf("\n")
 
