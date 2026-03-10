@@ -121,6 +121,7 @@ private:
     int nearestPowerOf2(long long N);
 
     int seedPlayer(int rank, int partSize);
+    static int meetingRound(int slot1, int slot2);
     void prepareMatches();
     void clearAllMatches();
 

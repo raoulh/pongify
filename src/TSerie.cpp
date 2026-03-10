@@ -3,6 +3,7 @@
 #include <QCollator>
 #include <algorithm>
 #include <random>
+#include <cmath>
 #include <QQmlEngine>
 #include <QMenu>
 #include <QAction>
@@ -436,6 +437,15 @@ int TSerie::seedPlayer(int rank, int partSize)
     return seedPlayer(rank / 2 + 1, partSize / 2);
 }
 
+int TSerie::meetingRound(int slot1, int slot2)
+{
+    if (slot1 == slot2)
+        return 0;
+
+    int diff = slot1 ^ slot2;
+    return 1 + static_cast<int>(std::log2(diff));
+}
+
 void TSerie::autoSeedPlayers()
 {
     //first get players and sort them
@@ -476,10 +486,12 @@ void TSerie::autoSeedPlayers()
 
     //seed max 25% of the best players manually, the rest will be randomly placed
     int seedMax = ceil(allp.count() * 0.25);
+    QSet<Player *> seededPlayers;
     for (int i = 0;i < seedMax;i++)
     {
         auto matchIdx = seedPlayer(i + 1, firstRound->count() * 2);
         firstRound->at(matchIdx / 2)->update_player1(allp.at(i));
+        seededPlayers.insert(allp.at(i));
 
         if (byeCount > 0)
         {
@@ -489,37 +501,287 @@ void TSerie::autoSeedPlayers()
         }
     }
 
-    //remove seeded players from list and randomize it
+    //remove seeded players from list (already sorted by ranking)
     allp.remove(0, seedMax);
-    std::shuffle(allp.begin(), allp.end(), std::mt19937{std::random_device{}()});
 
-    for (int iround = 0, jplayer = 0;iround < firstRound->count() && jplayer < allp.count();iround++)
+    //Build map of slots already occupied by seeded players, grouped by club
+    int totalSlots = firstRound->count() * 2;
+    QHash<QString, QVector<int>> clubSlots;
+    for (int i = 0;i < firstRound->count();i++)
     {
-        Player *pl = allp.at(jplayer);
-
-        if (!firstRound->at(iround)->get_player1())
+        auto m = firstRound->at(i);
+        if (m->get_player1())
         {
-            firstRound->at(iround)->update_player1(pl);
-            jplayer++;
-            if (jplayer >= allp.count())
-                break;
-            pl = allp.at(jplayer);
+            QString club = m->get_player1()->get_club();
+            if (!club.isEmpty())
+                clubSlots[club].append(i * 2);
+        }
+        if (m->get_player2())
+        {
+            QString club = m->get_player2()->get_club();
+            if (!club.isEmpty())
+                clubSlots[club].append(i * 2 + 1);
+        }
+    }
 
-            //if there is still some bye to place, put them
-            if (byeCount > 0)
+    //Assign remaining byes to the best remaining players (by ranking, already sorted)
+    QSet<Player *> byePlayers;
+    for (int i = 0;i < byeCount && i < allp.count();i++)
+        byePlayers.insert(allp.at(i));
+
+    //Separate players with a club from those without
+    QVector<Player *> playersWithClub;
+    QVector<Player *> playersNoClub;
+    for (auto *p : allp)
+    {
+        if (p->get_club().isEmpty())
+            playersNoClub.append(p);
+        else
+            playersWithClub.append(p);
+    }
+
+    //Group players by club, sorted by group size descending (most constrained first)
+    QHash<QString, QVector<Player *>> clubGroups;
+    for (auto *p : playersWithClub)
+        clubGroups[p->get_club()].append(p);
+
+    QList<QString> clubKeys = clubGroups.keys();
+    std::sort(clubKeys.begin(), clubKeys.end(),
+              [&clubGroups](const QString &a, const QString &b)
+    {
+        return clubGroups[a].count() > clubGroups[b].count();
+    });
+
+    //Build list of all free slots
+    //A slot is: match_index * 2 for player1, match_index * 2 + 1 for player2
+    //Slots needing a bye: player goes in player1 (even slot), player2 = nullptr + isBye
+    //We track free matches (where player1 is empty) and half-free matches (player1 set, player2 empty, not bye)
+    auto placePlayer = [&](Player *player)
+    {
+        bool needsBye = byePlayers.contains(player);
+        QString club = player->get_club();
+
+        //Collect candidate slots with their separation score
+        struct Candidate { int matchIdx; bool asPlayer1; int score; };
+        QVector<Candidate> candidates;
+
+        for (int i = 0;i < firstRound->count();i++)
+        {
+            auto m = firstRound->at(i);
+
+            if (needsBye)
             {
-                firstRound->at(iround)->update_player2(nullptr);
-                firstRound->at(iround)->update_isBye(true);
-                byeCount--;
+                //Bye players need an empty match (player1 slot)
+                if (!m->get_player1() && !m->get_player2() && !m->get_isBye())
+                    candidates.append({i, true, 0});
+            }
+            else
+            {
+                //Non-bye: can go in player1 of empty match, or player2 of half-filled non-bye match
+                if (!m->get_player1() && !m->get_player2() && !m->get_isBye())
+                    candidates.append({i, true, 0});
+                if (m->get_player1() && !m->get_player2() && !m->get_isBye())
+                    candidates.append({i, false, 0});
             }
         }
 
-        if (firstRound->at(iround)->get_player1() &&
-            !firstRound->at(iround)->get_isBye() &&
-            !firstRound->at(iround)->get_player2())
+        if (candidates.isEmpty())
+            return;
+
+        //Score each candidate: minimum meetingRound with any same-club slot already placed
+        const QVector<int> &sameClubSlots = clubSlots.value(club);
+
+        for (auto &c : candidates)
         {
-            firstRound->at(iround)->update_player2(pl);
-            jplayer++;
+            int slot = c.asPlayer1 ? c.matchIdx * 2 : c.matchIdx * 2 + 1;
+
+            if (club.isEmpty() || sameClubSlots.isEmpty())
+            {
+                c.score = totalSlots; //maximum score, no constraint
+            }
+            else
+            {
+                int minRound = totalSlots;
+                for (int s : sameClubSlots)
+                {
+                    int r = meetingRound(slot, s);
+                    if (r < minRound)
+                        minRound = r;
+                }
+                c.score = minRound;
+            }
+        }
+
+        //Find best score
+        int bestScore = 0;
+        for (const auto &c : candidates)
+        {
+            if (c.score > bestScore)
+                bestScore = c.score;
+        }
+
+        //Collect all candidates with the best score
+        QVector<Candidate> best;
+        for (const auto &c : candidates)
+        {
+            if (c.score == bestScore)
+                best.append(c);
+        }
+
+        //Pick randomly among the best candidates
+        static std::mt19937 rng{std::random_device{}()};
+        std::uniform_int_distribution<int> dist(0, best.count() - 1);
+        auto chosen = best.at(dist(rng));
+
+        //Place the player
+        auto m = firstRound->at(chosen.matchIdx);
+        int placedSlot;
+        if (chosen.asPlayer1)
+        {
+            m->update_player1(player);
+            placedSlot = chosen.matchIdx * 2;
+
+            if (needsBye)
+            {
+                m->update_player2(nullptr);
+                m->update_isBye(true);
+            }
+        }
+        else
+        {
+            m->update_player2(player);
+            placedSlot = chosen.matchIdx * 2 + 1;
+        }
+
+        //Update club slots tracking
+        if (!club.isEmpty())
+            clubSlots[club].append(placedSlot);
+    };
+
+    //Shuffle each group once upfront
+    for (const auto &clubName : clubKeys)
+    {
+        auto &group = clubGroups[clubName];
+        std::shuffle(group.begin(), group.end(), std::mt19937{std::random_device{}()});
+    }
+    std::shuffle(playersNoClub.begin(), playersNoClub.end(), std::mt19937{std::random_device{}()});
+
+    //Place bye players FIRST — they require empty matches (no player1, no player2).
+    //Non-bye players placed as player1 would consume those empty matches,
+    //so all bye players must be placed before any non-bye player.
+    for (const auto &clubName : clubKeys)
+    {
+        for (auto *p : clubGroups[clubName])
+        {
+            if (byePlayers.contains(p))
+                placePlayer(p);
+        }
+    }
+    for (auto *p : playersNoClub)
+    {
+        if (byePlayers.contains(p))
+            placePlayer(p);
+    }
+
+    //Then place non-bye players (can go as player1 or player2)
+    for (const auto &clubName : clubKeys)
+    {
+        for (auto *p : clubGroups[clubName])
+        {
+            if (!byePlayers.contains(p))
+                placePlayer(p);
+        }
+    }
+    for (auto *p : playersNoClub)
+    {
+        if (!byePlayers.contains(p))
+            placePlayer(p);
+    }
+
+    //Repair phase: fix same-club conflicts in first round by swapping player2s
+    auto getClub = [](Player *p) -> QString {
+        return p ? p->get_club() : QString();
+    };
+
+    auto hasConflict = [&getClub](TMatch *m) -> bool {
+        if (m->get_isBye() || !m->get_player1() || !m->get_player2())
+            return false;
+        QString c1 = getClub(m->get_player1());
+        QString c2 = getClub(m->get_player2());
+        return !c1.isEmpty() && c1 == c2;
+    };
+
+    for (int i = 0;i < firstRound->count();i++)
+    {
+        auto mi = firstRound->at(i);
+        if (!hasConflict(mi))
+            continue;
+
+        bool fixed = false;
+
+        //Try swapping player2 of conflicting match with player2 of another match
+        for (int j = 0;j < firstRound->count() && !fixed;j++)
+        {
+            if (j == i) continue;
+            auto mj = firstRound->at(j);
+            if (mj->get_isBye() || !mj->get_player1() || !mj->get_player2())
+                continue;
+
+            //Simulate swap: mi.p2 <-> mj.p2
+            Player *pi2 = mi->get_player2();
+            Player *pj2 = mj->get_player2();
+
+            //Check new match i: mi.p1 vs pj2
+            QString ci1 = getClub(mi->get_player1());
+            QString cj2 = getClub(pj2);
+            bool newConflictI = !ci1.isEmpty() && ci1 == cj2;
+
+            //Check new match j: mj.p1 vs pi2
+            QString cj1 = getClub(mj->get_player1());
+            QString ci2 = getClub(pi2);
+            bool newConflictJ = !cj1.isEmpty() && cj1 == ci2;
+
+            if (!newConflictI && !newConflictJ)
+            {
+                mi->update_player2(pj2);
+                mj->update_player2(pi2);
+                fixed = true;
+            }
+        }
+
+        if (fixed)
+            continue;
+
+        //Try swapping player1 (only non-seeded) with player1 of another match
+        for (int j = 0;j < firstRound->count() && !fixed;j++)
+        {
+            if (j == i) continue;
+            auto mj = firstRound->at(j);
+            if (mj->get_isBye() || !mj->get_player1() || !mj->get_player2())
+                continue;
+
+            Player *pi1 = mi->get_player1();
+            Player *pj1 = mj->get_player1();
+
+            //Don't move seeded players
+            if (seededPlayers.contains(pi1) || seededPlayers.contains(pj1))
+                continue;
+
+            //Simulate swap: mi.p1 <-> mj.p1
+            QString ci2 = getClub(mi->get_player2());
+            QString cj1 = getClub(pj1);
+            bool newConflictI = !ci2.isEmpty() && ci2 == cj1;
+
+            QString cj2 = getClub(mj->get_player2());
+            QString ci1 = getClub(pi1);
+            bool newConflictJ = !cj2.isEmpty() && cj2 == ci1;
+
+            if (!newConflictI && !newConflictJ)
+            {
+                mi->update_player1(pj1);
+                mj->update_player1(pi1);
+                fixed = true;
+            }
         }
     }
 
