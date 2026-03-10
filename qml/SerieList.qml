@@ -133,7 +133,10 @@ Rectangle {
                                 Layout.preferredWidth: implicitWidth
                                 icon.name: "menu"
                                 icon.height: 16
-                                onClicked: mainWindow.showSerieMenu(index)
+                                onClicked: {
+                                    AppActions.selectSerie(index)
+                                    mainWindow.showSerieMenu(index)
+                                }
                             }
 
                             Item { Layout.preferredWidth: 5; height: 1 }
