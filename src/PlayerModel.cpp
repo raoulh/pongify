@@ -369,6 +369,19 @@ Player *Player::fromJson(const QJsonObject &obj)
     return player;
 }
 
+static QString removeDiacritics(const QString &str)
+{
+    QString normalized = str.normalized(QString::NormalizationForm_D);
+    QString result;
+    result.reserve(normalized.size());
+    for (const QChar &c : normalized)
+    {
+        if (c.category() != QChar::Mark_NonSpacing)
+            result.append(c);
+    }
+    return result;
+}
+
 PlayerFilterModel::PlayerFilterModel(QObject *parent):
     QSortFilterProxyModel(parent)
 {
@@ -388,7 +401,7 @@ int PlayerFilterModel::indexFromSource(int idx)
 
 void PlayerFilterModel::setClub(QString s)
 {
-    club = s.toLower();
+    club = removeDiacritics(s).toLower();
     invalidate();
 }
 
@@ -400,7 +413,7 @@ void PlayerFilterModel::setLicenseList(QStringList lics)
 
 void PlayerFilterModel::setSearchName(QString s)
 {
-    terms = s.toLower();
+    terms = removeDiacritics(s).toLower();
     invalidate();
 }
 
@@ -413,7 +426,9 @@ bool PlayerFilterModel::filterAcceptsRow(int source_row, const QModelIndex &sour
 
     PlayerModel *model = dynamic_cast<PlayerModel *>(sourceModel());
     Player *item = model->item(source_row);
-    auto txt = item->get_firstName().toLower() + item->get_lastName().toLower();
+    auto txt = removeDiacritics(item->get_firstName()).toLower()
+              + removeDiacritics(item->get_lastName()).toLower()
+              + item->get_license().toLower();
 
     if (!licenseList.isEmpty())
     {
@@ -421,12 +436,14 @@ bool PlayerFilterModel::filterAcceptsRow(int source_row, const QModelIndex &sour
             return false;
     }
 
+    auto itemClub = removeDiacritics(item->get_club()).toLower();
+
     if (!terms.isEmpty() && !club.isEmpty())
-        return txt.contains(terms.toLower()) && item->get_club().toLower() == club.toLower();
+        return txt.contains(terms) && itemClub == club;
     else if (terms.isEmpty() && !club.isEmpty())
-        return item->get_club().toLower() == club.toLower();
+        return itemClub == club;
     else if (!terms.isEmpty() && club.isEmpty())
-        return txt.contains(terms.toLower());
+        return txt.contains(terms);
 
     return true;
 }

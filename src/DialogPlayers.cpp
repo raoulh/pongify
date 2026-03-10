@@ -16,7 +16,9 @@ DialogPlayers::DialogPlayers(PlayerModel *m, bool isAddDialog, QWidget *parent) 
     ui->treeView->setUniformRowHeights(true);
 
     ui->comboBoxSearch->addItem("Tous les clubs");
-    ui->comboBoxSearch->addItems(playerModel->getClubs());
+    QStringList clubList = playerModel->getClubs();
+    clubList.sort(Qt::CaseInsensitive);
+    ui->comboBoxSearch->addItems(clubList);
 
     connect(ui->comboBoxSearch, &QComboBox::currentIndexChanged, this, [this](int index)
     {
@@ -34,6 +36,7 @@ DialogPlayers::DialogPlayers(PlayerModel *m, bool isAddDialog, QWidget *parent) 
     if (isAddDialog)
     {
         ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+        ui->treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
         connect(ui->treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex &)
         {
@@ -59,6 +62,24 @@ Player *DialogPlayers::getSelected()
     auto idx = filterModel->indexToSource(indexes.at(0).row());
 
     return playerModel->item(idx);
+}
+
+QList<Player *> DialogPlayers::getSelectedList()
+{
+    QList<Player *> result;
+    QSet<int> seen;
+    auto indexes = ui->treeView->selectionModel()->selectedIndexes();
+    for (const auto &index : indexes)
+    {
+        int sourceRow = filterModel->indexToSource(index.row());
+        if (seen.contains(sourceRow))
+            continue;
+        seen.insert(sourceRow);
+        auto p = playerModel->item(sourceRow);
+        if (p)
+            result.append(p);
+    }
+    return result;
 }
 
 void DialogPlayers::on_pushButtonAddManual_clicked()

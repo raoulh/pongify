@@ -20,6 +20,7 @@ public:
     ~DialogPlayers();
 
     Player *getSelected();
+    QList<Player *> getSelectedList();
 
 private slots:
     void on_pushButtonAddManual_clicked();

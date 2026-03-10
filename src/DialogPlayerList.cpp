@@ -188,11 +188,14 @@ void DialogPlayerList::on_pushButtonAdd_clicked()
     DialogPlayers d(PlayerModel::Instance(), true);
     if (d.exec() == QDialog::Accepted)
     {
-        auto p = d.getSelected();
-        if (p && checkRanking(p->get_ranking()))
+        auto selected = d.getSelectedList();
+        for (auto p : selected)
         {
-            qDebug() << "add player: " << p->get_firstName() << " " << p->get_lastName() << " " << p->get_club();
-            playerModel->appendClone(p);
+            if (p && checkRanking(p->get_ranking()))
+            {
+                qDebug() << "add player: " << p->get_firstName() << " " << p->get_lastName() << " " << p->get_club();
+                playerModel->appendClone(p);
+            }
         }
     }
 }
