@@ -116,8 +116,8 @@
         <file>qml/DialogMatchSelector.qml</file>
     </qresource>
     <qresource prefix="/webapp">
-        <file alias="app-Bx-XYmLE.js">web/frontend/dist/app-Bx-XYmLE.js</file>
-        <file alias="index-BhTb1FLr.css">web/frontend/dist/index-BhTb1FLr.css</file>
+        <file alias="app-DnXG3Spb.js">web/frontend/dist/app-DnXG3Spb.js</file>
+        <file alias="index-C0ifBmEl.css">web/frontend/dist/index-C0ifBmEl.css</file>
         <file alias="index.html">web/frontend/dist/index.html</file>
     </qresource>
     <qresource prefix="/cloudflare">

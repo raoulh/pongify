@@ -75,22 +75,47 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
   }
   .bracket-column .match-card {
     position: relative;
     margin: 4px 0;
   }
-  .bracket-column .match-card::after {
+  /* Right connector: top of pair — horizontal + vertical going down with rounded corner */
+  .bracket-col-wrapper:not(:last-child) .bracket-slot:nth-child(odd):not(:last-child)::after {
     content: '';
     position: absolute;
-    right: -16px;
+    right: -9px;
     top: 50%;
-    width: 16px;
+    bottom: -1px;
+    width: 9px;
+    border-top: 2px solid #4fc1e9;
+    border-right: 2px solid #4fc1e9;
+    border-top-right-radius: 8px;
+    box-sizing: border-box;
+  }
+  /* Right connector: bottom of pair — horizontal + vertical going up with rounded corner */
+  .bracket-col-wrapper:not(:last-child) .bracket-slot:nth-child(even)::after {
+    content: '';
+    position: absolute;
+    right: -9px;
+    top: -1px;
+    bottom: 50%;
+    width: 9px;
+    border-bottom: 2px solid #4fc1e9;
+    border-right: 2px solid #4fc1e9;
+    border-bottom-right-radius: 8px;
+    box-sizing: border-box;
+  }
+  /* Left entry connector: horizontal line from gap midpoint into card */
+  .bracket-col-wrapper:not(:first-child) .bracket-slot::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 50%;
+    width: 9px;
     height: 0;
     border-top: 2px solid #4fc1e9;
-  }
-  .bracket-col-wrapper:last-child .bracket-column .match-card::after {
-    display: none;
   }
 }
 
@@ -126,22 +151,47 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
 }
 .bracket-grid-mobile .bracket-column .match-card {
   position: relative;
   margin: 3px 0;
 }
-.bracket-grid-mobile .bracket-column .match-card::after {
+/* Right connector: top of pair */
+.bracket-grid-mobile .bracket-col-wrapper:not(:last-child) .bracket-slot:nth-child(odd):not(:last-child)::after {
   content: '';
   position: absolute;
-  right: -12px;
+  right: -7px;
   top: 50%;
-  width: 12px;
+  bottom: -1px;
+  width: 7px;
+  border-top: 2px solid #4fc1e9;
+  border-right: 2px solid #4fc1e9;
+  border-top-right-radius: 6px;
+  box-sizing: border-box;
+}
+/* Right connector: bottom of pair */
+.bracket-grid-mobile .bracket-col-wrapper:not(:last-child) .bracket-slot:nth-child(even)::after {
+  content: '';
+  position: absolute;
+  right: -7px;
+  top: -1px;
+  bottom: 50%;
+  width: 7px;
+  border-bottom: 2px solid #4fc1e9;
+  border-right: 2px solid #4fc1e9;
+  border-bottom-right-radius: 6px;
+  box-sizing: border-box;
+}
+/* Left entry connector */
+.bracket-grid-mobile .bracket-col-wrapper:not(:first-child) .bracket-slot::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  width: 7px;
   height: 0;
   border-top: 2px solid #4fc1e9;
-}
-.bracket-grid-mobile .bracket-col-wrapper:last-child .bracket-column .match-card::after {
-  display: none;
 }
 
 /* Compact mobile bracket */
