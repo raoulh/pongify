@@ -8,6 +8,11 @@ TTable::TTable(QObject *parent):
 
     connect(this, &TTable::matchChanged, this, [this](QObject *m)
     {
+        // Clean up previous match connections to prevent stale lambda captures
+        for (auto &conn: connections)
+            disconnect(conn);
+        connections.clear();
+
         update_free(get_match() == nullptr);
 
         if (m)

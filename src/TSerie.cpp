@@ -321,6 +321,24 @@ void TSerie::clearPlayers()
     players->clear();
 }
 
+void TSerie::replaceAllPlayers(PlayerModel *source)
+{
+    // Temporarily disconnect to prevent N+1 intermediate playersModelChanged()
+    // calls during the clear+append sequence. Each intermediate call would
+    // destroy and recreate all TMatch objects via prepareMatches(), risking
+    // use-after-free in QML bindings observing the serie.
+    disconnect(players, &PlayerModel::playersChanged, this, &TSerie::playersModelChanged);
+
+    clearPlayers();
+    scoresWinners.clear();
+
+    for (int i = 0; i < source->rowCount(); i++)
+        players->appendClone(source->item(i));
+
+    connect(players, &PlayerModel::playersChanged, this, &TSerie::playersModelChanged);
+    playersModelChanged();
+}
+
 void TSerie::startSerie()
 {
     //Serie status:
@@ -936,8 +954,6 @@ void TSerie::clearAllMatches()
     }
     qDeleteAll(allMatches);
     allMatches.clear();
-
-    emit matchesUpdated();
 }
 
 void TSerie::updateNextMatches()

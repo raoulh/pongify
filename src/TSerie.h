@@ -77,6 +77,7 @@ public:
     PlayerModel *getPlayerModel() { return players; }
 
     void clearPlayers();
+    void replaceAllPlayers(PlayerModel *source);
 
     void startSerie();
     void stopSerie();
