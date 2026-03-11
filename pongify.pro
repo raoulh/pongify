@@ -17,16 +17,20 @@ SOURCES += \
     src/DialogBroadcastOpts.cpp \
     src/DialogChangePlayer.cpp \
     src/DialogCloudflareSetup.cpp \
+    src/DialogCreatePools.cpp \
     src/DialogEditInfo.cpp \
     src/DialogEditScore.cpp \
     src/DialogNewSerie.cpp \
     src/DialogNewTournament.cpp \
+    src/DialogPlayerDispatch.cpp \
     src/DialogPlayerList.cpp \
     src/DialogPlayers.cpp \
     src/DialogPlayersHtml.cpp \
     src/DialogPodiumRR.cpp \
     src/DialogPodiumSingle.cpp \
+    src/DialogQualification.cpp \
     src/DialogRestoreBackup.cpp \
+    src/DialogTournamentRoster.cpp \
     src/PlayerModel.cpp \
     src/PlayerSync.cpp \
     src/TSerie.cpp \
@@ -54,16 +58,20 @@ HEADERS += \
     src/DialogBroadcastOpts.h \
     src/DialogChangePlayer.h \
     src/DialogCloudflareSetup.h \
+    src/DialogCreatePools.h \
     src/DialogEditInfo.h \
     src/DialogEditScore.h \
     src/DialogNewSerie.h \
     src/DialogNewTournament.h \
+    src/DialogPlayerDispatch.h \
     src/DialogPlayerList.h \
     src/DialogPlayers.h \
     src/DialogPlayersHtml.h \
     src/DialogPodiumRR.h \
     src/DialogPodiumSingle.h \
+    src/DialogQualification.h \
     src/DialogRestoreBackup.h \
+    src/DialogTournamentRoster.h \
     src/MainWindow.h \
     src/PlayerModel.h \
     src/PlayerSync.h \
@@ -90,16 +98,20 @@ FORMS += \
     src/DialogBroadcastOpts.ui \
     src/DialogChangePlayer.ui \
     src/DialogCloudflareSetup.ui \
+    src/DialogCreatePools.ui \
     src/DialogEditInfo.ui \
     src/DialogEditScore.ui \
     src/DialogNewSerie.ui \
     src/DialogNewTournament.ui \
+    src/DialogPlayerDispatch.ui \
     src/DialogPlayerList.ui \
     src/DialogPlayers.ui \
     src/DialogPlayersHtml.ui \
     src/DialogPodiumRR.ui \
     src/DialogPodiumSingle.ui \
+    src/DialogQualification.ui \
     src/DialogRestoreBackup.ui \
+    src/DialogTournamentRoster.ui \
     src/MainWindow.ui \
     src/WidgetTextEdit.ui \
     src/DialogWebPublish.ui

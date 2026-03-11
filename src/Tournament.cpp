@@ -12,6 +12,9 @@ Tournament::Tournament(QObject *parent):
     update_tables(tables);
     set_defaultViewVisible(true);
 
+    tournamentPlayersModel = PlayerModel::createEmpty();
+    update_tournamentPlayers(tournamentPlayersModel);
+
     connect(this, &Tournament::defaultViewVisibleChanged, this, [this]()
     {
         TStorage::Instance()->saveToDisk(this);
@@ -166,6 +169,14 @@ Tournament *Tournament::fromJson(const QJsonObject &obj)
             t->addTable(table);
     }
 
+    // Load tournament player roster
+    arr = obj["tournament_players"].toArray();
+    for (int i = 0; i < arr.count(); i++)
+    {
+        auto o = arr.at(i).toObject();
+        t->tournamentPlayersModel->loadPlayer(o);
+    }
+
     return t;
 }
 
@@ -178,6 +189,10 @@ QJsonObject Tournament::toJson()
     QJsonArray arr2;
     for (int i = 0;i < tables->count();i++)
         arr2.append(tables->at(i)->toJson());
+
+    QJsonArray tournamentPlayersArr;
+    for (int i = 0; i < tournamentPlayersModel->rowCount(); i++)
+        tournamentPlayersArr.append(tournamentPlayersModel->item(i)->toJson());
 
     return {
         { "uuid", get_uuid() },
@@ -192,6 +207,7 @@ QJsonObject Tournament::toJson()
         { "default_view_visible", get_defaultViewVisible() },
         { "write_secret", get_writeSecret() },
         { "encryption_key", get_encryptionKey() },
+        { "tournament_players", tournamentPlayersArr },
     };
 }
 
@@ -216,6 +232,13 @@ QJsonObject Tournament::toJsonForPublish()
             stub.insert("handicapTable", handicapArr);
             stub.insert("uid", s->get_serieUid());
             stub.insert("start_time", s->get_startTime());
+            if (!s->get_feedFrom().isEmpty())
+            {
+                QJsonArray feedArr;
+                for (const auto &uid : s->get_feedFrom())
+                    feedArr.append(uid);
+                stub.insert("feed_from", feedArr);
+            }
             seriesArray.append(stub);
         }
         else

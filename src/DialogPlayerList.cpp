@@ -1,6 +1,7 @@
 #include "DialogPlayerList.h"
 #include "ui_DialogPlayerList.h"
 #include "TSerie.h"
+#include "Tournament.h"
 #include "PlayerModel.h"
 #include "DialogPlayers.h"
 #include "DialogAddDoublePlayers.h"
@@ -8,6 +9,8 @@
 #include <QMessageBox>
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QMenu>
+#include <QInputDialog>
 
 class TwoLineItemDelegate: public QStyledItemDelegate
 {
@@ -123,10 +126,11 @@ public:
     }
 };
 
-DialogPlayerList::DialogPlayerList(TSerie *s, QWidget *parent) :
+DialogPlayerList::DialogPlayerList(TSerie *s, Tournament *t, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogPlayerList),
-    serie(s)
+    serie(s),
+    tournament(t)
 {
     ui->setupUi(this);
 
@@ -163,25 +167,41 @@ void DialogPlayerList::on_pushButtonAdd_clicked()
 {
     if (serie->get_isDouble())
     {
-        DialogAddDoublePlayers d;
-        if (d.exec() == QDialog::Accepted)
+        if (tournament)
         {
-            auto p1 = d.getPlayer1();
-            auto p2 = d.getPlayer2();
-
-            // Build a merged JSON with both players' data so the model
-            // receives complete double info at insert time (fixes column count)
-            QJsonObject merged = p1->toJson();
-            merged.insert("firstnameSecond", p2->get_firstName());
-            merged.insert("lastnameSecond", p2->get_lastName());
-            merged.insert("clubSecond", p2->get_club());
-            merged.insert("licenseSecond", p2->get_license());
-            merged.insert("rankingSecond", p2->get_ranking());
-            merged.insert("license_validSecond", p2->get_licenseValid());
-
-            playerModel->loadPlayer(merged);
+            QMenu menu;
+            menu.addAction("Depuis la base CDSLS", this, [this]() { addDouble(nullptr); });
+            menu.addAction("Depuis les inscrits au tournoi", this, [this]() { addDouble(tournament->getTournamentPlayerModel()); });
+            menu.addAction("Depuis une autre série", this, [this]() { addDoubleFromOtherSerie(); });
+            menu.exec(ui->pushButtonAdd->mapToGlobal(QPoint(0, ui->pushButtonAdd->height())));
         }
+        else
+        {
+            addDouble(nullptr);
+        }
+        return;
+    }
 
+    // If we have a tournament, show a menu with multiple sources
+    if (tournament)
+    {
+        QMenu menu;
+        menu.addAction("Depuis la base CDSLS", this, [this]()
+        {
+            DialogPlayers d(PlayerModel::Instance(), true);
+            if (d.exec() == QDialog::Accepted)
+            {
+                auto selected = d.getSelectedList();
+                for (auto p : selected)
+                {
+                    if (p && checkRanking(p->get_ranking()))
+                        playerModel->appendClone(p);
+                }
+            }
+        });
+        menu.addAction("Depuis les inscrits au tournoi", this, [this]() { addFromRoster(); });
+        menu.addAction("Depuis une autre série", this, [this]() { addFromOtherSerie(); });
+        menu.exec(ui->pushButtonAdd->mapToGlobal(QPoint(0, ui->pushButtonAdd->height())));
         return;
     }
 
@@ -217,6 +237,32 @@ void DialogPlayerList::on_pushButtonRemove_clicked()
 void DialogPlayerList::on_buttonBox_accepted()
 {
     serie->replaceAllPlayers(playerModel);
+
+    // Auto-add players to tournament roster if not already there
+    if (tournament)
+    {
+        auto *roster = tournament->getTournamentPlayerModel();
+        for (int i = 0; i < playerModel->rowCount(); i++)
+        {
+            auto *p = playerModel->item(i);
+            if (!roster->getFromLicense(p->get_license()))
+                roster->appendClone(p);
+            // For doubles, also add the second player
+            if (!p->get_licenseSecond().isEmpty() &&
+                !roster->getFromLicense(p->get_licenseSecond()))
+            {
+                QJsonObject p2Json;
+                p2Json.insert("firstname", p->get_firstNameSecond());
+                p2Json.insert("lastname", p->get_lastNameSecond());
+                p2Json.insert("license", p->get_licenseSecond());
+                p2Json.insert("ranking", p->get_rankingSecond());
+                p2Json.insert("club", p->get_clubSecond());
+                p2Json.insert("license_valid", p->get_licenseValidSecond());
+                roster->loadPlayer(p2Json);
+            }
+        }
+    }
+
     accept();
 }
 
@@ -255,4 +301,136 @@ bool DialogPlayerList::checkRanking(QString rank)
     }
 
     return player_rank >= max;
+}
+
+void DialogPlayerList::addFromRoster()
+{
+    if (!tournament) return;
+
+    auto *roster = tournament->getTournamentPlayerModel();
+    DialogPlayers d(roster, true);
+    d.setWindowTitle("Sélectionner depuis le roster du tournoi");
+    if (d.exec() == QDialog::Accepted)
+    {
+        auto selected = d.getSelectedList();
+        for (auto p : selected)
+        {
+            if (p && checkRanking(p->get_ranking()))
+            {
+                if (!playerModel->getFromLicense(p->get_license()))
+                    playerModel->appendClone(p);
+            }
+        }
+    }
+}
+
+void DialogPlayerList::addFromOtherSerie()
+{
+    if (!tournament) return;
+
+    // Build list of other series
+    QStringList serieNames;
+    QList<int> serieIndexes;
+    for (int i = 0; i < tournament->serieCount(); i++)
+    {
+        auto *s = tournament->getSerie(i);
+        if (s->get_serieUid() == serie->get_serieUid()) continue;
+        serieNames << QStringLiteral("%1 (%2 joueurs)").arg(s->get_name()).arg(s->getPlayerModel()->rowCount());
+        serieIndexes << i;
+    }
+
+    if (serieNames.isEmpty())
+    {
+        QMessageBox::information(this, "Info", "Aucune autre série disponible.");
+        return;
+    }
+
+    bool ok;
+    QString choice = QInputDialog::getItem(this, "Sélectionner une série",
+                                           "Importer les joueurs depuis:", serieNames, 0, false, &ok);
+    if (!ok) return;
+
+    int choiceIdx = serieNames.indexOf(choice);
+    if (choiceIdx < 0 || choiceIdx >= serieIndexes.count()) return;
+
+    auto *sourceSerie = tournament->getSerie(serieIndexes[choiceIdx]);
+    auto *sourceModel = sourceSerie->getPlayerModel();
+
+    // Open player selection dialog from source serie's players
+    DialogPlayers d(sourceModel, true);
+    d.setWindowTitle(QStringLiteral("Joueurs de \"%1\"").arg(sourceSerie->get_name()));
+    if (d.exec() == QDialog::Accepted)
+    {
+        auto selected = d.getSelectedList();
+        for (auto p : selected)
+        {
+            if (p && checkRanking(p->get_ranking()))
+            {
+                if (!playerModel->getFromLicense(p->get_license()))
+                    playerModel->appendClone(p);
+            }
+        }
+    }
+}
+
+void DialogPlayerList::addDouble(PlayerModel *source)
+{
+    DialogAddDoublePlayers d(source);
+    if (d.exec() == QDialog::Accepted)
+    {
+        auto p1 = d.getPlayer1();
+        auto p2 = d.getPlayer2();
+
+        QJsonObject merged = p1->toJson();
+        merged.insert("firstnameSecond", p2->get_firstName());
+        merged.insert("lastnameSecond", p2->get_lastName());
+        merged.insert("clubSecond", p2->get_club());
+        merged.insert("licenseSecond", p2->get_license());
+        merged.insert("rankingSecond", p2->get_ranking());
+        merged.insert("license_validSecond", p2->get_licenseValid());
+
+        playerModel->loadPlayer(merged);
+    }
+}
+
+void DialogPlayerList::addDoubleFromOtherSerie()
+{
+    if (!tournament) return;
+
+    // Build list of other double series only
+    QStringList serieNames;
+    QList<int> serieIndexes;
+    for (int i = 0; i < tournament->serieCount(); i++)
+    {
+        auto *s = tournament->getSerie(i);
+        if (s->get_serieUid() == serie->get_serieUid()) continue;
+        if (!s->get_isDouble()) continue;
+        serieNames << QStringLiteral("%1 (%2 équipes)").arg(s->get_name()).arg(s->getPlayerModel()->rowCount());
+        serieIndexes << i;
+    }
+
+    if (serieNames.isEmpty())
+    {
+        QMessageBox::information(this, "Info", "Aucune autre série double disponible.");
+        return;
+    }
+
+    bool ok;
+    QString choice = QInputDialog::getItem(this, "Sélectionner une série",
+                                           "Importer les équipes depuis:", serieNames, 0, false, &ok);
+    if (!ok) return;
+
+    int choiceIdx = serieNames.indexOf(choice);
+    if (choiceIdx < 0 || choiceIdx >= serieIndexes.count()) return;
+
+    auto *sourceSerie = tournament->getSerie(serieIndexes[choiceIdx]);
+    auto *srcModel = sourceSerie->getPlayerModel();
+
+    // Import double pairs directly
+    for (int i = 0; i < srcModel->rowCount(); i++)
+    {
+        auto *p = srcModel->item(i);
+        if (!playerModel->getFromLicense(p->get_license()))
+            playerModel->appendClone(p);
+    }
 }

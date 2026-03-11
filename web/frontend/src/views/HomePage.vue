@@ -24,6 +24,7 @@
               <span v-if="serie.double"> · Double</span>
               <span v-if="serie.handicap"> · Handicap</span>
             </div>
+            <SerieGroupBadge :feedFrom="serie.feed_from" :allSeries="tournament.series" />
           </div>
           <span v-if="serie.start_time" class="text-xs text-gray-400">🕐 {{ serie.start_time }}</span>
           <span v-else class="text-xs text-gray-400">{{ serie.players?.length || 0 }} joueurs</span>
@@ -38,6 +39,7 @@
               <span v-if="serie.double"> · Double</span>
               <span v-if="serie.handicap"> · Handicap</span>
             </div>
+            <SerieGroupBadge :feedFrom="serie.feed_from" :allSeries="tournament.series" />
           </div>
           <span v-if="serie.start_time" class="text-xs text-gray-400">🕐 {{ serie.start_time }}</span>
           <span v-else class="text-xs text-gray-400">En attente</span>
@@ -50,6 +52,7 @@
 <script setup>
 import { onMounted, inject } from 'vue'
 import StatusBadge from '../components/StatusBadge.vue'
+import SerieGroupBadge from '../components/SerieGroupBadge.vue'
 
 defineProps({ tournament: Object })
 const { setPollContext } = inject('tournamentCtx')

@@ -10,13 +10,14 @@ class DialogPlayerList;
 class PlayerModel;
 class PlayerFilterModel;
 class TSerie;
+class Tournament;
 
 class DialogPlayerList : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit DialogPlayerList(TSerie *serie, QWidget *parent = nullptr);
+    explicit DialogPlayerList(TSerie *serie, Tournament *tournament = nullptr, QWidget *parent = nullptr);
     ~DialogPlayerList();
 
 private slots:
@@ -30,8 +31,13 @@ private:
     PlayerModel *playerModel = nullptr;
     PlayerFilterModel *filterModel = nullptr;
     TSerie *serie = nullptr;
+    Tournament *tournament = nullptr;
 
     bool checkRanking(QString rank);
+    void addFromRoster();
+    void addFromOtherSerie();
+    void addDouble(PlayerModel *sourceModel);
+    void addDoubleFromOtherSerie();
 };
 
 #endif // DIALOGPLAYERLIST_H

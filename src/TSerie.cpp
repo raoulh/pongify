@@ -132,6 +132,15 @@ TSerie *TSerie::fromJson(const QJsonObject &obj)
     if (t->get_serieUid().isEmpty())
         t->set_serieUid(QUuid::createUuid().toString());
 
+    // Load feedFrom (qualification source series UIDs)
+    if (obj.contains("feed_from"))
+    {
+        QStringList feedList;
+        for (const auto &v : obj["feed_from"].toArray())
+            feedList.append(v.toString());
+        t->update_feedFrom(feedList);
+    }
+
     QJsonArray arr = obj["players"].toArray();
     for (int i = 0;i < arr.count();i++)
     {
@@ -233,6 +242,15 @@ QJsonObject TSerie::toJson()
     obj.insert("uid", get_serieUid());
     obj.insert("view_visible", get_viewVisible());
     obj.insert("start_time", get_startTime());
+
+    // Save feedFrom (qualification source series UIDs)
+    if (!get_feedFrom().isEmpty())
+    {
+        QJsonArray feedArr;
+        for (const auto &uid : get_feedFrom())
+            feedArr.append(uid);
+        obj.insert("feed_from", feedArr);
+    }
 
     QJsonArray arr;
     for (int i = 0;i < players->rowCount();i++)
@@ -847,6 +865,20 @@ void TSerie::showPodium()
             emit matchesUpdated(); //save to disk
         }
     }
+}
+
+QList<ScoreRR> TSerie::getRRWinners()
+{
+    if (get_tournamentType() == "roundrobin")
+        calculateRRWinners();
+    return scoresWinners;
+}
+
+QList<Player *> TSerie::getSingleWinners()
+{
+    if (get_tournamentType() == "single")
+        calculateSingleWinners();
+    return singleWinners;
 }
 
 int TSerie::nearestPowerOf2(long long N)

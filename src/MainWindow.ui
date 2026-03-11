@@ -60,7 +60,8 @@
     </property>
     <addaction name="actionListe_des_joueurs"/>
     <addaction name="actionMettre_jour_la_liste_de_joueur_depuis_le_CDSLS"/>
-    <addaction name="actionListe_des_joueurs_du_tournoi"/>
+    <addaction name="separator"/>
+    <addaction name="actionTournamentRoster"/>
    </widget>
    <widget class="QMenu" name="menuAide">
     <property name="title">
@@ -103,11 +104,6 @@
     <string>Propriétés</string>
    </property>
   </action>
-  <action name="actionListe_des_joueurs_du_tournoi">
-   <property name="text">
-    <string>Liste des joueurs du tournoi...</string>
-   </property>
-  </action>
   <action name="actionA_propos">
    <property name="text">
     <string>A propos</string>
@@ -126,6 +122,11 @@
   <action name="actionRestaurer_backup">
    <property name="text">
     <string>Restaurer un backup...</string>
+   </property>
+  </action>
+  <action name="actionTournamentRoster">
+   <property name="text">
+    <string>Inscrits au tournoi...</string>
    </property>
   </action>
  </widget>

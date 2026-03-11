@@ -64,6 +64,12 @@ Rectangle {
                     tooltipText: "Ajouter une nouvelle série"
                 }
 
+                ToolButtonTip {
+                    icon.name: "casino2"
+                    onClicked: mainWindow.createPools()
+                    tooltipText: "Créer des poules automatiquement"
+                }
+
                 Item { Layout.fillWidth: true; height: 1 }
             }
         }

@@ -8,7 +8,15 @@ DialogPlayersHtml::DialogPlayersHtml(Tournament *t, QWidget *parent) :
     tournament(t)
 {
     ui->setupUi(this);
+    ui->textEdit->setHtml(buildHtml());
+}
 
+DialogPlayersHtml::DialogPlayersHtml(PlayerModel *model, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::DialogPlayersHtml),
+    rosterModel(model)
+{
+    ui->setupUi(this);
     ui->textEdit->setHtml(buildHtml());
 }
 
@@ -42,26 +50,45 @@ QString DialogPlayersHtml::buildHtml()
 
     QSet<Player *> s;
     QList<Player *> allPlayers;
-    for (int i = 0;i < tournament->serieCount();i++)
-    {
-        auto serie = tournament->getSerie(i);
-        auto players = reinterpret_cast<PlayerModel *>(serie->get_players());
-        for (int j = 0;j < players->rowCount();j++)
-        {
-            auto p = players->item(j);
 
+    if (rosterModel)
+    {
+        // Build from roster model directly
+        for (int i = 0; i < rosterModel->rowCount(); i++)
+        {
+            auto p = rosterModel->item(i);
             auto pA = PlayerModel::Instance()->getFromLicense(p->get_license());
             if (pA && !s.contains(pA))
             {
                 s.insert(pA);
                 allPlayers.append(pA);
             }
-
-            auto pB = PlayerModel::Instance()->getFromLicense(p->get_licenseSecond());
-            if (pB && !s.contains(pB))
+        }
+    }
+    else
+    {
+        // Build from all series players
+        for (int i = 0;i < tournament->serieCount();i++)
+        {
+            auto serie = tournament->getSerie(i);
+            auto players = reinterpret_cast<PlayerModel *>(serie->get_players());
+            for (int j = 0;j < players->rowCount();j++)
             {
-                s.insert(pB);
-                allPlayers.append(pB);
+                auto p = players->item(j);
+
+                auto pA = PlayerModel::Instance()->getFromLicense(p->get_license());
+                if (pA && !s.contains(pA))
+                {
+                    s.insert(pA);
+                    allPlayers.append(pA);
+                }
+
+                auto pB = PlayerModel::Instance()->getFromLicense(p->get_licenseSecond());
+                if (pB && !s.contains(pB))
+                {
+                    s.insert(pB);
+                    allPlayers.append(pB);
+                }
             }
         }
     }

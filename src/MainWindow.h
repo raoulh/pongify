@@ -48,6 +48,7 @@ public:
     Q_INVOKABLE void deleteSerie(int idx);
     Q_INVOKABLE void editSerie(int idx);
     Q_INVOKABLE void selectSerie(int idx);
+    Q_INVOKABLE void createPools();
 
     Q_INVOKABLE void newTable();
     Q_INVOKABLE void deleteTable();
@@ -77,8 +78,8 @@ private slots:
     void on_actionListe_des_joueurs_triggered();
     void on_actionFermer_triggered();
     void on_actionPropri_t_s_triggered();
-    void on_actionListe_des_joueurs_du_tournoi_triggered();
     void on_actionA_propos_triggered();
+    void on_actionTournamentRoster_triggered();
 
 private:
     Ui::MainWindow *ui;

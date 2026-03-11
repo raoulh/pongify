@@ -19,6 +19,10 @@
 #include "DialogTournamentQr.h"
 #include "QrCodeProvider.h"
 #include "DialogRestoreBackup.h"
+#include "DialogTournamentRoster.h"
+#include "DialogPlayerDispatch.h"
+#include "DialogCreatePools.h"
+#include "DialogQualification.h"
 #include "version.h"
 
 #include <qfappdispatcher.h>
@@ -93,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent):
     {
         ui->actionFermer->setEnabled(en);
         ui->actionPropri_t_s->setEnabled(en);
-        ui->actionListe_des_joueurs_du_tournoi->setEnabled(en);
+        ui->actionTournamentRoster->setEnabled(en);
         ui->actionExporter->setEnabled(en);
         ui->actionRestaurer_backup->setEnabled(en);
 
@@ -237,7 +241,7 @@ void MainWindow::showSerieMenu(int idx)
     action = menu.addAction(QIcon::fromTheme("athlete"), tr("Joueurs..."));
     connect(action, &QAction::triggered, this, [this, serie]()
     {
-        DialogPlayerList d(serie);
+        DialogPlayerList d(serie, currentTournament);
         if (d.exec() == QDialog::Accepted)
         {
             TStorage::Instance()->saveToDisk(currentTournament);
@@ -286,6 +290,35 @@ void MainWindow::showSerieMenu(int idx)
 
     menu.addSeparator();
 
+    // Qualification / Transfer actions
+    if (serie->get_status() == "stopped" && !serie->get_isDouble())
+    {
+        action = menu.addAction(QIcon::fromTheme("arrow-down"), tr("Importer des joueurs depuis une série..."));
+        connect(action, &QAction::triggered, this, [this, serie]()
+        {
+            DialogQualification d(currentTournament, serie, false);
+            if (d.exec() == QDialog::Accepted)
+            {
+                TStorage::Instance()->saveToDisk(currentTournament);
+            }
+        });
+    }
+
+    if (serie->get_status() == "stopped" && !serie->get_isDouble())
+    {
+        action = menu.addAction(QIcon::fromTheme("arrow-up"), tr("Transférer les joueurs vers une série..."));
+        connect(action, &QAction::triggered, this, [this, serie]()
+        {
+            DialogQualification d(currentTournament, serie, true);
+            if (d.exec() == QDialog::Accepted)
+            {
+                TStorage::Instance()->saveToDisk(currentTournament);
+            }
+        });
+    }
+
+    menu.addSeparator();
+
     action = menu.addAction(QIcon::fromTheme("trash"), tr("Supprimer"));
     connect(action, &QAction::triggered, this, [this, idx]()
     {
@@ -314,6 +347,15 @@ void MainWindow::newSerie()
 
         currentTournament->addSerie(s);
         TStorage::Instance()->saveToDisk(currentTournament);
+    }
+}
+
+void MainWindow::createPools()
+{
+    DialogCreatePools d(currentTournament);
+    if (d.exec() == QDialog::Accepted && d.poolsCreated())
+    {
+        // Series already saved inside the dialog
     }
 }
 
@@ -939,10 +981,13 @@ void MainWindow::buildMatchTableModel()
     }
 }
 
-void MainWindow::on_actionListe_des_joueurs_du_tournoi_triggered()
+void MainWindow::on_actionTournamentRoster_triggered()
 {
-    DialogPlayersHtml d(currentTournament);
-    d.exec();
+    DialogTournamentRoster d(currentTournament);
+    if (d.exec() == QDialog::Accepted)
+    {
+        TStorage::Instance()->saveToDisk(currentTournament);
+    }
 }
 
 void MainWindow::on_actionA_propos_triggered()

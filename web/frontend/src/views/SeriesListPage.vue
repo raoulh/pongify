@@ -20,6 +20,7 @@
             · {{ serie.players?.length || 0 }} joueurs
             <span v-if="serie.start_time"> · 🕐 {{ serie.start_time }}</span>
           </div>
+          <SerieGroupBadge :feedFrom="serie.feed_from" :allSeries="tournament.series" />
         </div>
         <span class="text-gray-400 text-lg">›</span>
       </div>
@@ -34,6 +35,7 @@
 <script setup>
 import { computed, onMounted, inject } from 'vue'
 import StatusBadge from '../components/StatusBadge.vue'
+import SerieGroupBadge from '../components/SerieGroupBadge.vue'
 
 const props = defineProps({ tournament: Object })
 const { setPollContext } = inject('tournamentCtx')

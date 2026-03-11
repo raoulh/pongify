@@ -66,6 +66,9 @@ class TSerie : public QObject
     //Optional planned start time for this serie (format "HH:mm" or empty)
     QML_READONLY_PROPERTY(QString, startTime)
 
+    //UIDs of series that fed players into this serie (for qualification tracking)
+    QML_READONLY_PROPERTY(QStringList, feedFrom)
+
 public:
     explicit TSerie(QObject *parent = nullptr);
     virtual ~TSerie();
@@ -92,6 +95,10 @@ public:
     Q_INVOKABLE bool winnerForMatch(int round, int match, int playerIdx);
     Q_INVOKABLE void clickedOnMatch(int round, int match);
     Q_INVOKABLE int computeHandicap(int ecart) const;
+
+    // Access ranked results for qualification/transfer
+    QList<ScoreRR> getRRWinners();
+    QList<Player *> getSingleWinners();
 
     typedef struct UnplayedMatch
     {

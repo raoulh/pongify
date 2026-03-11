@@ -3,9 +3,12 @@
 #include "DialogPlayers.h"
 #include "PlayerModel.h"
 
-DialogAddDoublePlayers::DialogAddDoublePlayers(QWidget *parent) :
+#include <QMessageBox>
+
+DialogAddDoublePlayers::DialogAddDoublePlayers(PlayerModel *source, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DialogAddDoublePlayers)
+    ui(new Ui::DialogAddDoublePlayers),
+    sourceModel(source)
 {
     ui->setupUi(this);
 
@@ -35,28 +38,80 @@ void DialogAddDoublePlayers::on_buttonBox_accepted()
 
 void DialogAddDoublePlayers::on_pushButtonChoose1_clicked()
 {
-    DialogPlayers d(PlayerModel::Instance(), true);
+    DialogPlayers d(sourceModel ? sourceModel : PlayerModel::Instance(), true);
     if (d.exec() == QDialog::Accepted)
     {
-        player1 = d.getSelected();
-        ui->lineEditFirstname1->setText(player1->get_firstName());
-        ui->lineEditLastname1->setText(player1->get_lastName());
-        ui->lineEditClub1->setText(player1->get_club());
-        ui->lineEditLicense1->setText(player1->get_license());
-        ui->lineEditRank1->setText(player1->get_ranking());
+        auto selected = d.getSelectedList();
+        if (selected.count() > 2)
+        {
+            QMessageBox::warning(this, "Double", "Veuillez sélectionner 1 ou 2 joueurs maximum.");
+            return;
+        }
+
+        if (selected.count() >= 1 && selected.at(0))
+        {
+            player1 = selected.at(0);
+            ui->lineEditFirstname1->setText(player1->get_firstName());
+            ui->lineEditLastname1->setText(player1->get_lastName());
+            ui->lineEditClub1->setText(player1->get_club());
+            ui->lineEditLicense1->setText(player1->get_license());
+            ui->lineEditRank1->setText(player1->get_ranking());
+        }
+
+        if (selected.count() == 2 && selected.at(1))
+        {
+            player2 = selected.at(1);
+            ui->lineEditFirstname2->setText(player2->get_firstName());
+            ui->lineEditLastname2->setText(player2->get_lastName());
+            ui->lineEditClub2->setText(player2->get_club());
+            ui->lineEditLicense2->setText(player2->get_license());
+            ui->lineEditRank2->setText(player2->get_ranking());
+        }
     }
 }
 
 void DialogAddDoublePlayers::on_pushButtonChoose2_clicked()
 {
-    DialogPlayers d(PlayerModel::Instance(), true);
+    DialogPlayers d(sourceModel ? sourceModel : PlayerModel::Instance(), true);
     if (d.exec() == QDialog::Accepted)
     {
-        player2 = d.getSelected();
-        ui->lineEditFirstname2->setText(player2->get_firstName());
-        ui->lineEditLastname2->setText(player2->get_lastName());
-        ui->lineEditClub2->setText(player2->get_club());
-        ui->lineEditLicense2->setText(player2->get_license());
-        ui->lineEditRank2->setText(player2->get_ranking());
+        auto selected = d.getSelectedList();
+        if (selected.count() > 2)
+        {
+            QMessageBox::warning(this, "Double", "Veuillez sélectionner 1 ou 2 joueurs maximum.");
+            return;
+        }
+
+        if (selected.count() == 1 && selected.at(0))
+        {
+            player2 = selected.at(0);
+            ui->lineEditFirstname2->setText(player2->get_firstName());
+            ui->lineEditLastname2->setText(player2->get_lastName());
+            ui->lineEditClub2->setText(player2->get_club());
+            ui->lineEditLicense2->setText(player2->get_license());
+            ui->lineEditRank2->setText(player2->get_ranking());
+        }
+
+        if (selected.count() == 2)
+        {
+            if (selected.at(0))
+            {
+                player1 = selected.at(0);
+                ui->lineEditFirstname1->setText(player1->get_firstName());
+                ui->lineEditLastname1->setText(player1->get_lastName());
+                ui->lineEditClub1->setText(player1->get_club());
+                ui->lineEditLicense1->setText(player1->get_license());
+                ui->lineEditRank1->setText(player1->get_ranking());
+            }
+            if (selected.at(1))
+            {
+                player2 = selected.at(1);
+                ui->lineEditFirstname2->setText(player2->get_firstName());
+                ui->lineEditLastname2->setText(player2->get_lastName());
+                ui->lineEditClub2->setText(player2->get_club());
+                ui->lineEditLicense2->setText(player2->get_license());
+                ui->lineEditRank2->setText(player2->get_ranking());
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@
 #include "qqmlhelpers.h"
 #include "TSerie.h"
 #include "TTable.h"
+#include "PlayerModel.h"
 
 class Tournament: public QObject
 {
@@ -23,6 +24,7 @@ class Tournament: public QObject
     QML_READONLY_PROPERTY(QObject *, tables)
     QML_READONLY_PROPERTY(QString, writeSecret)
     QML_READONLY_PROPERTY(QString, encryptionKey)
+    QML_READONLY_PROPERTY(QObject *, tournamentPlayers)
 
 public:
     explicit Tournament(QObject *parent = nullptr);
@@ -33,6 +35,8 @@ public:
     int serieCount() { return series->count(); }
     TSerie *getSerieUid(QString uid);
     int getSerieIndex(TSerie *s);
+
+    PlayerModel *getTournamentPlayerModel() { return tournamentPlayersModel; }
 
     void addTable(TTable *t);
     void removeTable(int idx);
@@ -50,6 +54,7 @@ signals:
 private:
     QQmlObjectListModel<TSerie> *series;
     QQmlObjectListModel<TTable> *tables;
+    PlayerModel *tournamentPlayersModel;
 };
 
 #endif // TOURNAMENT_H

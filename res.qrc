@@ -50,6 +50,10 @@
         <file>icons/pongify/32x32@2/casino.png</file>
         <file>icons/pongify/32x32@3/casino.png</file>
         <file>icons/pongify/32x32@4/casino.png</file>
+		<file>icons/pongify/32x32/casino2.png</file>
+        <file>icons/pongify/32x32@2/casino2.png</file>
+        <file>icons/pongify/32x32@3/casino2.png</file>
+        <file>icons/pongify/32x32@4/casino2.png</file>
         <file>img/podium.png</file>
         <file>qml/BracketView.qml</file>
         <file>qml/MatchBloc.qml</file>
@@ -116,8 +120,8 @@
         <file>qml/DialogMatchSelector.qml</file>
     </qresource>
     <qresource prefix="/webapp">
-        <file alias="app-DnXG3Spb.js">web/frontend/dist/app-DnXG3Spb.js</file>
-        <file alias="index-C0ifBmEl.css">web/frontend/dist/index-C0ifBmEl.css</file>
+        <file alias="app-BRYHB-FM.js">web/frontend/dist/app-BRYHB-FM.js</file>
+        <file alias="index-QwR4Yagv.css">web/frontend/dist/index-QwR4Yagv.css</file>
         <file alias="index.html">web/frontend/dist/index.html</file>
     </qresource>
     <qresource prefix="/cloudflare">
